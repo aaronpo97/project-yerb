@@ -1,4 +1,6 @@
 #include "../includes/Game.h"
+#include "../includes/EntityManager.h"
+#include "../includes/Tags.h"
 
 Game::Game() {}
 
@@ -36,6 +38,21 @@ void Game::init() {
   SDL_RenderPresent(renderer);
 
   isRunning = true; // Set isRunning to true after successful initialization
+
+  spawnPlayer();
+}
+
+void Game::spawnPlayer() {
+  auto player        = entities.addEntity(EntityTags::Player);
+  player->cTransform = std::make_shared<CTransform>(Vec2(100, 100), Vec2(0, 0), 0);
+  player->cShape =
+      std::make_shared<CShape>(renderer, ShapeConfig{50.0f, 50.0f, {255, 0, 0, 255}});
+  player->cCollision = std::make_shared<CCollision>(25);
+  player->cInput     = std::make_shared<CInput>();
+
+  std::cout << "Player entity created" << std::endl;
+
+  entities.update();
 }
 
 void Game::run() {
@@ -63,10 +80,27 @@ void Game::sRender() {
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Set background to black
   SDL_RenderClear(renderer);
 
-  // Draw a red rectangle
-  SDL_Rect rect = {10, 10, 100, 100};
-  SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-  SDL_RenderFillRect(renderer, &rect);
+  // // Draw a red rectangle
+  // SDL_Rect rect = {10, 10, 100, 100};
+  // SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+  // SDL_RenderFillRect(renderer, &rect);
+
+  // Draw all entities
+  std::cout << "hi" << std::endl;
+  for (auto &entity : entities.getEntities()) {
+    if (entity->cShape == nullptr) {
+      continue;
+    }
+
+    SDL_Rect &rect = entity->cShape->rect;
+    Vec2     &pos  = entity->cTransform->position;
+    rect.x         = static_cast<int>(pos.x);
+    rect.y         = static_cast<int>(pos.y);
+
+    std::cout << "Drawing entity at position: " << pos.x << ", " << pos.y << std::endl;
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_RenderFillRect(renderer, &rect);
+  }
 
   // Update the screen
   SDL_RenderPresent(renderer);
