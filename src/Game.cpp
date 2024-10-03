@@ -2,6 +2,7 @@
 #include <emscripten/emscripten.h>
 #endif
 
+#include "../includes/CollisionHelpers.h"
 #include "../includes/EntityManager.h"
 #include "../includes/Game.h"
 #include "../includes/Tags.h"
@@ -9,7 +10,16 @@
 Game::Game() {}
 
 Game::~Game() {
-  sCleanup();
+  if (renderer != nullptr) {
+    SDL_DestroyRenderer(renderer);
+    renderer = nullptr;
+  }
+  if (window != nullptr) {
+    SDL_DestroyWindow(window);
+    window = nullptr;
+  }
+  SDL_Quit();
+  std::cout << "Cleanup completed, SDL exited." << std::endl;
 }
 
 void Game::init() {
@@ -20,7 +30,7 @@ void Game::init() {
   std::cout << "SDL video system is ready to go" << std::endl;
 
   window = SDL_CreateWindow("C++ SDL2 Window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                            640, 480, SDL_WINDOW_SHOWN);
+                            1366, 768, SDL_WINDOW_SHOWN);
   if (window == nullptr) {
     std::cerr << "Window could not be created: " << SDL_GetError() << std::endl;
     SDL_Quit();
@@ -49,8 +59,8 @@ void Game::mainLoop(void *arg) {
   Game *game = static_cast<Game *>(arg);
   game->sInput();
   game->sRender();
-
   game->sMovement();
+  game->sCollision();
 }
 void Game::spawnPlayer() {
 
@@ -175,22 +185,20 @@ void Game::sRender() {
   SDL_RenderPresent(renderer);
 }
 
-void Game::sCleanup() {
-  if (renderer != nullptr) {
-    SDL_DestroyRenderer(renderer);
-    renderer = nullptr;
-  }
-  if (window != nullptr) {
-    SDL_DestroyWindow(window);
-    window = nullptr;
-  }
-  SDL_Quit();
-  std::cout << "Cleanup completed, SDL exited." << std::endl;
-}
-
 struct PlayerConfig {
   float speed;
 };
+
+void Game::sCollision() {
+  const auto player       = entities.getEntities(EntityTags::Player)[0];
+  const auto playerPos    = player->cTransform->position;
+  const auto playerRadius = player->cCollision->radius;
+
+  const auto windowSize = Vec2(1366, 768);
+
+  auto collides = CollisionHelpers::detectOutOfBounds(player, windowSize);
+  CollisionHelpers::enforcePlayerBounds(player, collides, windowSize);
+}
 
 void Game::sMovement() {
   auto player         = entities.getEntities(EntityTags::Player)[0];

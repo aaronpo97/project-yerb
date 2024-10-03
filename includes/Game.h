@@ -16,12 +16,12 @@ public:
   Game();
   ~Game();
 
-  void init();     // Initialize SDL and create window/renderer
-  void run();      // Run the game loop
-  void sInput();   // Handle input events
-  void sRender();  // Render the game scene
-  void sCleanup(); // Cleanup and shutdown SDL
+  void init();    // Initialize SDL and create window/renderer
+  void run();     // Run the game loop
+  void sInput();  // Handle input events
+  void sRender(); // Render the game scene
 
+  void sCollision();
   void sMovement();
 
   static void mainLoop(void *arg);
