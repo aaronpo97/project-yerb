@@ -1,5 +1,9 @@
-#include "../includes/Game.h"
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#endif
+
 #include "../includes/EntityManager.h"
+#include "../includes/Game.h"
 #include "../includes/Tags.h"
 
 Game::Game() {}
@@ -41,8 +45,15 @@ void Game::init() {
 
   spawnPlayer();
 }
+void Game::mainLoop(void *arg) {
+  Game *game = static_cast<Game *>(arg);
+  game->sInput();
+  game->sRender();
 
+  game->sMovement();
+}
 void Game::spawnPlayer() {
+
   auto player        = entities.addEntity(EntityTags::Player);
   player->cTransform = std::make_shared<CTransform>(Vec2(100, 100), Vec2(0, 0), 0);
   player->cShape =
@@ -56,21 +67,81 @@ void Game::spawnPlayer() {
 }
 
 void Game::run() {
+#ifdef __EMSCRIPTEN__
+  emscripten_set_main_loop_arg(Game::mainLoop, this, 0, 1);
+#else
   while (isRunning) {
-    sInput();
-    sRender();
+    mainLoop(this);
   }
-  sCleanup();
+#endif
+  std::cout << "Game loop exited" << std::endl;
 }
 
 void Game::sInput() {
   SDL_Event event;
+  auto      player = entities.getEntities(EntityTags::Player)[0];
   while (SDL_PollEvent(&event)) {
-    std::cout << "Event type: " << event.type << std::endl;
+
     if (event.type == SDL_QUIT) {
       std::cout << "Quit event detected - exiting game loop" << std::endl;
       isRunning = false; // Stop the game loop
       return;
+    }
+
+    if (event.type == SDL_KEYDOWN) {
+      std::cout << "Key pressed" << std::endl;
+      switch (event.key.keysym.sym) {
+        case SDLK_w: {
+          std::cout << "W key pressed" << std::endl;
+          player->cInput->forward = true;
+          break;
+        }
+        case SDLK_s: {
+          std::cout << "S key pressed" << std::endl;
+          player->cInput->backward = true;
+          break;
+        }
+
+        case SDLK_a: {
+          std::cout << "A key pressed" << std::endl;
+          player->cInput->left = true;
+          break;
+        }
+
+        case SDLK_d: {
+          std::cout << "D key pressed" << std::endl;
+          player->cInput->right = true;
+          break;
+        }
+      }
+    }
+
+    if (event.type == SDL_KEYUP) {
+      std::cout << "Key released" << std::endl;
+      switch (event.key.keysym.sym) {
+        case SDLK_w: {
+          std::cout << "W key released" << std::endl;
+          player->cInput->forward = false;
+          break;
+        }
+        case SDLK_s: {
+          std::cout << "S key released" << std::endl;
+          player->cInput->backward = false;
+          break;
+        }
+
+        case SDLK_a: {
+          std::cout << "A key released" << std::endl;
+          player->cInput->left = false;
+          break;
+        }
+
+        case SDLK_d: {
+          std::cout << "D key released" << std::endl;
+          player->cInput->right = false;
+          break;
+        }
+      }
     }
   }
 }
@@ -86,7 +157,6 @@ void Game::sRender() {
   // SDL_RenderFillRect(renderer, &rect);
 
   // Draw all entities
-  std::cout << "hi" << std::endl;
   for (auto &entity : entities.getEntities()) {
     if (entity->cShape == nullptr) {
       continue;
@@ -97,7 +167,6 @@ void Game::sRender() {
     rect.x         = static_cast<int>(pos.x);
     rect.y         = static_cast<int>(pos.y);
 
-    std::cout << "Drawing entity at position: " << pos.x << ", " << pos.y << std::endl;
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderFillRect(renderer, &rect);
   }
@@ -117,4 +186,30 @@ void Game::sCleanup() {
   }
   SDL_Quit();
   std::cout << "Cleanup completed, SDL exited." << std::endl;
+}
+
+struct PlayerConfig {
+  float speed;
+};
+
+void Game::sMovement() {
+  auto player         = entities.getEntities(EntityTags::Player)[0];
+  Vec2 playerVelocity = {0, 0};
+  if (player->cInput->forward) {
+    playerVelocity.y = -1;
+  }
+  if (player->cInput->backward) {
+    playerVelocity.y = 1;
+  }
+  if (player->cInput->left) {
+    playerVelocity.x = -1;
+  }
+  if (player->cInput->right) {
+    playerVelocity.x = 1;
+  }
+  for (auto e : entities.getEntities()) {
+    if (e->tag() == EntityTags::Player) {
+      player->cTransform->position += playerVelocity * 4;
+    }
+  }
 }

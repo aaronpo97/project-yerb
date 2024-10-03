@@ -13,16 +13,19 @@ private:
   EntityManager entities;
 
 public:
-  Game();  // Constructor
-  ~Game(); // Destructor
+  Game();
+  ~Game();
 
   void init();     // Initialize SDL and create window/renderer
-  void run();      // Main game loop
+  void run();      // Run the game loop
   void sInput();   // Handle input events
   void sRender();  // Render the game scene
   void sCleanup(); // Cleanup and shutdown SDL
 
-  void spawnPlayer();
+  void sMovement();
+
+  static void mainLoop(void *arg);
+  void        spawnPlayer();
 };
 
 #endif // GAME_H

@@ -1,35 +1,34 @@
-# OBJS specifies all .cpp files in the src directory
 OBJS = $(wildcard src/*.cpp)
+CC = em++
 
-# CC specifies which compiler we're using
-CC = g++
 
-# Compiler flags: -O3 for optimization, -std=c++17 for the C++ standard
-# Adding -Isrc to specify the directory for header files
-COMPILER_FLAGS = -O3 -std=c++17 -Isrc
+COMPILER_FLAGS = -O2 -std=c++17 -Isrc -s USE_SDL=2 -s USE_SDL_IMAGE=2
+LINKER_FLAGS = -s ALLOW_MEMORY_GROWTH=1 -s WASM=1
 
-# LINKER_FLAGS specifies the libraries we're linking against
-LINKER_FLAGS = -lSDL2
+# PRELOAD_FILES = --preload-file assets
+
+# Output HTML file for the game
+OBJ_NAME = index.html
 
 # Build directory
 BUILD_DIR = build
 
-# OBJ_NAME specifies the name of our executable
-OBJ_NAME = app.out
-
-# This is the target that compiles our executable
+# This is the target that compiles our executable for WASM
 all: $(BUILD_DIR) $(OBJS)
-	$(CC) $(OBJS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(BUILD_DIR)/$(OBJ_NAME)
+	$(CC) $(OBJS) $(COMPILER_FLAGS) $(LINKER_FLAGS) $(PRELOAD_FILES) -o $(BUILD_DIR)/$(OBJ_NAME)
 
 # Create build directory if it doesn't exist
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-# Run the executable after building
-run: all
-	./$(BUILD_DIR)/$(OBJ_NAME)
+# Serve command to start a local server for testing
 
-# Clean command to remove the executable and the build directory
+run: serve
+
+serve: all
+	cd $(BUILD_DIR) && npx serve .
+
+# Clean command to remove the build directory
 clean:
 	rm -f $(BUILD_DIR)/$(OBJ_NAME)
 	rm -rf $(BUILD_DIR)
