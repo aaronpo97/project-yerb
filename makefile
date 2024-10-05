@@ -5,11 +5,15 @@ CC = em++
 COMPILER_FLAGS = -O2 -std=c++17 -Isrc -s USE_SDL=2 -s USE_SDL_IMAGE=2
 LINKER_FLAGS = -s ALLOW_MEMORY_GROWTH=1 -s WASM=1
 
-OBJ_NAME = index.html
+OBJ_NAME = index.js
 BUILD_DIR = build
 
-all: $(BUILD_DIR) $(OBJ_FILES)
+all: $(BUILD_DIR) $(OBJ_FILES) $(BUILD_DIR)/index.html
 	$(CC) $(OBJ_FILES) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(BUILD_DIR)/$(OBJ_NAME)
+
+# Rule to copy template.html to build directory and rename it to index.html
+$(BUILD_DIR)/index.html: template.html | $(BUILD_DIR)
+	cp $< $@
 
 # Update the object file rule to point to the 'objects' directory
 objects/%.o: src/%.cpp | objects
@@ -31,4 +35,4 @@ serve: all
 clean:
 	rm -f $(BUILD_DIR)/$(OBJ_NAME)
 	rm -rf $(BUILD_DIR)
-	rm -rf objects  # Clean the 'objects' directory
+	rm -rf objects
