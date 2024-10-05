@@ -5,22 +5,34 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 
+struct GameConfig {
+  Vec2        windowSize;
+  std::string windowTitle;
+};
+
+struct PlayerConfig {
+  float       speed;
+  ShapeConfig shape;
+};
+
 class Game {
 private:
-  SDL_Window   *window    = nullptr;
-  SDL_Renderer *renderer  = nullptr;
-  bool          isRunning = false;
-  EntityManager entities;
+  SDL_Window   *m_window    = nullptr;
+  SDL_Renderer *m_renderer  = nullptr;
+  bool          m_isRunning = false;
+  EntityManager m_entities;
+  float         m_deltaTime = 0.0f;
+
+  GameConfig   m_gameConfig   = {{1366, 768}, "C++ SDL2 Window"};
+  PlayerConfig m_playerConfig = {5.0f, {50, 50}};
 
 public:
   Game();
   ~Game();
 
-  void init();    // Initialize SDL and create window/renderer
-  void run();     // Run the game loop
-  void sInput();  // Handle input events
-  void sRender(); // Render the game scene
-
+  void run();
+  void sInput();
+  void sRender();
   void sCollision();
   void sMovement();
 

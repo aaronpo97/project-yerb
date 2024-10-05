@@ -32,7 +32,8 @@ struct RGBA {
 struct ShapeConfig {
   float height;
   float width;
-  RGBA  color;
+
+  RGBA color;
 };
 
 class CShape {
@@ -49,8 +50,6 @@ public:
 
     rect.h = config.height;
     rect.w = config.width;
-    rect.x = 100;
-    rect.y = 100;
 
     SDL_SetRenderDrawColor(renderer, config.color.r, config.color.g, config.color.b,
                            config.color.a);
