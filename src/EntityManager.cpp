@@ -1,7 +1,6 @@
 
 #include "../includes/EntityManager.h"
 #include "../includes/Entity.h"
-#include "../includes/Tags.h"
 
 #include <iostream>
 

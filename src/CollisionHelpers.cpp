@@ -7,12 +7,10 @@ enum Boundaries { TOP, BOTTOM, LEFT, RIGHT };
 
 bool hasNullComponentPointers(const std::shared_ptr<Entity> &entity) {
   const bool cTransformIsNullPtr = !entity->cTransform;
-  const bool cCollisionIsNullPtr = !entity->cCollision;
-  return cTransformIsNullPtr || cCollisionIsNullPtr;
+  return cTransformIsNullPtr;
 }
 
 namespace CollisionHelpers {
-
   std::bitset<4> detectOutOfBounds(const std::shared_ptr<Entity> &entity,
                                    const Vec2                    &window_size) {
     if (hasNullComponentPointers(entity)) {
@@ -21,17 +19,14 @@ namespace CollisionHelpers {
                                " lacks a transform or collision component.");
     }
 
-    const float                    radius          = entity->cCollision->radius;
-    const std::shared_ptr<CShape> &entityCShape    = entity->cShape;
-    Vec2                          &entityCenterPos = entity->cTransform->centerPos;
+    const std::shared_ptr<CShape> &entityCShape = entity->cShape;
 
-    entityCenterPos.x = entity->cTransform->topLeftCornerPos.x + entityCShape->rect.w / 2;
-    entityCenterPos.y = entity->cTransform->topLeftCornerPos.y + entityCShape->rect.h / 2;
+    const Vec2 &topLeftCornerPos = entity->cTransform->topLeftCornerPos;
 
-    const bool collidesWithTop    = entityCenterPos.y - radius < 0;
-    const bool collidesWithBottom = entityCenterPos.y + radius > window_size.y;
-    const bool collidesWithLeft   = entityCenterPos.x - radius < 0;
-    const bool collidesWithRight  = entityCenterPos.x + radius > window_size.x;
+    const bool collidesWithTop    = topLeftCornerPos.y <= 0;
+    const bool collidesWithBottom = topLeftCornerPos.y + entityCShape->rect.h >= window_size.y;
+    const bool collidesWithLeft   = topLeftCornerPos.x <= 0;
+    const bool collidesWithRight  = topLeftCornerPos.x + entityCShape->rect.w >= window_size.x;
 
     std::bitset<4> collidesWithBoundary;
     collidesWithBoundary[TOP]    = collidesWithTop;
@@ -65,10 +60,6 @@ namespace CollisionHelpers {
     if (collides[RIGHT]) {
       leftCornerPosition.x = window_size.x - cShape->rect.w;
     }
-
-    Vec2 &centerPos = entity->cTransform->centerPos;
-    centerPos.x     = leftCornerPosition.x + cShape->rect.w / 2;
-    centerPos.y     = leftCornerPosition.y + cShape->rect.h / 2;
   }
 
   bool calculateCollisionBetweenEntities(const std::shared_ptr<Entity> &entityA,
@@ -84,16 +75,18 @@ namespace CollisionHelpers {
                                " lacks a transform or collision component.");
     }
 
-    const Vec2 &centerPosA = entityA->cTransform->centerPos;
-    const Vec2 &centerPosB = entityB->cTransform->centerPos;
+    const auto &rectA = entityA->cShape->rect;
+    const auto &rectB = entityB->cShape->rect;
 
-    const float distance =
-        MathHelpers::pythagoras(centerPosA.x - centerPosB.x, centerPosA.y - centerPosB.y);
+    const auto &posA = entityA->cTransform->topLeftCornerPos;
+    const auto &posB = entityB->cTransform->topLeftCornerPos;
 
-    const float radiusA = entityA->cCollision->radius;
-    const float radiusB = entityB->cCollision->radius;
+    const bool leftSideCollision   = posA.x + rectA.w >= posB.x;
+    const bool rightSideCollision  = posA.x <= posB.x + rectB.w;
+    const bool topSideCollision    = posA.y + rectA.h >= posB.y;
+    const bool bottomSideCollision = posA.y <= posB.y + rectB.h;
 
-    return distance < radiusA + radiusB;
+    return leftSideCollision && rightSideCollision && topSideCollision && bottomSideCollision;
   }
 
 } // namespace CollisionHelpers

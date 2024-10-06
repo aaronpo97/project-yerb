@@ -4,6 +4,7 @@
 
 namespace EntityTags {
   inline std::string Player = "Player";
+  inline std::string Enemy  = "Enemy";
 } // namespace EntityTags
 
 #endif // ENTITY_TAGS_H

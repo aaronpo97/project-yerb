@@ -4,8 +4,8 @@
 
 #include "../includes/CollisionHelpers.h"
 #include "../includes/EntityManager.h"
+#include "../includes/EntityTags.h"
 #include "../includes/Game.h"
-#include "../includes/Tags.h"
 
 Game::Game() {
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -66,26 +66,6 @@ void Game::mainLoop(void *arg) {
     game->sCollision();
     game->sSpawner();
   }
-}
-void Game::spawnPlayer() {
-
-  m_player = m_entities.addEntity(EntityTags::Player);
-
-  auto &cTransform = m_player->cTransform;
-  auto &cShape     = m_player->cShape;
-  auto &cCollision = m_player->cCollision;
-  auto &cInput     = m_player->cInput;
-
-  cTransform = std::make_shared<CTransform>(Vec2(0, 0), Vec2(0, 0), 0);
-  cShape     = std::make_shared<CShape>(m_renderer, m_playerConfig.shape);
-
-  const auto radius = cShape->rect.w / 2;
-  cCollision        = std::make_shared<CCollision>(radius);
-  cInput            = std::make_shared<CInput>();
-
-  std::cout << "Player entity created" << std::endl;
-
-  m_entities.update();
 }
 
 void Game::run() {
@@ -171,13 +151,6 @@ void Game::sRender() {
     SDL_Rect &rect = entity->cShape->rect;
     Vec2     &pos  = entity->cTransform->topLeftCornerPos;
 
-    auto  centerPositionY = entity->cTransform->topLeftCornerPos.y + (rect.h / 2);
-    auto  centerPositionX = entity->cTransform->topLeftCornerPos.x + (rect.w / 2);
-    Vec2 &centerPos       = entity->cTransform->centerPos;
-
-    centerPos.x = centerPositionX;
-    centerPos.y = centerPositionY;
-
     rect.x = static_cast<int>(pos.x);
     rect.y = static_cast<int>(pos.y);
 
@@ -201,9 +174,12 @@ void Game::sCollision() {
     }
 
     if (CollisionHelpers::calculateCollisionBetweenEntities(m_player, entity)) {
-      std::cout << "Player collided with " << entity->tag() << std::endl;
+      std::cout << "Player collided with enemy" << std::endl;
+      entity->destroy();
     }
   }
+
+  m_entities.update();
 }
 
 void Game::sMovement() {
@@ -248,28 +224,33 @@ void Game::sSpawner() {
   spawnEnemy();
 }
 
+void Game::spawnPlayer() {
+  m_player = m_entities.addEntity(EntityTags::Player);
+
+  std::shared_ptr<CTransform> &playerCTransform = m_player->cTransform;
+  std::shared_ptr<CShape>     &playerCShape     = m_player->cShape;
+  std::shared_ptr<CInput>     &playerCInput     = m_player->cInput;
+
+  playerCTransform = std::make_shared<CTransform>(Vec2(0, 0), Vec2(0, 0), 0);
+  playerCShape     = std::make_shared<CShape>(m_renderer, m_playerConfig.shape);
+  playerCInput     = std::make_shared<CInput>();
+
+  std::cout << "Player entity created" << std::endl;
+
+  m_entities.update();
+}
+
 void Game::spawnEnemy() {
-  std::shared_ptr<Entity>      enemy      = m_entities.addEntity("Enemy");
-  std::shared_ptr<CTransform> &cTransform = enemy->cTransform;
-  std::shared_ptr<CShape>     &cShape     = enemy->cShape;
-  std::shared_ptr<CCollision> &cCollision = enemy->cCollision;
-
   const Vec2 &windowSize = m_gameConfig.windowSize;
+  const int   x          = rand() % static_cast<int>(windowSize.x);
+  const int   y          = rand() % static_cast<int>(windowSize.y);
 
-  const int x = rand() % static_cast<int>(windowSize.x);
-  const int y = rand() % static_cast<int>(windowSize.y);
+  std::shared_ptr<Entity>      enemy            = m_entities.addEntity(EntityTags::Enemy);
+  std::shared_ptr<CTransform> &entityCTransform = enemy->cTransform;
+  std::shared_ptr<CShape>     &entityCShape     = enemy->cShape;
 
-  cTransform = std::make_shared<CTransform>(Vec2(x, y), Vec2(0, 0), 0);
-  cShape     = std::make_shared<CShape>(m_renderer, ShapeConfig({40, 40, {255, 0, 0, 255}}));
-
-  float centerPositionX = cTransform->topLeftCornerPos.x + cShape->rect.w / 2;
-  float centerPositionY = cTransform->topLeftCornerPos.y + cShape->rect.h / 2;
-
-  cTransform->centerPos = Vec2(centerPositionX, centerPositionY);
-
-  auto radius = cShape->rect.w / 2;
-
-  cCollision = std::make_shared<CCollision>(radius);
+  entityCTransform = std::make_shared<CTransform>(Vec2(x, y), Vec2(0, 0), 0);
+  entityCShape = std::make_shared<CShape>(m_renderer, ShapeConfig({40, 40, {255, 0, 0, 255}}));
 
   std::cout << "Enemy entity created" << std::endl;
 

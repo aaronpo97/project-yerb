@@ -19,7 +19,6 @@ public:
   // component pointers
   std::shared_ptr<CTransform> cTransform;
   std::shared_ptr<CShape>     cShape;
-  std::shared_ptr<CCollision> cCollision;
   std::shared_ptr<CInput>     cInput;
 
   // private member access functions

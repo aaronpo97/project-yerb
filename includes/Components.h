@@ -9,19 +9,11 @@
 class CTransform {
 public:
   Vec2  topLeftCornerPos = {0, 0};
-  Vec2  centerPos        = {0, 0};
   Vec2  velocity         = {0, 0};
   float angle            = 0;
 
   CTransform(const Vec2 &position, const Vec2 &velocity, const float angle) :
       topLeftCornerPos(position), velocity(velocity), angle(angle) {}
-};
-
-class CCollision {
-public:
-  float radius = 0;
-  CCollision(const float radius) :
-      radius(radius) {}
 };
 
 struct RGBA {
@@ -38,11 +30,15 @@ struct ShapeConfig {
 };
 
 class CShape {
-public:
-  SDL_Rect      rect;
+private:
+  // Renderer is only used to draw the shape and should not be directly modified
   SDL_Renderer *renderer;
-  RGBA          color;
 
+public:
+  SDL_Rect rect;
+  RGBA     color;
+
+  // Inject the renderer dependency
   CShape(SDL_Renderer *renderer, ShapeConfig config) :
       renderer(renderer) {
 
