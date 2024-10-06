@@ -78,8 +78,10 @@ void Game::spawnPlayer() {
 
   cTransform = std::make_shared<CTransform>(Vec2(0, 0), Vec2(0, 0), 0);
   cShape     = std::make_shared<CShape>(m_renderer, m_playerConfig.shape);
-  cCollision = std::make_shared<CCollision>(0);
-  cInput     = std::make_shared<CInput>();
+
+  const auto radius = cShape->rect.w / 2;
+  cCollision        = std::make_shared<CCollision>(radius);
+  cInput            = std::make_shared<CInput>();
 
   std::cout << "Player entity created" << std::endl;
 
@@ -167,9 +169,17 @@ void Game::sRender() {
     }
 
     SDL_Rect &rect = entity->cShape->rect;
-    Vec2     &pos  = entity->cTransform->position;
-    rect.x         = static_cast<int>(pos.x);
-    rect.y         = static_cast<int>(pos.y);
+    Vec2     &pos  = entity->cTransform->topLeftCornerPos;
+
+    auto  centerPositionY = entity->cTransform->topLeftCornerPos.y + (rect.h / 2);
+    auto  centerPositionX = entity->cTransform->topLeftCornerPos.x + (rect.w / 2);
+    Vec2 &centerPos       = entity->cTransform->centerPos;
+
+    centerPos.x = centerPositionX;
+    centerPos.y = centerPositionY;
+
+    rect.x = static_cast<int>(pos.x);
+    rect.y = static_cast<int>(pos.y);
 
     const RGBA &color = entity->cShape->color;
     SDL_SetRenderDrawColor(m_renderer, color.r, color.g, color.b, color.a);
@@ -181,11 +191,19 @@ void Game::sRender() {
 }
 
 void Game::sCollision() {
-  const Vec2    &playerPos    = m_player->cTransform->position;
-  const float    playerRadius = m_player->cCollision->radius;
-  const Vec2     windowSize   = Vec2(1366, 768);
-  std::bitset<4> collides     = CollisionHelpers::detectOutOfBounds(m_player, windowSize);
+  const Vec2     windowSize = Vec2(1366, 768);
+  std::bitset<4> collides   = CollisionHelpers::detectOutOfBounds(m_player, windowSize);
   CollisionHelpers::enforcePlayerBounds(m_player, collides, windowSize);
+
+  for (auto &entity : m_entities.getEntities()) {
+    if (entity->tag() == EntityTags::Player) {
+      continue;
+    }
+
+    if (CollisionHelpers::calculateCollisionBetweenEntities(m_player, entity)) {
+      std::cout << "Player collided with " << entity->tag() << std::endl;
+    }
+  }
 }
 
 void Game::sMovement() {
@@ -214,7 +232,7 @@ void Game::sMovement() {
                                " lacks a transform component.");
     }
 
-    Vec2 &position = e->cTransform->position;
+    Vec2 &position = e->cTransform->topLeftCornerPos;
 
     if (e->tag() == EntityTags::Player) {
       position += playerVelocity * 2;
@@ -222,27 +240,36 @@ void Game::sMovement() {
   }
 }
 void Game::sSpawner() {
-
   const Uint32 ticks = SDL_GetTicks();
-
   if (ticks - m_lastEnemySpawnTime < 2500) {
     return;
   }
-
   m_lastEnemySpawnTime = ticks;
+  spawnEnemy();
+}
 
-  // spawn enemies
-  std::shared_ptr<Entity> enemy      = m_entities.addEntity("Enemy");
-  auto                   &cTransform = enemy->cTransform;
-  auto                   &cShape     = enemy->cShape;
-  auto                   &cCollision = enemy->cCollision;
+void Game::spawnEnemy() {
+  std::shared_ptr<Entity>      enemy      = m_entities.addEntity("Enemy");
+  std::shared_ptr<CTransform> &cTransform = enemy->cTransform;
+  std::shared_ptr<CShape>     &cShape     = enemy->cShape;
+  std::shared_ptr<CCollision> &cCollision = enemy->cCollision;
 
-  float x = static_cast<float>(rand() % 1366);
-  float y = static_cast<float>(rand() % 768);
+  const Vec2 &windowSize = m_gameConfig.windowSize;
+
+  const int x = rand() % static_cast<int>(windowSize.x);
+  const int y = rand() % static_cast<int>(windowSize.y);
 
   cTransform = std::make_shared<CTransform>(Vec2(x, y), Vec2(0, 0), 0);
-  cShape     = std::make_shared<CShape>(m_renderer, ShapeConfig({50, 50, {255, 0, 0, 255}}));
-  cCollision = std::make_shared<CCollision>(0);
+  cShape     = std::make_shared<CShape>(m_renderer, ShapeConfig({40, 40, {255, 0, 0, 255}}));
+
+  float centerPositionX = cTransform->topLeftCornerPos.x + cShape->rect.w / 2;
+  float centerPositionY = cTransform->topLeftCornerPos.y + cShape->rect.h / 2;
+
+  cTransform->centerPos = Vec2(centerPositionX, centerPositionY);
+
+  auto radius = cShape->rect.w / 2;
+
+  cCollision = std::make_shared<CCollision>(radius);
 
   std::cout << "Enemy entity created" << std::endl;
 

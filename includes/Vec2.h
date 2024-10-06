@@ -3,7 +3,7 @@
 
 class Vec2 {
 public:
-  double x, y;
+  float x, y;
 
   Vec2(float x = 0, float y = 0);
 

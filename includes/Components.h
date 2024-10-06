@@ -8,12 +8,13 @@
 
 class CTransform {
 public:
-  Vec2  position = {0, 0};
-  Vec2  velocity = {0, 0};
-  float angle    = 0;
+  Vec2  topLeftCornerPos = {0, 0};
+  Vec2  centerPos        = {0, 0};
+  Vec2  velocity         = {0, 0};
+  float angle            = 0;
 
   CTransform(const Vec2 &position, const Vec2 &velocity, const float angle) :
-      position(position), velocity(velocity), angle(angle) {}
+      topLeftCornerPos(position), velocity(velocity), angle(angle) {}
 };
 
 class CCollision {

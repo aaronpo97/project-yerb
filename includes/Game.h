@@ -27,7 +27,7 @@ private:
   Uint32                  m_lastEnemySpawnTime = 0;
 
   GameConfig   m_gameConfig   = {{1366, 768}, "C++ SDL2 Window"};
-  PlayerConfig m_playerConfig = {5.0f, {50, 50, {0, 0, 255, 255}}};
+  PlayerConfig m_playerConfig = {5.0f, {80, 80, {0, 0, 255, 255}}};
 
 public:
   Game();
@@ -38,7 +38,6 @@ public:
   void sRender();
   void sCollision();
   void sMovement();
-
   void sSpawner();
 
   void setPaused(const bool paused) {
@@ -48,6 +47,7 @@ public:
 
   static void mainLoop(void *arg);
   void        spawnPlayer();
+  void        spawnEnemy();
 };
 
 #endif // GAME_H
