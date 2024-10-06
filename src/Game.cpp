@@ -173,7 +173,12 @@ void Game::sRender() {
     rect.x         = static_cast<int>(pos.x);
     rect.y         = static_cast<int>(pos.y);
 
-    SDL_SetRenderDrawColor(m_renderer, 255, 0, 0, 255);
+    const RGBA &color = entity->cShape->color;
+
+    std::cout << "Color: " << color.r << ", " << color.g << ", " << color.b << ", " << color.a
+              << std::endl;
+    SDL_SetRenderDrawColor(m_renderer, color.r, color.g, color.b, color.a);
+
     SDL_RenderFillRect(m_renderer, &rect);
   }
 

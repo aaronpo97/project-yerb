@@ -40,6 +40,7 @@ class CShape {
 public:
   SDL_Rect      rect;
   SDL_Renderer *renderer;
+  RGBA          color;
 
   CShape(SDL_Renderer *renderer, ShapeConfig config) :
       renderer(renderer) {
@@ -51,6 +52,7 @@ public:
     rect.h = config.height;
     rect.w = config.width;
 
+    color = {config.color.r, config.color.g, config.color.b, config.color.a};
     SDL_SetRenderDrawColor(renderer, config.color.r, config.color.g, config.color.b,
                            config.color.a);
 

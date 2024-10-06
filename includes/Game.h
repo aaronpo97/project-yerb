@@ -26,7 +26,7 @@ private:
   std::shared_ptr<Entity> m_player;
 
   GameConfig   m_gameConfig   = {{1366, 768}, "C++ SDL2 Window"};
-  PlayerConfig m_playerConfig = {5.0f, {50, 50}};
+  PlayerConfig m_playerConfig = {5.0f, {50, 50, {0, 0, 255, 255}}};
 
 public:
   Game();
