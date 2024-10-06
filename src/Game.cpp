@@ -57,19 +57,26 @@ Game::~Game() {
 
 void Game::mainLoop(void *arg) {
   Game *game = static_cast<Game *>(arg);
+
   game->sInput();
-  game->sRender();
-  game->sMovement();
-  game->sCollision();
+
+  if (!game->m_paused) {
+    game->sRender();
+    game->sMovement();
+    game->sCollision();
+
+    std::cout << "Player position: " << game->m_player->cTransform->position.x << ", "
+              << game->m_player->cTransform->position.y << std::endl;
+  }
 }
 void Game::spawnPlayer() {
 
-  auto player = m_entities.addEntity(EntityTags::Player);
+  m_player = m_entities.addEntity(EntityTags::Player);
 
-  auto &cTransform = player->cTransform;
-  auto &cShape     = player->cShape;
-  auto &cCollision = player->cCollision;
-  auto &cInput     = player->cInput;
+  auto &cTransform = m_player->cTransform;
+  auto &cShape     = m_player->cShape;
+  auto &cCollision = m_player->cCollision;
+  auto &cInput     = m_player->cInput;
 
   cTransform = std::make_shared<CTransform>(Vec2(0, 0), Vec2(0, 0), 0);
   cShape     = std::make_shared<CShape>(m_renderer, m_playerConfig.shape);
@@ -94,7 +101,6 @@ void Game::run() {
 
 void Game::sInput() {
   SDL_Event event;
-  auto      player = m_entities.getEntities(EntityTags::Player)[0];
   while (SDL_PollEvent(&event)) {
 
     if (event.type == SDL_QUIT) {
@@ -105,21 +111,26 @@ void Game::sInput() {
     if (event.type == SDL_KEYDOWN) {
       switch (event.key.keysym.sym) {
         case SDLK_w: {
-          player->cInput->forward = true;
+          m_player->cInput->forward = true;
           break;
         }
         case SDLK_s: {
-          player->cInput->backward = true;
+          m_player->cInput->backward = true;
           break;
         }
 
         case SDLK_a: {
-          player->cInput->left = true;
+          m_player->cInput->left = true;
           break;
         }
 
         case SDLK_d: {
-          player->cInput->right = true;
+          m_player->cInput->right = true;
+          break;
+        }
+
+        case SDLK_p: {
+          setPaused(!m_paused);
           break;
         }
       }
@@ -128,19 +139,19 @@ void Game::sInput() {
     if (event.type == SDL_KEYUP) {
       switch (event.key.keysym.sym) {
         case SDLK_w: {
-          player->cInput->forward = false;
+          m_player->cInput->forward = false;
           break;
         }
         case SDLK_s: {
-          player->cInput->backward = false;
+          m_player->cInput->backward = false;
           break;
         }
         case SDLK_a: {
-          player->cInput->left = false;
+          m_player->cInput->left = false;
           break;
         }
         case SDLK_d: {
-          player->cInput->right = false;
+          m_player->cInput->right = false;
           break;
         }
       }
@@ -171,32 +182,30 @@ void Game::sRender() {
 }
 
 void Game::sCollision() {
-  const auto    &player       = m_entities.getEntities(EntityTags::Player)[0];
-  const Vec2    &playerPos    = player->cTransform->position;
-  const float    playerRadius = player->cCollision->radius;
+  const Vec2    &playerPos    = m_player->cTransform->position;
+  const float    playerRadius = m_player->cCollision->radius;
   const Vec2     windowSize   = Vec2(1366, 768);
-  std::bitset<4> collides     = CollisionHelpers::detectOutOfBounds(player, windowSize);
-  CollisionHelpers::enforcePlayerBounds(player, collides, windowSize);
+  std::bitset<4> collides     = CollisionHelpers::detectOutOfBounds(m_player, windowSize);
+  CollisionHelpers::enforcePlayerBounds(m_player, collides, windowSize);
 }
 
 void Game::sMovement() {
-  auto &player         = m_entities.getEntities(EntityTags::Player)[0];
-  Vec2  playerVelocity = {0, 0};
+  Vec2 playerVelocity = {0, 0};
 
-  if (player->cInput == nullptr) {
+  if (m_player->cInput == nullptr) {
     throw std::runtime_error("Player entity lacks an input component.");
   }
 
-  if (player->cInput->forward) {
+  if (m_player->cInput->forward) {
     playerVelocity.y = -1;
   }
-  if (player->cInput->backward) {
+  if (m_player->cInput->backward) {
     playerVelocity.y = 1;
   }
-  if (player->cInput->left) {
+  if (m_player->cInput->left) {
     playerVelocity.x = -1;
   }
-  if (player->cInput->right) {
+  if (m_player->cInput->right) {
     playerVelocity.x = 1;
   }
 
@@ -209,7 +218,6 @@ void Game::sMovement() {
     Vec2 &position = e->cTransform->position;
 
     if (e->tag() == EntityTags::Player) {
-      std::cout << "Player position: " << position.x << ", " << position.y << std::endl;
       position += playerVelocity * 2;
     }
   }

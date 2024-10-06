@@ -17,11 +17,13 @@ struct PlayerConfig {
 
 class Game {
 private:
-  SDL_Window   *m_window    = nullptr;
-  SDL_Renderer *m_renderer  = nullptr;
-  bool          m_isRunning = false;
-  EntityManager m_entities;
-  float         m_deltaTime = 0.0f;
+  SDL_Window             *m_window    = nullptr;
+  SDL_Renderer           *m_renderer  = nullptr;
+  bool                    m_isRunning = false;
+  EntityManager           m_entities;
+  float                   m_deltaTime = 0.0f;
+  bool                    m_paused    = false;
+  std::shared_ptr<Entity> m_player;
 
   GameConfig   m_gameConfig   = {{1366, 768}, "C++ SDL2 Window"};
   PlayerConfig m_playerConfig = {5.0f, {50, 50}};
@@ -35,6 +37,11 @@ public:
   void sRender();
   void sCollision();
   void sMovement();
+
+  void setPaused(const bool paused) {
+    std::cout << "Game is " << (paused ? "paused" : "unpaused") << std::endl;
+    m_paused = paused;
+  }
 
   static void mainLoop(void *arg);
   void        spawnPlayer();
