@@ -64,6 +64,7 @@ void Game::mainLoop(void *arg) {
     game->sRender();
     game->sMovement();
     game->sCollision();
+    game->sSpawner();
 
     std::cout << "Player position: " << game->m_player->cTransform->position.x << ", "
               << game->m_player->cTransform->position.y << std::endl;
@@ -174,11 +175,7 @@ void Game::sRender() {
     rect.y         = static_cast<int>(pos.y);
 
     const RGBA &color = entity->cShape->color;
-
-    std::cout << "Color: " << color.r << ", " << color.g << ", " << color.b << ", " << color.a
-              << std::endl;
     SDL_SetRenderDrawColor(m_renderer, color.r, color.g, color.b, color.a);
-
     SDL_RenderFillRect(m_renderer, &rect);
   }
 
@@ -226,4 +223,31 @@ void Game::sMovement() {
       position += playerVelocity * 2;
     }
   }
+}
+void Game::sSpawner() {
+
+  const Uint32 ticks = SDL_GetTicks();
+
+  if (ticks - m_lastEnemySpawnTime < 1000) {
+    return;
+  }
+
+  m_lastEnemySpawnTime = ticks;
+
+  // spawn enemies
+  std::shared_ptr<Entity> enemy      = m_entities.addEntity("Enemy");
+  auto                   &cTransform = enemy->cTransform;
+  auto                   &cShape     = enemy->cShape;
+  auto                   &cCollision = enemy->cCollision;
+
+  float x = static_cast<float>(rand() % 1366);
+  float y = static_cast<float>(rand() % 768);
+
+  cTransform = std::make_shared<CTransform>(Vec2(x, y), Vec2(0, 0), 0);
+  cShape     = std::make_shared<CShape>(m_renderer, ShapeConfig({50, 50, {255, 0, 0, 255}}));
+  cCollision = std::make_shared<CCollision>(0);
+
+  std::cout << "Enemy entity created" << std::endl;
+
+  m_entities.update();
 }

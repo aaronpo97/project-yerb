@@ -24,6 +24,7 @@ private:
   float                   m_deltaTime = 0.0f;
   bool                    m_paused    = false;
   std::shared_ptr<Entity> m_player;
+  Uint32                  m_lastEnemySpawnTime = 0;
 
   GameConfig   m_gameConfig   = {{1366, 768}, "C++ SDL2 Window"};
   PlayerConfig m_playerConfig = {5.0f, {50, 50, {0, 0, 255, 255}}};
@@ -37,6 +38,8 @@ public:
   void sRender();
   void sCollision();
   void sMovement();
+
+  void sSpawner();
 
   void setPaused(const bool paused) {
     std::cout << "Game is " << (paused ? "paused" : "unpaused") << std::endl;
