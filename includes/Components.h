@@ -57,8 +57,6 @@ public:
                            config.color.a);
 
     SDL_RenderFillRect(renderer, &rect);
-
-    std::cout << "CShape entity created" << std::endl;
   }
 };
 

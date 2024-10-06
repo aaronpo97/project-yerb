@@ -65,9 +65,6 @@ void Game::mainLoop(void *arg) {
     game->sMovement();
     game->sCollision();
     game->sSpawner();
-
-    std::cout << "Player position: " << game->m_player->cTransform->position.x << ", "
-              << game->m_player->cTransform->position.y << std::endl;
   }
 }
 void Game::spawnPlayer() {
@@ -228,7 +225,7 @@ void Game::sSpawner() {
 
   const Uint32 ticks = SDL_GetTicks();
 
-  if (ticks - m_lastEnemySpawnTime < 1000) {
+  if (ticks - m_lastEnemySpawnTime < 2500) {
     return;
   }
 
