@@ -40,6 +40,9 @@ Game::Game() {
 
   m_isRunning = true; // Set isRunning to true after successful initialization
 
+  std::cout << "Game initialized successfully, use the WASD keys to move the player"
+            << std::endl;
+
   spawnPlayer();
 }
 Game::~Game() {

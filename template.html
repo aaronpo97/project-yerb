@@ -8,23 +8,21 @@
       content="A game made with SDL2 and compiled for the web using Emscripten"
     />
   </head>
-  <link
-    href="https://cdn.jsdelivr.net/npm/daisyui@4.12.12/dist/full.min.css"
-    rel="stylesheet"
-    type="text/css"
-  />
+
   <script src="https://cdn.tailwindcss.com"></script>
   <body>
-    <main class="flex flex-row w-dvh items-center justify-center h-dvh">
+    <main
+      class="flex flex-row w-dvh items-center justify-center h-dvh bg-gray-800"
+    >
       <canvas
         id="canvas"
-        class="w-10/12 h-8/12"
+        class="w-[80%] h-8/12"
         oncontextmenu="event.preventDefault()"
       ></canvas>
       <textarea
         id="output"
         readonly
-        class="w-2/12 h-dvh font-mono p-5 resize-none text-xs"
+        class="w-[20%] h-dvh font-mono p-5 resize-none text-xs bg-gray-700 text-white font-bold"
       ></textarea>
     </main>
     <script type="text/javascript">
