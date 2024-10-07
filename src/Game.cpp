@@ -175,7 +175,9 @@ void Game::sCollision() {
     }
 
     if (CollisionHelpers::calculateCollisionBetweenEntities(m_player, entity)) {
+      m_score += 1;
       std::cout << "Player collided with enemy" << std::endl;
+      std::cout << "Score: " << m_score << std::endl;
       entity->destroy();
     }
   }

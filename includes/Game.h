@@ -25,6 +25,7 @@ private:
   bool                    m_paused    = false;
   std::shared_ptr<Entity> m_player;
   Uint32                  m_lastEnemySpawnTime = 0;
+  int                     m_score              = 0;
 
   GameConfig   m_gameConfig   = {{1366, 768}, "C++ SDL2 Window"};
   PlayerConfig m_playerConfig = {5.0f, {80, 80, {0, 0, 255, 255}}};

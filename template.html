@@ -8,42 +8,24 @@
       content="A game made with SDL2 and compiled for the web using Emscripten"
     />
   </head>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-    }
-    canvas {
-      display: block;
-      margin: 0 auto;
-      background-color: #000;
-    }
-    textarea {
-      display: block;
-      margin: 0 auto;
-      width: 100%;
-      height: 100%;
-      background-color: #000;
-      color: #fff;
-      font-family: monospace;
-      font-size: 12px;
-      border-top: 3px solid #fff;
-      resize: none;
-      overflow: auto;
-    }
-
-    .container {
-      display: flex;
-      height: 100dvh;
-      width: 100dvw;
-      flex-direction: column;
-    }
-  </style>
-
+  <link
+    href="https://cdn.jsdelivr.net/npm/daisyui@4.12.12/dist/full.min.css"
+    rel="stylesheet"
+    type="text/css"
+  />
+  <script src="https://cdn.tailwindcss.com"></script>
   <body>
-    <main class="container">
-      <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
-      <textarea id="output" readonly></textarea>
+    <main class="flex flex-row w-dvh items-center justify-center h-dvh">
+      <canvas
+        id="canvas"
+        class="w-10/12 h-8/12"
+        oncontextmenu="event.preventDefault()"
+      ></canvas>
+      <textarea
+        id="output"
+        readonly
+        class="w-2/12 h-dvh font-mono p-5 resize-none text-xs"
+      ></textarea>
     </main>
     <script type="text/javascript">
       window.Module = {
