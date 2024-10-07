@@ -39,6 +39,7 @@ public:
   void sCollision();
   void sMovement();
   void sSpawner();
+  void sLifespan();
 
   void setPaused(const bool paused) {
     std::cout << "Game is " << (paused ? "paused" : "unpaused") << std::endl;

@@ -20,6 +20,7 @@ public:
   std::shared_ptr<CTransform> cTransform;
   std::shared_ptr<CShape>     cShape;
   std::shared_ptr<CInput>     cInput;
+  std::shared_ptr<CLifespan>  cLifespan;
 
   // private member access functions
   bool               isActive() const;

@@ -61,10 +61,11 @@ void Game::mainLoop(void *arg) {
   game->sInput();
 
   if (!game->m_paused) {
-    game->sRender();
     game->sMovement();
     game->sCollision();
     game->sSpawner();
+    game->sLifespan();
+    game->sRender();
   }
 }
 
@@ -224,6 +225,30 @@ void Game::sSpawner() {
   spawnEnemy();
 }
 
+void Game::sLifespan() {
+  for (auto &entity : m_entities.getEntities()) {
+
+    if (entity->tag() == EntityTags::Player) {
+      continue;
+    }
+    if (entity->cLifespan == nullptr) {
+      std::cout << "Entity with ID " << entity->id() << " lacks a lifespan component"
+                << std::endl;
+      continue;
+    }
+
+    const Uint32 currentTime = SDL_GetTicks();
+
+    const double lifespanPercentage = (currentTime - entity->cLifespan->birthTime) /
+                                      static_cast<double>(entity->cLifespan->lifespan);
+
+    if (currentTime - entity->cLifespan->birthTime > entity->cLifespan->lifespan) {
+      std::cout << "Entity with ID " << entity->id() << " has expired" << std::endl;
+      entity->destroy();
+    }
+  }
+}
+
 void Game::spawnPlayer() {
   m_player = m_entities.addEntity(EntityTags::Player);
 
@@ -248,11 +273,51 @@ void Game::spawnEnemy() {
   std::shared_ptr<Entity>      enemy            = m_entities.addEntity(EntityTags::Enemy);
   std::shared_ptr<CTransform> &entityCTransform = enemy->cTransform;
   std::shared_ptr<CShape>     &entityCShape     = enemy->cShape;
+  std::shared_ptr<CLifespan>  &entityLifespan   = enemy->cLifespan;
 
   entityCTransform = std::make_shared<CTransform>(Vec2(x, y), Vec2(0, 0), 0);
   entityCShape = std::make_shared<CShape>(m_renderer, ShapeConfig({40, 40, {255, 0, 0, 255}}));
+  entityLifespan = std::make_shared<CLifespan>(30000);
 
-  std::cout << "Enemy entity created" << std::endl;
+  bool touchesBoundary = CollisionHelpers::detectOutOfBounds(enemy, windowSize).any();
+
+  bool touchesOtherEntities = false;
+
+  for (auto &entity : m_entities.getEntities()) {
+    if (CollisionHelpers::calculateCollisionBetweenEntities(entity, enemy)) {
+      touchesOtherEntities = true;
+      break;
+    }
+  }
+
+  bool      isValidSpawn       = !touchesBoundary && !touchesOtherEntities;
+  const int MAX_SPAWN_ATTEMPTS = 10;
+  int       spawnAttempt       = 1;
+
+  while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
+    const int randomX = rand() % static_cast<int>(windowSize.x);
+    const int randomY = rand() % static_cast<int>(windowSize.y);
+
+    enemy->cTransform->topLeftCornerPos = Vec2(randomX, randomY);
+    touchesBoundary      = CollisionHelpers::detectOutOfBounds(enemy, windowSize).any();
+    touchesOtherEntities = false;
+
+    for (auto &entity : m_entities.getEntities()) {
+      if (CollisionHelpers::calculateCollisionBetweenEntities(entity, enemy)) {
+        touchesOtherEntities = true;
+        break;
+      }
+    }
+
+    spawnAttempt += 1;
+    isValidSpawn = !touchesBoundary && !touchesOtherEntities;
+  }
+
+  if (!isValidSpawn) {
+    std::cout << "Could not spawn enemy after " << MAX_SPAWN_ATTEMPTS << " attempts"
+              << std::endl;
+    enemy->destroy();
+  }
 
   m_entities.update();
 }

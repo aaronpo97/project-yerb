@@ -66,4 +66,15 @@ public:
 
   CInput() {}
 };
+
+class CLifespan {
+public:
+  Uint32 birthTime;
+  Uint32 lifespan;
+
+  CLifespan() :
+      birthTime(SDL_GetTicks()), lifespan(0) {}
+  CLifespan(Uint32 lifespan) :
+      birthTime(SDL_GetTicks()), lifespan(lifespan) {}
+};
 #endif // COMPONENTS_H
