@@ -192,7 +192,7 @@ void Game::sCollision() {
 
           const Uint32 startTime = SDL_GetTicks();
           const Uint32 duration  = 7000 + (rand() % 5000);
-          entity->cEffects->addEffect({startTime, duration, "SpeedBoost"});
+          entity->cEffects->addEffect({startTime, duration, EffectTypes::SpeedBoost});
           otherEntity->destroy();
         }
       }
@@ -243,11 +243,12 @@ void Game::sSpawner() {
   m_lastEnemySpawnTime = ticks;
   spawnEnemy();
 
+  const auto &playerEffects = m_player->cEffects->getEffects();
+
   const bool hasSpeedBoost =
-      std::find_if(m_player->cEffects->getEffects().begin(),
-                   m_player->cEffects->getEffects().end(), [](const Effect &effect) {
-                     return effect.name == "SpeedBoost";
-                   }) != m_player->cEffects->getEffects().end();
+      std::find_if(playerEffects.begin(), playerEffects.end(), [](const Effect &effect) {
+        return effect.type == EffectTypes::SpeedBoost;
+      }) != playerEffects.end();
 
   // Spawns a speed boost with a 10% chance and while speed boost is not active
   const bool willSpawnSpeedBoost = rand() % 100 < 10 && !hasSpeedBoost;
@@ -258,30 +259,25 @@ void Game::sSpawner() {
 
 void Game::sEffects() {
   const auto effects = m_player->cEffects->getEffects();
-
   if (effects.empty()) {
     return;
   }
 
   const Uint32 currentTime = SDL_GetTicks();
-
   for (auto &effect : effects) {
-
     const bool effectExpired = currentTime - effect.startTime > effect.duration;
-
-    if (effectExpired) {
-      std::cout << "Effect " << effect.name << " has expired" << std::endl;
-      m_player->cEffects->removeEffect(effect.name);
-
-      if (effect.name == "SpeedBoost" || effect.name == "Slowness") {
-        std::cout << "resetting player speed" << std::endl;
-        m_playerConfig.speed = 2.0f;
+    if (!effectExpired) {
+      if (effect.type == EffectTypes::SpeedBoost) {
+        m_playerConfig.speed = 6.0f;
       }
 
       return;
     }
-    if (effect.name == "SpeedBoost") {
-      m_playerConfig.speed = 6.0f;
+
+    m_player->cEffects->removeEffect(effect.type);
+    if (effect.type == EffectTypes::SpeedBoost) {
+      std::cout << "resetting player speed" << std::endl;
+      m_playerConfig.speed = 2.0f;
     }
   }
 }
@@ -350,11 +346,11 @@ void Game::spawnEnemy() {
   std::shared_ptr<CLifespan>  &entityLifespan   = enemy->cLifespan;
 
   entityCTransform = std::make_shared<CTransform>(Vec2(x, y), Vec2(0, 0), 0);
-  entityCShape = std::make_shared<CShape>(m_renderer, ShapeConfig({40, 40, {255, 0, 0, 255}}));
-  entityLifespan = std::make_shared<CLifespan>(30000);
 
-  bool touchesBoundary = CollisionHelpers::detectOutOfBounds(enemy, windowSize).any();
-
+  ShapeConfig cShapeConfig  = {40, 40, {255, 0, 0, 255}};
+  entityCShape              = std::make_shared<CShape>(m_renderer, cShapeConfig);
+  entityLifespan            = std::make_shared<CLifespan>(30000);
+  bool touchesBoundary      = CollisionHelpers::detectOutOfBounds(enemy, windowSize).any();
   bool touchesOtherEntities = false;
 
   for (auto &entity : m_entities.getEntities()) {
@@ -406,9 +402,10 @@ void Game::spawnSpeedBoost() {
   std::shared_ptr<CShape>     &entityCShape     = speedBoost->cShape;
   std::shared_ptr<CLifespan>  &entityLifespan   = speedBoost->cLifespan;
 
-  entityCTransform = std::make_shared<CTransform>(Vec2(x, y), Vec2(0, 0), 0);
-  entityCShape = std::make_shared<CShape>(m_renderer, ShapeConfig({20, 20, {0, 255, 0, 255}}));
-  entityLifespan = std::make_shared<CLifespan>(25000);
+  const ShapeConfig shapeConfig = {20, 20, {0, 255, 0, 255}};
+  entityCTransform              = std::make_shared<CTransform>(Vec2(x, y), Vec2(0, 0), 0);
+  entityCShape                  = std::make_shared<CShape>(m_renderer, shapeConfig);
+  entityLifespan                = std::make_shared<CLifespan>(25000);
 
   bool touchesBoundary = CollisionHelpers::detectOutOfBounds(speedBoost, windowSize).any();
   bool touchesOtherEntities = false;

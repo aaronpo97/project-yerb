@@ -77,10 +77,11 @@ public:
       birthTime(SDL_GetTicks()), lifespan(lifespan) {}
 };
 
+enum EffectTypes { SpeedBoost };
 struct Effect {
   Uint32      startTime;
   Uint32      duration;
-  std::string name;
+  EffectTypes type;
 };
 
 class CEffects {
@@ -92,12 +93,11 @@ public:
 
     // do not add the effect if it already exists
     for (const auto &existingEffect : effects) {
-      if (existingEffect.name == effect.name) {
+      if (existingEffect.type == effect.type) {
         return;
       }
     }
 
-    std::cout << "Adding effect: " << effect.name << std::endl;
     effects.push_back(effect);
   }
 
@@ -105,11 +105,10 @@ public:
     return effects;
   }
 
-  void removeEffect(const std::string &name) {
-    effects.erase(
-        std::remove_if(effects.begin(), effects.end(),
-                       [&name](const Effect &effect) { return effect.name == name; }),
-        effects.end());
+  void removeEffect(const EffectTypes type) {
+    effects.erase(std::remove_if(effects.begin(), effects.end(),
+                                 [type](const Effect &effect) { return effect.type == type; }),
+                  effects.end());
   }
 };
 #endif // COMPONENTS_H
