@@ -35,6 +35,7 @@ Game::Game() {
   std::cout << "Renderer created successfully!" << std::endl;
 
   SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
+  SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
   SDL_RenderClear(m_renderer);
   SDL_RenderPresent(m_renderer);
 
@@ -69,6 +70,7 @@ void Game::mainLoop(void *arg) {
     game->sSpawner();
     game->sLifespan();
     game->sRender();
+    game->sEffects();
   }
 }
 
@@ -173,15 +175,27 @@ void Game::sCollision() {
   CollisionHelpers::enforcePlayerBounds(m_player, collides, windowSize);
 
   for (auto &entity : m_entities.getEntities()) {
-    if (entity->tag() == EntityTags::Player) {
-      continue;
-    }
+    for (auto &otherEntity : m_entities.getEntities()) {
+      if (entity == otherEntity) {
+        continue;
+      }
 
-    if (CollisionHelpers::calculateCollisionBetweenEntities(m_player, entity)) {
-      m_score += 1;
-      std::cout << "Player collided with enemy" << std::endl;
-      std::cout << "Score: " << m_score << std::endl;
-      entity->destroy();
+      if (CollisionHelpers::calculateCollisionBetweenEntities(entity, otherEntity)) {
+        if (entity->tag() == EntityTags::Player && otherEntity->tag() == EntityTags::Enemy) {
+          std::cout << "Player collided with enemy" << std::endl;
+          otherEntity->destroy();
+        }
+
+        if (entity->tag() == EntityTags::Player &&
+            otherEntity->tag() == EntityTags::SpeedBoost) {
+          std::cout << "Player collided with speed boost!" << std::endl;
+
+          const Uint32 startTime = SDL_GetTicks();
+          const Uint32 duration  = 7000 + (rand() % 5000);
+          entity->cEffects->addEffect({startTime, duration, "SpeedBoost"});
+          otherEntity->destroy();
+        }
+      }
     }
   }
 
@@ -217,7 +231,7 @@ void Game::sMovement() {
     Vec2 &position = e->cTransform->topLeftCornerPos;
 
     if (e->tag() == EntityTags::Player) {
-      position += playerVelocity * 2;
+      position += playerVelocity * m_playerConfig.speed;
     }
   }
 }
@@ -228,11 +242,52 @@ void Game::sSpawner() {
   }
   m_lastEnemySpawnTime = ticks;
   spawnEnemy();
+
+  const bool hasSpeedBoost =
+      std::find_if(m_player->cEffects->getEffects().begin(),
+                   m_player->cEffects->getEffects().end(), [](const Effect &effect) {
+                     return effect.name == "SpeedBoost";
+                   }) != m_player->cEffects->getEffects().end();
+
+  // Spawns a speed boost with a 10% chance and while speed boost is not active
+  const bool willSpawnSpeedBoost = rand() % 100 < 10 && !hasSpeedBoost;
+  if (willSpawnSpeedBoost) {
+    spawnSpeedBoost();
+  }
+}
+
+void Game::sEffects() {
+  const auto effects = m_player->cEffects->getEffects();
+
+  if (effects.empty()) {
+    return;
+  }
+
+  const Uint32 currentTime = SDL_GetTicks();
+
+  for (auto &effect : effects) {
+
+    const bool effectExpired = currentTime - effect.startTime > effect.duration;
+
+    if (effectExpired) {
+      std::cout << "Effect " << effect.name << " has expired" << std::endl;
+      m_player->cEffects->removeEffect(effect.name);
+
+      if (effect.name == "SpeedBoost" || effect.name == "Slowness") {
+        std::cout << "resetting player speed" << std::endl;
+        m_playerConfig.speed = 2.0f;
+      }
+
+      return;
+    }
+    if (effect.name == "SpeedBoost") {
+      m_playerConfig.speed = 6.0f;
+    }
+  }
 }
 
 void Game::sLifespan() {
   for (auto &entity : m_entities.getEntities()) {
-
     if (entity->tag() == EntityTags::Player) {
       continue;
     }
@@ -243,14 +298,26 @@ void Game::sLifespan() {
     }
 
     const Uint32 currentTime = SDL_GetTicks();
+    Uint32       elapsedTime = currentTime - entity->cLifespan->birthTime;
+    // Calculate the lifespan percentage, ensuring it's clamped between 0 and 1
+    float lifespanPercentage =
+        std::min(1.0f, static_cast<float>(elapsedTime) / entity->cLifespan->lifespan);
 
-    const double lifespanPercentage = (currentTime - entity->cLifespan->birthTime) /
-                                      static_cast<double>(entity->cLifespan->lifespan);
-
-    if (currentTime - entity->cLifespan->birthTime > entity->cLifespan->lifespan) {
+    // Check if the entity's lifespan has expired
+    if (elapsedTime > entity->cLifespan->lifespan) {
       std::cout << "Entity with ID " << entity->id() << " has expired" << std::endl;
       entity->destroy();
+      continue;
     }
+
+    const float MAX_COLOR_VALUE = 255.0f;
+    float       colorValue =
+        MAX_COLOR_VALUE * (1.0f - lifespanPercentage); // Fade out as time progresses
+    // Ensure the alpha value is clamped between 0 and 255
+    colorValue = std::max(0.0f, std::min(colorValue, MAX_COLOR_VALUE));
+    // Update the entity's alpha value
+    auto &color           = entity->cShape->color;
+    entity->cShape->color = {color.r, color.g, color.b, colorValue};
   }
 }
 
@@ -260,10 +327,12 @@ void Game::spawnPlayer() {
   std::shared_ptr<CTransform> &playerCTransform = m_player->cTransform;
   std::shared_ptr<CShape>     &playerCShape     = m_player->cShape;
   std::shared_ptr<CInput>     &playerCInput     = m_player->cInput;
+  std::shared_ptr<CEffects>   &playerCEffects   = m_player->cEffects;
 
   playerCTransform = std::make_shared<CTransform>(Vec2(0, 0), Vec2(0, 0), 0);
   playerCShape     = std::make_shared<CShape>(m_renderer, m_playerConfig.shape);
   playerCInput     = std::make_shared<CInput>();
+  playerCEffects   = std::make_shared<CEffects>();
 
   std::cout << "Player entity created" << std::endl;
 
@@ -325,4 +394,52 @@ void Game::spawnEnemy() {
   }
 
   m_entities.update();
+}
+
+void Game::spawnSpeedBoost() {
+  const Vec2 &windowSize = m_gameConfig.windowSize;
+  const int   x          = rand() % static_cast<int>(windowSize.x);
+  const int   y          = rand() % static_cast<int>(windowSize.y);
+
+  std::shared_ptr<Entity>      speedBoost       = m_entities.addEntity(EntityTags::SpeedBoost);
+  std::shared_ptr<CTransform> &entityCTransform = speedBoost->cTransform;
+  std::shared_ptr<CShape>     &entityCShape     = speedBoost->cShape;
+  std::shared_ptr<CLifespan>  &entityLifespan   = speedBoost->cLifespan;
+
+  entityCTransform = std::make_shared<CTransform>(Vec2(x, y), Vec2(0, 0), 0);
+  entityCShape = std::make_shared<CShape>(m_renderer, ShapeConfig({20, 20, {0, 255, 0, 255}}));
+  entityLifespan = std::make_shared<CLifespan>(25000);
+
+  bool touchesBoundary = CollisionHelpers::detectOutOfBounds(speedBoost, windowSize).any();
+  bool touchesOtherEntities = false;
+
+  for (auto &entity : m_entities.getEntities()) {
+    if (CollisionHelpers::calculateCollisionBetweenEntities(entity, speedBoost)) {
+      touchesOtherEntities = true;
+      break;
+    }
+  }
+
+  bool      isValidSpawn       = !touchesBoundary && !touchesOtherEntities;
+  const int MAX_SPAWN_ATTEMPTS = 10;
+  int       spawnAttempt       = 1;
+
+  while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
+    const int randomX = rand() % static_cast<int>(windowSize.x);
+    const int randomY = rand() % static_cast<int>(windowSize.y);
+
+    speedBoost->cTransform->topLeftCornerPos = Vec2(randomX, randomY);
+    touchesBoundary      = CollisionHelpers::detectOutOfBounds(speedBoost, windowSize).any();
+    touchesOtherEntities = false;
+
+    for (auto &entity : m_entities.getEntities()) {
+      if (CollisionHelpers::calculateCollisionBetweenEntities(entity, speedBoost)) {
+        touchesOtherEntities = true;
+        break;
+      }
+    }
+
+    spawnAttempt += 1;
+    isValidSpawn = !touchesBoundary && !touchesOtherEntities;
+  }
 }

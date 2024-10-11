@@ -28,7 +28,7 @@ private:
   int                     m_score              = 0;
 
   GameConfig   m_gameConfig   = {{1366, 768}, "C++ SDL2 Window"};
-  PlayerConfig m_playerConfig = {5.0f, {80, 80, {0, 0, 255, 255}}};
+  PlayerConfig m_playerConfig = {2.0f, {80, 80, {0, 0, 255, 255}}};
 
 public:
   Game();
@@ -41,6 +41,7 @@ public:
   void sMovement();
   void sSpawner();
   void sLifespan();
+  void sEffects();
 
   void setPaused(const bool paused) {
     std::cout << "Game is " << (paused ? "paused" : "unpaused") << std::endl;
@@ -48,8 +49,14 @@ public:
   }
 
   static void mainLoop(void *arg);
-  void        spawnPlayer();
-  void        spawnEnemy();
+
+  void spawnPlayer();
+  void setPlayerSpeed(const float speed) {
+    m_playerConfig.speed = speed;
+    std::cout << "Player speed set to " << speed << std::endl;
+  }
+  void spawnEnemy();
+  void spawnSpeedBoost();
 };
 
 #endif // GAME_H

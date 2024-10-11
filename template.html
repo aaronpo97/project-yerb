@@ -12,18 +12,20 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <body>
     <main
-      class="flex flex-row w-dvh items-center justify-center h-dvh bg-gray-800"
+      class="flex flex-col w-dvh items-center justify-center h-dvh bg-neutral-800"
     >
       <canvas
         id="canvas"
-        class="w-[80%] h-8/12"
+        class="h-[80%]"
         oncontextmenu="event.preventDefault()"
       ></canvas>
-      <textarea
-        id="output"
-        readonly
-        class="w-[20%] h-dvh font-mono p-5 resize-none text-xs bg-gray-700 text-white font-bold"
-      ></textarea>
+      <div class="h-[20%] w-dvw pt-7 p-4 bg-neutral-700 text-white">
+        <textarea
+          id="output"
+          readonly
+          class="w-full h-full font-mono resize-none text-xs font-bold bg-transparent"
+        ></textarea>
+      </div>
     </main>
     <script type="text/javascript">
       window.Module = {
@@ -34,12 +36,13 @@
         },
         printErr(text) {
           const outputElement = document.getElementById("output");
-          outputElement.value += "ERROR: " + text + "\n"; // Append error messages
+          outputElement.value += `ERROR: ${text}\n`; // Append error messages using template literals
           outputElement.scrollTop = outputElement.scrollHeight; // Auto-scroll to bottom
         },
         canvas: document.getElementById("canvas"),
       };
     </script>
+
     <script src="./index.js"></script>
   </body>
 </html>

@@ -21,6 +21,7 @@ public:
   std::shared_ptr<CShape>     cShape;
   std::shared_ptr<CInput>     cInput;
   std::shared_ptr<CLifespan>  cLifespan;
+  std::shared_ptr<CEffects>   cEffects;
 
   // private member access functions
   bool               isActive() const;

@@ -50,8 +50,7 @@ public:
     rect.w = config.width;
 
     color = {config.color.r, config.color.g, config.color.b, config.color.a};
-    SDL_SetRenderDrawColor(renderer, config.color.r, config.color.g, config.color.b,
-                           config.color.a);
+    SDL_SetRenderDrawColor(renderer, config.color.r, config.color.g, config.color.b, 255);
 
     SDL_RenderFillRect(renderer, &rect);
   }
@@ -76,5 +75,41 @@ public:
       birthTime(SDL_GetTicks()), lifespan(0) {}
   CLifespan(Uint32 lifespan) :
       birthTime(SDL_GetTicks()), lifespan(lifespan) {}
+};
+
+struct Effect {
+  Uint32      startTime;
+  Uint32      duration;
+  std::string name;
+};
+
+class CEffects {
+  std::vector<Effect> effects;
+
+public:
+  CEffects() {}
+  void addEffect(const Effect &effect) {
+
+    // do not add the effect if it already exists
+    for (const auto &existingEffect : effects) {
+      if (existingEffect.name == effect.name) {
+        return;
+      }
+    }
+
+    std::cout << "Adding effect: " << effect.name << std::endl;
+    effects.push_back(effect);
+  }
+
+  const std::vector<Effect> &getEffects() {
+    return effects;
+  }
+
+  void removeEffect(const std::string &name) {
+    effects.erase(
+        std::remove_if(effects.begin(), effects.end(),
+                       [&name](const Effect &effect) { return effect.name == name; }),
+        effects.end());
+  }
 };
 #endif // COMPONENTS_H
