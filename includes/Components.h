@@ -77,7 +77,7 @@ public:
       birthTime(SDL_GetTicks()), lifespan(lifespan) {}
 };
 
-enum EffectTypes { SpeedBoost };
+enum EffectTypes { Speed, Slowness };
 struct Effect {
   Uint32      startTime;
   Uint32      duration;

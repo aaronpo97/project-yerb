@@ -6,6 +6,7 @@
 #include "../includes/EntityManager.h"
 #include "../includes/EntityTags.h"
 #include "../includes/Game.h"
+#include "../includes/MovementHelpers.h"
 
 Game::Game() {
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -170,11 +171,21 @@ void Game::sRender() {
 }
 
 void Game::sCollision() {
-  const Vec2     windowSize = Vec2(1366, 768);
-  std::bitset<4> collides   = CollisionHelpers::detectOutOfBounds(m_player, windowSize);
-  CollisionHelpers::enforcePlayerBounds(m_player, collides, windowSize);
+  const Vec2 windowSize = Vec2(1366, 768);
 
   for (auto &entity : m_entities.getEntities()) {
+
+    if (entity->tag() == EntityTags::SpeedBoost) {
+      std::bitset<4> speedBoostCollides =
+          CollisionHelpers::detectOutOfBounds(entity, windowSize);
+      CollisionHelpers::enforceEffectBounds(entity, speedBoostCollides, windowSize);
+    }
+
+    if (entity->tag() == EntityTags::Player) {
+      std::bitset<4> playerCollides = CollisionHelpers::detectOutOfBounds(entity, windowSize);
+      CollisionHelpers::enforcePlayerBounds(entity, playerCollides, windowSize);
+    }
+
     for (auto &otherEntity : m_entities.getEntities()) {
       if (entity == otherEntity) {
         continue;
@@ -192,7 +203,7 @@ void Game::sCollision() {
 
           const Uint32 startTime = SDL_GetTicks();
           const Uint32 duration  = 7000 + (rand() % 5000);
-          entity->cEffects->addEffect({startTime, duration, EffectTypes::SpeedBoost});
+          entity->cEffects->addEffect({startTime, duration, EffectTypes::Speed});
           otherEntity->destroy();
         }
       }
@@ -203,38 +214,13 @@ void Game::sCollision() {
 }
 
 void Game::sMovement() {
-  Vec2 playerVelocity = {0, 0};
-
-  if (m_player->cInput == nullptr) {
-    throw std::runtime_error("Player entity lacks an input component.");
-  }
-
-  if (m_player->cInput->forward) {
-    playerVelocity.y = -1;
-  }
-  if (m_player->cInput->backward) {
-    playerVelocity.y = 1;
-  }
-  if (m_player->cInput->left) {
-    playerVelocity.x = -1;
-  }
-  if (m_player->cInput->right) {
-    playerVelocity.x = 1;
-  }
-
-  for (auto e : m_entities.getEntities()) {
-    if (e->cTransform == nullptr) {
-      throw std::runtime_error("Entity " + e->tag() + ", with ID " + std::to_string(e->id()) +
-                               " lacks a transform component.");
-    }
-
-    Vec2 &position = e->cTransform->topLeftCornerPos;
-
-    if (e->tag() == EntityTags::Player) {
-      position += playerVelocity * m_playerConfig.speed;
-    }
+  for (std::shared_ptr<Entity> entity : m_entities.getEntities()) {
+    MovementHelpers::moveEnemies(entity);
+    MovementHelpers::moveSpeedBoosts(entity);
+    MovementHelpers::movePlayer(entity, m_playerConfig);
   }
 }
+
 void Game::sSpawner() {
   const Uint32 ticks = SDL_GetTicks();
   if (ticks - m_lastEnemySpawnTime < 2500) {
@@ -247,7 +233,7 @@ void Game::sSpawner() {
 
   const bool hasSpeedBoost =
       std::find_if(playerEffects.begin(), playerEffects.end(), [](const Effect &effect) {
-        return effect.type == EffectTypes::SpeedBoost;
+        return effect.type == EffectTypes::Speed;
       }) != playerEffects.end();
 
   // Spawns a speed boost with a 10% chance and while speed boost is not active
@@ -267,7 +253,7 @@ void Game::sEffects() {
   for (auto &effect : effects) {
     const bool effectExpired = currentTime - effect.startTime > effect.duration;
     if (!effectExpired) {
-      if (effect.type == EffectTypes::SpeedBoost) {
+      if (effect.type == EffectTypes::Speed) {
         m_playerConfig.speed = 6.0f;
       }
 
@@ -275,7 +261,7 @@ void Game::sEffects() {
     }
 
     m_player->cEffects->removeEffect(effect.type);
-    if (effect.type == EffectTypes::SpeedBoost) {
+    if (effect.type == EffectTypes::Speed) {
       std::cout << "resetting player speed" << std::endl;
       m_playerConfig.speed = 2.0f;
     }
