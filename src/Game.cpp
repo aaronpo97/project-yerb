@@ -193,7 +193,7 @@ void Game::sCollision() {
 
       if (CollisionHelpers::calculateCollisionBetweenEntities(entity, otherEntity)) {
         if (entity->tag() == EntityTags::Player && otherEntity->tag() == EntityTags::Enemy) {
-          std::cout << "Player collided with enemy" << std::endl;
+          std::cout << "Player collided with enemy!" << std::endl;
           otherEntity->destroy();
         }
 
@@ -204,7 +204,12 @@ void Game::sCollision() {
           const Uint32 startTime = SDL_GetTicks();
           const Uint32 duration  = 7000 + (rand() % 5000);
           entity->cEffects->addEffect({startTime, duration, EffectTypes::Speed});
-          otherEntity->destroy();
+
+          for (auto &entities : m_entities.getEntities()) {
+            if (entities->tag() == EntityTags::SpeedBoost) {
+              entities->destroy();
+            }
+          }
         }
       }
     }
@@ -262,7 +267,7 @@ void Game::sEffects() {
 
     m_player->cEffects->removeEffect(effect.type);
     if (effect.type == EffectTypes::Speed) {
-      std::cout << "resetting player speed" << std::endl;
+      std::cout << "Your speed boost expired. 😔" << std::endl;
       m_playerConfig.speed = 2.0f;
     }
   }
@@ -287,7 +292,6 @@ void Game::sLifespan() {
 
     // Check if the entity's lifespan has expired
     if (elapsedTime > entity->cLifespan->lifespan) {
-      std::cout << "Entity with ID " << entity->id() << " has expired" << std::endl;
       entity->destroy();
       continue;
     }
@@ -316,7 +320,7 @@ void Game::spawnPlayer() {
   playerCInput     = std::make_shared<CInput>();
   playerCEffects   = std::make_shared<CEffects>();
 
-  std::cout << "Player entity created" << std::endl;
+  std::cout << "Player entity created!" << std::endl;
 
   m_entities.update();
 }
@@ -370,8 +374,6 @@ void Game::spawnEnemy() {
   }
 
   if (!isValidSpawn) {
-    std::cout << "Could not spawn enemy after " << MAX_SPAWN_ATTEMPTS << " attempts"
-              << std::endl;
     enemy->destroy();
   }
 

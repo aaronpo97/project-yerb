@@ -98,6 +98,28 @@ public:
       }
     }
 
+    std::string effectType;
+    std::string effectEmoji;
+    switch (effect.type) {
+      case EffectTypes::Speed: {
+        effectType  = "Speed";
+        effectEmoji = "🚀";
+        break;
+      }
+      case EffectTypes::Slowness: {
+        effectType  = "Slowness";
+        effectEmoji = "🐢";
+        break;
+      }
+      default: {
+        effectType  = "Unknown";
+        effectEmoji = "❓";
+        break;
+      }
+    }
+
+    std::cout << "Effect added: " << effectType << " for " << effect.duration << "ms."
+              << effectEmoji << std::endl;
     effects.push_back(effect);
   }
 

@@ -78,24 +78,20 @@ namespace CollisionHelpers {
     const std::shared_ptr<CShape> &cShape             = entity->cShape;
     Vec2                          &leftCornerPosition = entity->cTransform->topLeftCornerPos;
     Vec2                          &velocity           = entity->cTransform->velocity;
-    // bounce off the walls
+    // Bounce the entity off the boundaries
     if (collides[TOP]) {
-      std::cout << "Collided with top" << std::endl;
       leftCornerPosition.y = 0;
       velocity.y           = -velocity.y;
     }
     if (collides[BOTTOM]) {
-      std::cout << "Collided with bottom" << std::endl;
       leftCornerPosition.y = window_size.y - cShape->rect.h;
       velocity.y           = -velocity.y;
     }
     if (collides[LEFT]) {
-      std::cout << "Collided with left" << std::endl;
       leftCornerPosition.x = 0;
       velocity.x           = -velocity.x;
     }
     if (collides[RIGHT]) {
-      std::cout << "Collided with right" << std::endl;
       leftCornerPosition.x = window_size.x - cShape->rect.w;
       velocity.x           = -velocity.x;
     }
