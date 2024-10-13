@@ -68,8 +68,7 @@ void Game::mainLoop(void *arg) {
   Game *game = static_cast<Game *>(arg);
 
   const Uint32 currentTime = SDL_GetTicks();
-  // Calculate delta time and convert from milliseconds to seconds
-  game->m_deltaTime = (currentTime - game->m_lastTime);
+  game->m_deltaTime        = (currentTime - game->m_lastTime);
 
 #ifdef __EMSCRIPTEN__
   if (!game->m_isRunning) {

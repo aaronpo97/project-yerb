@@ -7,11 +7,11 @@
 #include <memory>
 
 namespace MovementHelpers {
-  void moveEnemies(std::shared_ptr<Entity> &entity, const Uint32 &deltaTime);
-  void moveSpeedBoosts(std::shared_ptr<Entity> &entity, const Uint32 &deltaTime);
+  void moveEnemies(std::shared_ptr<Entity> &entity, const float &deltaTime);
+  void moveSpeedBoosts(std::shared_ptr<Entity> &entity, const float &deltaTime);
   void movePlayer(std::shared_ptr<Entity> &entity,
                   const PlayerConfig      &m_playerConfig,
-                  const Uint32            &deltaTime);
+                  const float             &deltaTime);
 } // namespace MovementHelpers
 
 #endif // MOVEMENT_HELPERS_H

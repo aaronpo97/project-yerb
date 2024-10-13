@@ -21,8 +21,8 @@ private:
   SDL_Renderer           *m_renderer  = nullptr;
   bool                    m_isRunning = false;
   EntityManager           m_entities;
-  Uint32                  m_lastTime  = 0;
-  Uint32                  m_deltaTime = 0;
+  float                   m_lastTime  = 0;
+  float                   m_deltaTime = 0;
   bool                    m_paused    = false;
   std::shared_ptr<Entity> m_player;
   Uint32                  m_lastEnemySpawnTime = 0;
