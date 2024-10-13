@@ -42,10 +42,17 @@ Game::Game() {
 
   m_isRunning = true; // Set isRunning to true after successful initialization
 
-  std::cout << "Game initialized successfully, use the WASD keys to move the player"
-            << std::endl;
+  std::cout << "Game initialized successfully! 🥰" << std::endl;
+  std::cout << "Spawning player entity..." << std::endl;
 
   spawnPlayer();
+
+  std::cout << "You just spawned in the game! 🎉" << std::endl;
+
+  std::cout
+      << "Press W to move forward, S to move backward, A to move left, D to move right, and P "
+         "to pause/unpause the game."
+      << std::endl;
 }
 Game::~Game() {
   if (m_renderer != nullptr) {
@@ -178,12 +185,17 @@ void Game::sCollision() {
     if (entity->tag() == EntityTags::SpeedBoost) {
       std::bitset<4> speedBoostCollides =
           CollisionHelpers::detectOutOfBounds(entity, windowSize);
-      CollisionHelpers::enforceEffectBounds(entity, speedBoostCollides, windowSize);
+      CollisionHelpers::enforceNonPlayerBounds(entity, speedBoostCollides, windowSize);
     }
 
     if (entity->tag() == EntityTags::Player) {
       std::bitset<4> playerCollides = CollisionHelpers::detectOutOfBounds(entity, windowSize);
       CollisionHelpers::enforcePlayerBounds(entity, playerCollides, windowSize);
+    }
+
+    if (entity->tag() == EntityTags::Enemy) {
+      std::bitset<4> enemyCollides = CollisionHelpers::detectOutOfBounds(entity, windowSize);
+      CollisionHelpers::enforceNonPlayerBounds(entity, enemyCollides, windowSize);
     }
 
     for (auto &otherEntity : m_entities.getEntities()) {
@@ -259,7 +271,7 @@ void Game::sEffects() {
     const bool effectExpired = currentTime - effect.startTime > effect.duration;
     if (!effectExpired) {
       if (effect.type == EffectTypes::Speed) {
-        m_playerConfig.speed = 6.0f;
+        m_playerConfig.speed = 8.0f;
       }
 
       return;
@@ -268,7 +280,7 @@ void Game::sEffects() {
     m_player->cEffects->removeEffect(effect.type);
     if (effect.type == EffectTypes::Speed) {
       std::cout << "Your speed boost expired. 😔" << std::endl;
-      m_playerConfig.speed = 2.0f;
+      m_playerConfig.speed = 4.0f;
     }
   }
 }
@@ -427,4 +439,9 @@ void Game::spawnSpeedBoost() {
     spawnAttempt += 1;
     isValidSpawn = !touchesBoundary && !touchesOtherEntities;
   }
+
+  if (!isValidSpawn) {
+    speedBoost->destroy();
+  }
+  m_entities.update();
 }

@@ -63,16 +63,16 @@ namespace CollisionHelpers {
     }
   }
 
-  void enforceEffectBounds(const std::shared_ptr<Entity> &entity,
-                           const std::bitset<4>          &collides,
-                           const Vec2                    &window_size) {
+  void enforceNonPlayerBounds(const std::shared_ptr<Entity> &entity,
+                              const std::bitset<4>          &collides,
+                              const Vec2                    &window_size) {
 
     if (hasNullComponentPointers(entity)) {
       throw std::runtime_error("Entity " + entity->tag() + ", with ID " +
                                std::to_string(entity->id()) +
                                " lacks a transform or collision component.");
     }
-    if (entity->tag() != EntityTags::SpeedBoost) {
+    if (entity->tag() == EntityTags::Player) {
       return;
     }
     const std::shared_ptr<CShape> &cShape             = entity->cShape;

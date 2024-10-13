@@ -20,9 +20,15 @@ namespace MovementHelpers {
                                std::to_string(entity->id()) + " lacks a transform component.");
     }
 
-    const auto &position = entityCTransform->topLeftCornerPos;
-    const auto &velocity = entityCTransform->velocity;
-    // TODO: Implement enemy movement
+    auto &position = entityCTransform->topLeftCornerPos;
+    auto &velocity = entityCTransform->velocity;
+
+    while (velocity == Vec2{0, 0}) {
+      velocity.x = static_cast<float>(rand() % 3 - 1);
+      velocity.y = static_cast<float>(rand() % 3 - 1);
+    }
+
+    position += velocity;
   }
   void moveSpeedBoosts(std::shared_ptr<Entity> &entity) {
     if (entity == nullptr) {

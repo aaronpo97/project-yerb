@@ -16,9 +16,9 @@ namespace CollisionHelpers {
                            const std::bitset<4>          &collides,
                            const Vec2                    &window_size);
 
-  void enforceEffectBounds(const std::shared_ptr<Entity> &entity,
-                           const std::bitset<4>          &collides,
-                           const Vec2                    &window_size);
+  void enforceNonPlayerBounds(const std::shared_ptr<Entity> &entity,
+                              const std::bitset<4>          &collides,
+                              const Vec2                    &window_size);
 
   bool calculateCollisionBetweenEntities(const std::shared_ptr<Entity> &entityA,
                                          const std::shared_ptr<Entity> &entityB);

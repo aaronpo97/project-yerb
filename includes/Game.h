@@ -28,7 +28,7 @@ private:
   int                     m_score              = 0;
 
   GameConfig   m_gameConfig   = {{1366, 768}, "C++ SDL2 Window"};
-  PlayerConfig m_playerConfig = {2.0f, {80, 80, {0, 0, 255, 255}}};
+  PlayerConfig m_playerConfig = {4.0f, {80, 80, {0, 0, 255, 255}}};
 
 public:
   Game();
