@@ -43,6 +43,25 @@ public:
   void sLifespan();
   void sEffects();
 
+  void setScore(const int score) {
+    const int previousScore = m_score;
+    m_score                 = score;
+
+    const int diff = m_score - previousScore;
+
+    if (m_score < 0) {
+      std::cout << "Your score dipped below 0! 😬" << std::endl;
+      setGameOver();
+      return;
+    }
+    const std::string scoreChange = diff > 0 ? "increased" : "decreased";
+    const std::string emoji       = diff > 0 ? "😃" : "😔";
+
+    std::cout << "Score " << scoreChange << " by " << std::abs(diff) << " point"
+              << (diff > 1 ? "s" : "") << "! " << emoji << std::endl;
+
+    std::cout << "Your score is now " << m_score << "." << std::endl;
+  }
   void setPaused(const bool paused) {
     std::cout << "Game is " << (paused ? "paused" : "unpaused") << std::endl;
     m_paused = paused;
@@ -57,6 +76,15 @@ public:
   }
   void spawnEnemy();
   void spawnSpeedBoost();
+  void setGameOver() {
+    if (!m_isRunning) {
+      throw std::runtime_error("Game is already over.");
+      return;
+    }
+
+    m_isRunning = false;
+    std::cout << "Game over! 😭" << std::endl;
+  }
 };
 
 #endif // GAME_H

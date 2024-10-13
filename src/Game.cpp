@@ -46,13 +46,10 @@ Game::Game() {
   std::cout << "Spawning player entity..." << std::endl;
 
   spawnPlayer();
-
   std::cout << "You just spawned in the game! 🎉" << std::endl;
-
-  std::cout
-      << "Press W to move forward, S to move backward, A to move left, D to move right, and P "
-         "to pause/unpause the game."
-      << std::endl;
+  std::cout << "Press W to move forward, S to move backward, A to move left, D to move right, "
+               "and P to pause/unpause the game."
+            << std::endl;
 }
 Game::~Game() {
   if (m_renderer != nullptr) {
@@ -69,6 +66,12 @@ Game::~Game() {
 
 void Game::mainLoop(void *arg) {
   Game *game = static_cast<Game *>(arg);
+
+#ifdef __EMSCRIPTEN__
+  if (!game->m_isRunning) {
+    emscripten_cancel_main_loop();
+  }
+#endif
 
   game->sInput();
 
@@ -205,7 +208,8 @@ void Game::sCollision() {
 
       if (CollisionHelpers::calculateCollisionBetweenEntities(entity, otherEntity)) {
         if (entity->tag() == EntityTags::Player && otherEntity->tag() == EntityTags::Enemy) {
-          std::cout << "Player collided with enemy!" << std::endl;
+          std::cout << "Player caught an enemy!" << std::endl;
+          setScore(m_score + 1);
           otherEntity->destroy();
         }
 
@@ -217,10 +221,10 @@ void Game::sCollision() {
           const Uint32 duration  = 7000 + (rand() % 5000);
           entity->cEffects->addEffect({startTime, duration, EffectTypes::Speed});
 
-          for (auto &entities : m_entities.getEntities()) {
-            if (entities->tag() == EntityTags::SpeedBoost) {
-              entities->destroy();
-            }
+          const EntityVector &speedBoosts = m_entities.getEntities("SpeedBoost");
+
+          for (auto &speedBoost : speedBoosts) {
+            speedBoost->destroy();
           }
         }
       }
@@ -291,7 +295,7 @@ void Game::sLifespan() {
       continue;
     }
     if (entity->cLifespan == nullptr) {
-      std::cout << "Entity with ID " << entity->id() << " lacks a lifespan component"
+      std::cerr << "Entity with ID " << entity->id() << " lacks a lifespan component"
                 << std::endl;
       continue;
     }
@@ -304,6 +308,10 @@ void Game::sLifespan() {
 
     // Check if the entity's lifespan has expired
     if (elapsedTime > entity->cLifespan->lifespan) {
+      if (entity->tag() == EntityTags::Enemy) {
+        std::cout << "You missed an enemy! 😢" << std::endl;
+        setScore(m_score - 1);
+      }
       entity->destroy();
       continue;
     }
