@@ -67,6 +67,10 @@ Game::~Game() {
 void Game::mainLoop(void *arg) {
   Game *game = static_cast<Game *>(arg);
 
+  const Uint32 currentTime = SDL_GetTicks();
+  // Calculate delta time and convert from milliseconds to seconds
+  game->m_deltaTime = (currentTime - game->m_lastTime);
+
 #ifdef __EMSCRIPTEN__
   if (!game->m_isRunning) {
     emscripten_cancel_main_loop();
@@ -83,6 +87,8 @@ void Game::mainLoop(void *arg) {
     game->sRender();
     game->sEffects();
   }
+  // Update the lastTime for the next loop iteration
+  game->m_lastTime = currentTime;
 }
 
 void Game::run() {
@@ -236,9 +242,9 @@ void Game::sCollision() {
 
 void Game::sMovement() {
   for (std::shared_ptr<Entity> entity : m_entities.getEntities()) {
-    MovementHelpers::moveEnemies(entity);
-    MovementHelpers::moveSpeedBoosts(entity);
-    MovementHelpers::movePlayer(entity, m_playerConfig);
+    MovementHelpers::moveEnemies(entity, m_deltaTime);
+    MovementHelpers::moveSpeedBoosts(entity, m_deltaTime);
+    MovementHelpers::movePlayer(entity, m_playerConfig, m_deltaTime);
   }
 }
 

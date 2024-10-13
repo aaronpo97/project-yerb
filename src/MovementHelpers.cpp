@@ -4,7 +4,7 @@
 #include <memory>
 
 namespace MovementHelpers {
-  void moveEnemies(std::shared_ptr<Entity> &entity) {
+  void moveEnemies(std::shared_ptr<Entity> &entity, const Uint32 &deltaTime) {
     if (entity == nullptr) {
       throw std::runtime_error("Entity is null");
     }
@@ -28,9 +28,9 @@ namespace MovementHelpers {
       velocity.y = static_cast<float>(rand() % 3 - 1);
     }
 
-    position += velocity;
+    position += velocity * (deltaTime / 8);
   }
-  void moveSpeedBoosts(std::shared_ptr<Entity> &entity) {
+  void moveSpeedBoosts(std::shared_ptr<Entity> &entity, const Uint32 &deltaTime) {
     if (entity == nullptr) {
       throw std::runtime_error("Entity is null");
     }
@@ -57,10 +57,12 @@ namespace MovementHelpers {
       velocity.y = static_cast<float>(rand() % 3 - 1);
     }
 
-    position += velocity;
+    position += velocity * (deltaTime / 8);
   }
 
-  void movePlayer(std::shared_ptr<Entity> &entity, const PlayerConfig &m_playerConfig) {
+  void movePlayer(std::shared_ptr<Entity> &entity,
+                  const PlayerConfig      &m_playerConfig,
+                  const Uint32            &deltaTime) {
     if (entity == nullptr) {
       throw std::runtime_error("Entity is null");
     }
@@ -99,6 +101,6 @@ namespace MovementHelpers {
       velocity.x = 1;
     }
 
-    position += velocity * m_playerConfig.speed;
+    position += velocity * m_playerConfig.speed * (deltaTime / 8);
   }
 } // namespace MovementHelpers
