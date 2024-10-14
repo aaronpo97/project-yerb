@@ -21,11 +21,11 @@ private:
   SDL_Renderer           *m_renderer  = nullptr;
   bool                    m_isRunning = false;
   EntityManager           m_entities;
-  float                   m_lastTime  = 0;
-  float                   m_deltaTime = 0;
-  bool                    m_paused    = false;
+  Uint64                  m_lastFrameTime = 0;
+  float                   m_deltaTime     = 0;
+  bool                    m_paused        = false;
   std::shared_ptr<Entity> m_player;
-  Uint32                  m_lastEnemySpawnTime = 0;
+  Uint64                  m_lastEnemySpawnTime = 0;
   int                     m_score              = 0;
 
   GameConfig   m_gameConfig   = {{1366, 768}, "C++ SDL2 Window"};

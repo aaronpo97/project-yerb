@@ -28,7 +28,7 @@ namespace MovementHelpers {
       velocity.y = static_cast<float>(rand() % 3 - 1);
     }
 
-    position += velocity * deltaTime * 0.05f;
+    position += velocity * deltaTime * 50;
   }
   void moveSpeedBoosts(std::shared_ptr<Entity> &entity, const float &deltaTime) {
     if (entity == nullptr) {
@@ -57,7 +57,7 @@ namespace MovementHelpers {
       velocity.y = static_cast<float>(rand() % 3 - 1);
     }
 
-    position += velocity * deltaTime * 0.05f;
+    position += velocity * deltaTime * 50;
   }
 
   void movePlayer(std::shared_ptr<Entity> &entity,
@@ -101,6 +101,6 @@ namespace MovementHelpers {
       velocity.x = 1;
     }
 
-    position += velocity * m_playerConfig.speed * deltaTime * 0.05f;
+    position += velocity * m_playerConfig.speed * deltaTime * 50;
   }
 } // namespace MovementHelpers

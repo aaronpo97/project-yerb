@@ -67,8 +67,8 @@ Game::~Game() {
 void Game::mainLoop(void *arg) {
   Game *game = static_cast<Game *>(arg);
 
-  const Uint32 currentTime = SDL_GetTicks();
-  game->m_deltaTime        = (currentTime - game->m_lastTime);
+  const Uint64 currentTime = SDL_GetTicks64();
+  game->m_deltaTime        = (currentTime - game->m_lastFrameTime) / 1000.0f;
 
 #ifdef __EMSCRIPTEN__
   if (!game->m_isRunning) {
@@ -86,8 +86,8 @@ void Game::mainLoop(void *arg) {
     game->sRender();
     game->sEffects();
   }
-  // Update the lastTime for the next loop iteration
-  game->m_lastTime = currentTime;
+
+  game->m_lastFrameTime = currentTime;
 }
 
 void Game::run() {
@@ -248,7 +248,7 @@ void Game::sMovement() {
 }
 
 void Game::sSpawner() {
-  const Uint32 ticks = SDL_GetTicks();
+  const Uint64 ticks = SDL_GetTicks64();
   if (ticks - m_lastEnemySpawnTime < 2500) {
     return;
   }
