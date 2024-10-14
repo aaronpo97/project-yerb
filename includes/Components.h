@@ -68,19 +68,19 @@ public:
 
 class CLifespan {
 public:
-  Uint32 birthTime;
-  Uint32 lifespan;
+  Uint64 birthTime;
+  Uint64 lifespan;
 
   CLifespan() :
       birthTime(SDL_GetTicks()), lifespan(0) {}
-  CLifespan(Uint32 lifespan) :
+  CLifespan(Uint64 lifespan) :
       birthTime(SDL_GetTicks()), lifespan(lifespan) {}
 };
 
 enum EffectTypes { Speed, Slowness };
 struct Effect {
-  Uint32      startTime;
-  Uint32      duration;
+  Uint64      startTime;
+  Uint64      duration;
   EffectTypes type;
 };
 

@@ -110,11 +110,11 @@ namespace CollisionHelpers {
                                " lacks a transform or collision component.");
     }
 
-    const auto &rectA = entityA->cShape->rect;
-    const auto &rectB = entityB->cShape->rect;
+    const SDL_Rect &rectA = entityA->cShape->rect;
+    const SDL_Rect &rectB = entityB->cShape->rect;
 
-    const auto &posA = entityA->cTransform->topLeftCornerPos;
-    const auto &posB = entityB->cTransform->topLeftCornerPos;
+    const Vec2 &posA = entityA->cTransform->topLeftCornerPos;
+    const Vec2 &posB = entityB->cTransform->topLeftCornerPos;
 
     const bool leftSideCollision   = posA.x + rectA.w >= posB.x;
     const bool rightSideCollision  = posA.x <= posB.x + rectB.w;

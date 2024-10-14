@@ -9,19 +9,19 @@ namespace MovementHelpers {
       throw std::runtime_error("Entity is null");
     }
 
-    const auto &entityTag = entity->tag();
+    const std::string &entityTag = entity->tag();
     if (entityTag != EntityTags::Enemy) {
       return;
     }
 
-    const auto &entityCTransform = entity->cTransform;
+    const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
     if (entityCTransform == nullptr) {
       throw std::runtime_error("Entity " + entity->tag() + ", with ID " +
                                std::to_string(entity->id()) + " lacks a transform component.");
     }
 
-    auto &position = entityCTransform->topLeftCornerPos;
-    auto &velocity = entityCTransform->velocity;
+    Vec2 &position = entityCTransform->topLeftCornerPos;
+    Vec2 &velocity = entityCTransform->velocity;
 
     while (velocity == Vec2{0, 0}) {
       velocity.x = static_cast<float>(rand() % 3 - 1);
@@ -35,12 +35,12 @@ namespace MovementHelpers {
       throw std::runtime_error("Entity is null");
     }
 
-    const auto &entityTag = entity->tag();
+    const std::string &entityTag = entity->tag();
     if (entityTag != EntityTags::SpeedBoost) {
       return;
     }
 
-    const auto &entityCTransform = entity->cTransform;
+    const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
     if (entityCTransform == nullptr) {
       throw std::runtime_error("Entity " + entity->tag() + ", with ID " +
                                std::to_string(entity->id()) + " lacks a transform component.");
@@ -67,12 +67,12 @@ namespace MovementHelpers {
       throw std::runtime_error("Entity is null");
     }
 
-    const auto &entityTag = entity->tag();
+    const std::string &entityTag = entity->tag();
     if (entityTag != EntityTags::Player) {
       return;
     }
 
-    const auto &entityCTransform = entity->cTransform;
+    const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
     if (entityCTransform == nullptr) {
       throw std::runtime_error("Entity " + entity->tag() + ", with ID " +
                                std::to_string(entity->id()) + " lacks a transform component.");

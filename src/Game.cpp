@@ -189,7 +189,6 @@ void Game::sCollision() {
   const Vec2 windowSize = Vec2(1366, 768);
 
   for (auto &entity : m_entities.getEntities()) {
-
     if (entity->tag() == EntityTags::SpeedBoost) {
       std::bitset<4> speedBoostCollides =
           CollisionHelpers::detectOutOfBounds(entity, windowSize);
@@ -222,8 +221,8 @@ void Game::sCollision() {
             otherEntity->tag() == EntityTags::SpeedBoost) {
           std::cout << "Player collided with speed boost!" << std::endl;
 
-          const Uint32 startTime = SDL_GetTicks();
-          const Uint32 duration  = 7000 + (rand() % 5000);
+          const Uint64 startTime = SDL_GetTicks64();
+          const Uint64 duration  = 7000 + (rand() % 5000);
           entity->cEffects->addEffect({startTime, duration, EffectTypes::Speed});
 
           const EntityVector &speedBoosts = m_entities.getEntities("SpeedBoost");
@@ -275,7 +274,7 @@ void Game::sEffects() {
     return;
   }
 
-  const Uint32 currentTime = SDL_GetTicks();
+  const Uint64 currentTime = SDL_GetTicks64();
   for (auto &effect : effects) {
     const bool effectExpired = currentTime - effect.startTime > effect.duration;
     if (!effectExpired) {
@@ -305,30 +304,30 @@ void Game::sLifespan() {
       continue;
     }
 
-    const Uint32 currentTime = SDL_GetTicks();
-    Uint32       elapsedTime = currentTime - entity->cLifespan->birthTime;
+    const Uint64 currentTime = SDL_GetTicks();
+    const Uint64 elapsedTime = currentTime - entity->cLifespan->birthTime;
     // Calculate the lifespan percentage, ensuring it's clamped between 0 and 1
-    float lifespanPercentage =
+    const float lifespanPercentage =
         std::min(1.0f, static_cast<float>(elapsedTime) / entity->cLifespan->lifespan);
 
-    // Check if the entity's lifespan has expired
-    if (elapsedTime > entity->cLifespan->lifespan) {
-      if (entity->tag() == EntityTags::Enemy) {
-        std::cout << "You missed an enemy! 😢" << std::endl;
-        setScore(m_score - 1);
-      }
-      entity->destroy();
+    const bool entityExpired = elapsedTime > entity->cLifespan->lifespan;
+    if (!entityExpired) {
+      const float MAX_COLOR_VALUE = 255.0f;
+      const float colorValue      = std::max(
+          0.0f, std::min(MAX_COLOR_VALUE, MAX_COLOR_VALUE * (1.0f - lifespanPercentage)));
+
+      RGBA &color = entity->cShape->color;
+      color       = {color.r, color.g, color.b, colorValue};
+
       continue;
     }
 
-    const float MAX_COLOR_VALUE = 255.0f;
-    float       colorValue =
-        MAX_COLOR_VALUE * (1.0f - lifespanPercentage); // Fade out as time progresses
-    // Ensure the alpha value is clamped between 0 and 255
-    colorValue = std::max(0.0f, std::min(colorValue, MAX_COLOR_VALUE));
-    // Update the entity's alpha value
-    auto &color           = entity->cShape->color;
-    entity->cShape->color = {color.r, color.g, color.b, colorValue};
+    if (entity->tag() == EntityTags::Enemy) {
+      std::cout << "You missed an enemy! 😢" << std::endl;
+      setScore(m_score - 1);
+    }
+
+    entity->destroy();
   }
 }
 

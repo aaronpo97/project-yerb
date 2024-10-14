@@ -17,16 +17,16 @@ struct PlayerConfig {
 
 class Game {
 private:
-  SDL_Window             *m_window    = nullptr;
-  SDL_Renderer           *m_renderer  = nullptr;
   bool                    m_isRunning = false;
+  bool                    m_paused    = false;
   EntityManager           m_entities;
-  Uint64                  m_lastFrameTime = 0;
-  float                   m_deltaTime     = 0;
-  bool                    m_paused        = false;
+  float                   m_deltaTime = 0;
+  int                     m_score     = 0;
+  SDL_Renderer           *m_renderer  = nullptr;
+  SDL_Window             *m_window    = nullptr;
   std::shared_ptr<Entity> m_player;
   Uint64                  m_lastEnemySpawnTime = 0;
-  int                     m_score              = 0;
+  Uint64                  m_lastFrameTime      = 0;
 
   GameConfig   m_gameConfig   = {{1366, 768}, "C++ SDL2 Window"};
   PlayerConfig m_playerConfig = {4.0f, {80, 80, {0, 0, 255, 255}}};
