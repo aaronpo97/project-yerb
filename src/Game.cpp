@@ -1,3 +1,5 @@
+#include <filesystem>
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
 #endif
@@ -7,16 +9,34 @@
 #include "../includes/EntityTags.h"
 #include "../includes/Game.h"
 #include "../includes/MovementHelpers.h"
+#include "../includes/TextHelpers.h"
 
 Game::Game() {
+  if (!std::filesystem::exists("./assets")) {
+    std::cerr << "Assets folder not found." << std::endl;
+    return;
+  }
+
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     std::cerr << "SDL video system is not ready to go: " << SDL_GetError() << std::endl;
     return;
   }
   std::cout << "SDL video system is ready to go" << std::endl;
 
-  const std::string &WINDOW_TITLE = m_gameConfig.windowTitle;
+  if (TTF_Init() != 0) {
+    std::cerr << "TTF_Init: " << TTF_GetError() << std::endl;
+    return;
+  }
 
+  m_font_big   = TTF_OpenFont(m_gameConfig.fontPath.c_str(), 28);
+  m_font_small = TTF_OpenFont(m_gameConfig.fontPath.c_str(), 22);
+  if (!m_font_big || !m_font_small) {
+    std::cerr << "Failed to load fonts: " << TTF_GetError() << std::endl;
+    return;
+  }
+  std::cout << "Fonts loaded successfully!" << std::endl;
+
+  const std::string &WINDOW_TITLE = m_gameConfig.windowTitle;
   m_window = SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED,
                               SDL_WINDOWPOS_CENTERED, 1366, 768, SDL_WINDOW_SHOWN);
   if (m_window == nullptr) {
@@ -60,6 +80,17 @@ Game::~Game() {
     SDL_DestroyWindow(m_window);
     m_window = nullptr;
   }
+
+  if (m_font_big != nullptr) {
+    TTF_CloseFont(m_font_big);
+    m_font_big = nullptr;
+  }
+
+  if (m_font_small != nullptr) {
+    TTF_CloseFont(m_font_small);
+    m_font_small = nullptr;
+  }
+  TTF_Quit();
   SDL_Quit();
   std::cout << "Cleanup completed, SDL exited." << std::endl;
 }
@@ -83,8 +114,8 @@ void Game::mainLoop(void *arg) {
     game->sCollision();
     game->sSpawner();
     game->sLifespan();
-    game->sRender();
     game->sEffects();
+    game->sRender();
   }
 
   game->m_lastFrameTime = currentTime;
@@ -98,7 +129,6 @@ void Game::run() {
     mainLoop(this);
   }
 #endif
-  std::cout << "Game loop exited" << std::endl;
 }
 
 void Game::sInput() {
@@ -161,7 +191,31 @@ void Game::sInput() {
   }
 }
 
+void Game::renderText() {
+  const SDL_Color   scoreColor = {255, 255, 255, 255};
+  const std::string scoreText  = "Score: " + std::to_string(m_score);
+  const Vec2        scorePos   = {10, 10};
+  TextHelpers::renderLineOfText(m_renderer, m_font_big, scoreText, scoreColor, scorePos);
+
+  if (m_player->cEffects->hasEffect(EffectTypes::Speed)) {
+    const SDL_Color   speedBoostColor = {0, 255, 0, 255};
+    const std::string speedBoostText  = "Speed Boost Active!";
+    const Vec2        speedBoostPos   = {10, 50};
+    TextHelpers::renderLineOfText(m_renderer, m_font_small, speedBoostText, speedBoostColor,
+                                  speedBoostPos);
+  };
+
+  if (m_player->cEffects->hasEffect(EffectTypes::Slowness)) {
+    const SDL_Color   slownessColor = {255, 0, 0, 255};
+    const std::string slownessText  = "Slowness Active!";
+    const Vec2        slownessPos   = {10, 70};
+    TextHelpers::renderLineOfText(m_renderer, m_font_small, slownessText, slownessColor,
+                                  slownessPos);
+  };
+}
+
 void Game::sRender() {
+  // Clear the renderer with a black color
   SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
   SDL_RenderClear(m_renderer);
 
@@ -181,6 +235,7 @@ void Game::sRender() {
     SDL_RenderFillRect(m_renderer, &rect);
   }
 
+  renderText();
   // Update the screen
   SDL_RenderPresent(m_renderer);
 }
@@ -339,10 +394,18 @@ void Game::spawnPlayer() {
   std::shared_ptr<CInput>     &playerCInput     = m_player->cInput;
   std::shared_ptr<CEffects>   &playerCEffects   = m_player->cEffects;
 
-  playerCTransform = std::make_shared<CTransform>(Vec2(0, 0), Vec2(0, 0), 0);
-  playerCShape     = std::make_shared<CShape>(m_renderer, m_playerConfig.shape);
-  playerCInput     = std::make_shared<CInput>();
-  playerCEffects   = std::make_shared<CEffects>();
+  // set the player's initial position to the center of the screen
+  const Vec2 &windowSize = m_gameConfig.windowSize;
+
+  playerCShape = std::make_shared<CShape>(m_renderer, m_playerConfig.shape);
+
+  const int playerHeight = playerCShape->rect.h;
+  const int playerWidth  = playerCShape->rect.w;
+
+  const Vec2 playerPosition = windowSize / 2 - Vec2(playerWidth / 2, playerHeight / 2);
+  playerCTransform          = std::make_shared<CTransform>(playerPosition, Vec2(0, 0), 0);
+  playerCInput              = std::make_shared<CInput>();
+  playerCEffects            = std::make_shared<CEffects>();
 
   std::cout << "Player entity created!" << std::endl;
 

@@ -132,5 +132,11 @@ public:
                                  [type](const Effect &effect) { return effect.type == type; }),
                   effects.end());
   }
+
+  const bool hasEffect(const EffectTypes type) {
+    return std::find_if(effects.begin(), effects.end(), [type](const Effect &effect) {
+             return effect.type == type;
+           }) != effects.end();
+  }
 };
 #endif // COMPONENTS_H

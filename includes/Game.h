@@ -3,11 +3,13 @@
 
 #include "../includes/EntityManager.h"
 #include <SDL2/SDL.h>
+#include <SDL_ttf.h>
 #include <iostream>
 
 struct GameConfig {
   Vec2        windowSize;
   std::string windowTitle;
+  std::string fontPath;
 };
 
 struct PlayerConfig {
@@ -27,8 +29,11 @@ private:
   std::shared_ptr<Entity> m_player;
   Uint64                  m_lastEnemySpawnTime = 0;
   Uint64                  m_lastFrameTime      = 0;
+  TTF_Font               *m_font_big;
+  TTF_Font               *m_font_small;
 
-  GameConfig   m_gameConfig   = {{1366, 768}, "C++ SDL2 Window"};
+  GameConfig m_gameConfig = {
+      {1366, 768}, "C++ SDL2 Window", "./assets/fonts/Sixtyfour/static/Sixtyfour-Regular.ttf"};
   PlayerConfig m_playerConfig = {4.0f, {80, 80, {0, 0, 255, 255}}};
 
 public:
@@ -43,6 +48,8 @@ public:
   void sSpawner();
   void sLifespan();
   void sEffects();
+
+  void renderText();
 
   void setScore(const int score) {
     const int previousScore = m_score;
