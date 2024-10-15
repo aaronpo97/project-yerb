@@ -1,21 +1,11 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "../includes/ConfigManager.h"
 #include "../includes/EntityManager.h"
 #include <SDL2/SDL.h>
 #include <SDL_ttf.h>
 #include <iostream>
-
-struct GameConfig {
-  Vec2        windowSize;
-  std::string windowTitle;
-  std::string fontPath;
-};
-
-struct PlayerConfig {
-  float       speed;
-  ShapeConfig shape;
-};
 
 class Game {
 private:
@@ -32,10 +22,7 @@ private:
   TTF_Font               *m_font_big;
   TTF_Font               *m_font_small;
   Uint64                  m_timeRemaining = 60 * 1000; // 60 seconds
-
-  GameConfig m_gameConfig = {
-      {1366, 768}, "C++ SDL2 Window", "./assets/fonts/Sixtyfour/static/Sixtyfour-Regular.ttf"};
-  PlayerConfig m_playerConfig = {4.0f, {80, 80, {0, 0, 255, 255}}};
+  ConfigManager           m_configManager;
 
 public:
   Game();
@@ -81,7 +68,7 @@ public:
 
   void spawnPlayer();
   void setPlayerSpeed(const float speed) {
-    m_playerConfig.speed = speed;
+    m_configManager.updatePlayerSpeed(speed);
     std::cout << "Player speed set to " << speed << std::endl;
   }
   void spawnEnemy();

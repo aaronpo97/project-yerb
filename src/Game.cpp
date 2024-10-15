@@ -17,6 +17,9 @@ Game::Game() {
     return;
   }
 
+  m_configManager = ConfigManager();
+  m_configManager.loadConfig();
+
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     std::cerr << "SDL video system is not ready to go: " << SDL_GetError() << std::endl;
     return;
@@ -28,15 +31,18 @@ Game::Game() {
     return;
   }
 
-  m_font_big   = TTF_OpenFont(m_gameConfig.fontPath.c_str(), 28);
-  m_font_small = TTF_OpenFont(m_gameConfig.fontPath.c_str(), 22);
+  const std::string &fontPath = m_configManager.getGameConfig().fontPath;
+
+  m_font_big   = TTF_OpenFont(fontPath.c_str(), 28);
+  m_font_small = TTF_OpenFont(fontPath.c_str(), 14);
+
   if (!m_font_big || !m_font_small) {
     std::cerr << "Failed to load fonts: " << TTF_GetError() << std::endl;
     return;
   }
   std::cout << "Fonts loaded successfully!" << std::endl;
 
-  const std::string &WINDOW_TITLE = m_gameConfig.windowTitle;
+  const std::string &WINDOW_TITLE = m_configManager.getGameConfig().windowTitle;
   m_window = SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED,
                               SDL_WINDOWPOS_CENTERED, 1366, 768, SDL_WINDOW_SHOWN);
   if (m_window == nullptr) {
@@ -240,7 +246,7 @@ void Game::sRender() {
     rect.x = static_cast<int>(pos.x);
     rect.y = static_cast<int>(pos.y);
 
-    const RGBA &color = entity->cShape->color;
+    const SDL_Color &color = entity->cShape->color;
     SDL_SetRenderDrawColor(m_renderer, color.r, color.g, color.b, color.a);
     SDL_RenderFillRect(m_renderer, &rect);
   }
@@ -304,10 +310,14 @@ void Game::sCollision() {
 }
 
 void Game::sMovement() {
+
+  const PlayerConfig &playerConfig = m_configManager.getPlayerConfig();
+  const EnemyConfig  &enemyConfig  = m_configManager.getEnemyConfig();
+
   for (std::shared_ptr<Entity> entity : m_entities.getEntities()) {
     MovementHelpers::moveEnemies(entity, m_deltaTime);
     MovementHelpers::moveSpeedBoosts(entity, m_deltaTime);
-    MovementHelpers::movePlayer(entity, m_playerConfig, m_deltaTime);
+    MovementHelpers::movePlayer(entity, playerConfig, m_deltaTime);
   }
 }
 
@@ -344,7 +354,7 @@ void Game::sEffects() {
     const bool effectExpired = currentTime - effect.startTime > effect.duration;
     if (!effectExpired) {
       if (effect.type == EffectTypes::Speed) {
-        m_playerConfig.speed = 8.0f;
+        setPlayerSpeed(8.0f);
       }
 
       return;
@@ -353,7 +363,7 @@ void Game::sEffects() {
     m_player->cEffects->removeEffect(effect.type);
     if (effect.type == EffectTypes::Speed) {
       std::cout << "Your speed boost expired. 😔" << std::endl;
-      m_playerConfig.speed = 4.0f;
+      setPlayerSpeed(4.0f);
     }
   }
 }
@@ -390,11 +400,11 @@ void Game::sLifespan() {
     const bool entityExpired = elapsedTime > entity->cLifespan->lifespan;
     if (!entityExpired) {
       const float MAX_COLOR_VALUE = 255.0f;
-      const float colorValue      = std::max(
+      const Uint8 colorValue      = std::max(
           0.0f, std::min(MAX_COLOR_VALUE, MAX_COLOR_VALUE * (1.0f - lifespanPercentage)));
 
-      RGBA &color = entity->cShape->color;
-      color       = {color.r, color.g, color.b, colorValue};
+      SDL_Color &color = entity->cShape->color;
+      color            = {color.r, color.g, color.b, colorValue};
 
       continue;
     }
@@ -409,6 +419,10 @@ void Game::sLifespan() {
 }
 
 void Game::spawnPlayer() {
+
+  const PlayerConfig &playerConfig = m_configManager.getPlayerConfig();
+  const GameConfig   &gameConfig   = m_configManager.getGameConfig();
+
   m_player = m_entities.addEntity(EntityTags::Player);
 
   std::shared_ptr<CTransform> &playerCTransform = m_player->cTransform;
@@ -417,9 +431,9 @@ void Game::spawnPlayer() {
   std::shared_ptr<CEffects>   &playerCEffects   = m_player->cEffects;
 
   // set the player's initial position to the center of the screen
-  const Vec2 &windowSize = m_gameConfig.windowSize;
+  const Vec2 &windowSize = gameConfig.windowSize;
 
-  playerCShape = std::make_shared<CShape>(m_renderer, m_playerConfig.shape);
+  playerCShape = std::make_shared<CShape>(m_renderer, playerConfig.shape);
 
   const int playerHeight = playerCShape->rect.h;
   const int playerWidth  = playerCShape->rect.w;
@@ -435,9 +449,11 @@ void Game::spawnPlayer() {
 }
 
 void Game::spawnEnemy() {
-  const Vec2 &windowSize = m_gameConfig.windowSize;
-  const int   x          = rand() % static_cast<int>(windowSize.x);
-  const int   y          = rand() % static_cast<int>(windowSize.y);
+
+  const GameConfig &gameConfig = m_configManager.getGameConfig();
+  const Vec2       &windowSize = gameConfig.windowSize;
+  const int         x          = rand() % static_cast<int>(windowSize.x);
+  const int         y          = rand() % static_cast<int>(windowSize.y);
 
   std::shared_ptr<Entity>      enemy            = m_entities.addEntity(EntityTags::Enemy);
   std::shared_ptr<CTransform> &entityCTransform = enemy->cTransform;
@@ -490,9 +506,10 @@ void Game::spawnEnemy() {
 }
 
 void Game::spawnSpeedBoost() {
-  const Vec2 &windowSize = m_gameConfig.windowSize;
-  const int   x          = rand() % static_cast<int>(windowSize.x);
-  const int   y          = rand() % static_cast<int>(windowSize.y);
+  const GameConfig &gameConfig = m_configManager.getGameConfig();
+  const Vec2       &windowSize = gameConfig.windowSize;
+  const int         x          = rand() % static_cast<int>(windowSize.x);
+  const int         y          = rand() % static_cast<int>(windowSize.y);
 
   std::shared_ptr<Entity>      speedBoost       = m_entities.addEntity(EntityTags::SpeedBoost);
   std::shared_ptr<CTransform> &entityCTransform = speedBoost->cTransform;

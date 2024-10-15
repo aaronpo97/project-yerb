@@ -62,7 +62,7 @@ namespace MovementHelpers {
   }
 
   void movePlayer(std::shared_ptr<Entity> &entity,
-                  const PlayerConfig      &m_playerConfig,
+                  const PlayerConfig      &playerConfig,
                   const float             &deltaTime) {
     if (entity == nullptr) {
       throw std::runtime_error("Entity is null");
@@ -102,6 +102,6 @@ namespace MovementHelpers {
       velocity.x = 1;
     }
 
-    position += velocity * m_playerConfig.speed * deltaTime * 50;
+    position += velocity * playerConfig.speed * deltaTime * 50;
   }
 } // namespace MovementHelpers

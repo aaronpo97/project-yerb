@@ -3,6 +3,7 @@
 
 #include "./Vec2.h"
 
+#include "./Config.h"
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <vector>
@@ -17,27 +18,14 @@ public:
       topLeftCornerPos(position), velocity(velocity), angle(angle) {}
 };
 
-struct RGBA {
-  float r;
-  float g;
-  float b;
-  float a;
-};
-struct ShapeConfig {
-  float height;
-  float width;
-
-  RGBA color;
-};
-
 class CShape {
 private:
   // Renderer is only used to draw the shape and should not be directly modified
   SDL_Renderer *renderer;
 
 public:
-  SDL_Rect rect;
-  RGBA     color;
+  SDL_Rect  rect;
+  SDL_Color color;
 
   // Inject the renderer dependency
   CShape(SDL_Renderer *renderer, ShapeConfig config) :
