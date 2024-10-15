@@ -67,10 +67,6 @@ public:
   static void mainLoop(void *arg);
 
   void spawnPlayer();
-  void setPlayerSpeed(const float speed) {
-    m_configManager.updatePlayerSpeed(speed);
-    std::cout << "Player speed set to " << speed << std::endl;
-  }
   void spawnEnemy();
   void spawnSpeedBoost();
   void setGameOver() {

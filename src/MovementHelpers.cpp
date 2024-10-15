@@ -1,11 +1,15 @@
 #include "../includes/Entity.h"
-#include <../includes/EntityTags.h>
-#include <../includes/Game.h>
+#include "../includes/EntityTags.h"
+#include "../includes/Game.h"
 #include <memory>
 
+const float BASE_MOVEMENT_MULTIPLIER = 50.0f;
+
 namespace MovementHelpers {
-  void moveEnemies(std::shared_ptr<Entity> &entity, const float &deltaTime) {
-    const float ENEMY_SPEED = 2.0f;
+  void moveEnemies(std::shared_ptr<Entity> &entity,
+                   const EnemyConfig       &enemyConfig,
+                   const float             &deltaTime) {
+
     if (entity == nullptr) {
       throw std::runtime_error("Entity is null");
     }
@@ -29,7 +33,7 @@ namespace MovementHelpers {
       velocity.y = static_cast<float>(rand() % 3 - 1);
     }
 
-    position += velocity * deltaTime * 50 * ENEMY_SPEED;
+    position += velocity * ((enemyConfig.speed) * (deltaTime * BASE_MOVEMENT_MULTIPLIER));
   }
   void moveSpeedBoosts(std::shared_ptr<Entity> &entity, const float &deltaTime) {
     if (entity == nullptr) {
@@ -58,7 +62,7 @@ namespace MovementHelpers {
       velocity.y = static_cast<float>(rand() % 3 - 1);
     }
 
-    position += velocity * deltaTime * 50;
+    position += velocity * deltaTime * BASE_MOVEMENT_MULTIPLIER;
   }
 
   void movePlayer(std::shared_ptr<Entity> &entity,
@@ -102,6 +106,17 @@ namespace MovementHelpers {
       velocity.x = 1;
     }
 
-    position += velocity * playerConfig.speed * deltaTime * 50;
+    float effectMultiplier = 1;
+
+    if (entity->cEffects->hasEffect(EffectTypes::Speed)) {
+      effectMultiplier = playerConfig.speedBoostMultiplier;
+    }
+
+    if (entity->cEffects->hasEffect(EffectTypes::Slowness)) {
+      effectMultiplier = playerConfig.slownessMultiplier;
+    }
+
+    position += velocity * ((playerConfig.baseSpeed * effectMultiplier) *
+                            (deltaTime * BASE_MOVEMENT_MULTIPLIER));
   }
 } // namespace MovementHelpers

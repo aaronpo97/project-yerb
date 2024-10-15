@@ -31,12 +31,14 @@ public:
 
 class PlayerConfig {
 public:
-  float       speed;
+  float       baseSpeed;
+  float       speedBoostMultiplier = 1.0f;
+  float       slownessMultiplier   = 1.0f;
   ShapeConfig shape;
 
   // Constructor
   PlayerConfig(float s = 5.0f, ShapeConfig sh = ShapeConfig()) :
-      speed(s), shape(sh) {}
+      baseSpeed(s), shape(sh) {}
 };
 
 class EnemyConfig {

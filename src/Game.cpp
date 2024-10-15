@@ -315,8 +315,8 @@ void Game::sMovement() {
   const EnemyConfig  &enemyConfig  = m_configManager.getEnemyConfig();
 
   for (std::shared_ptr<Entity> entity : m_entities.getEntities()) {
-    MovementHelpers::moveEnemies(entity, m_deltaTime);
     MovementHelpers::moveSpeedBoosts(entity, m_deltaTime);
+    MovementHelpers::moveEnemies(entity, enemyConfig, m_deltaTime);
     MovementHelpers::movePlayer(entity, playerConfig, m_deltaTime);
   }
 }
@@ -353,9 +353,6 @@ void Game::sEffects() {
   for (auto &effect : effects) {
     const bool effectExpired = currentTime - effect.startTime > effect.duration;
     if (!effectExpired) {
-      if (effect.type == EffectTypes::Speed) {
-        setPlayerSpeed(8.0f);
-      }
 
       return;
     }
@@ -363,7 +360,6 @@ void Game::sEffects() {
     m_player->cEffects->removeEffect(effect.type);
     if (effect.type == EffectTypes::Speed) {
       std::cout << "Your speed boost expired. 😔" << std::endl;
-      setPlayerSpeed(4.0f);
     }
   }
 }
