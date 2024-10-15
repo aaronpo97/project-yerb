@@ -5,6 +5,7 @@
 
 namespace MovementHelpers {
   void moveEnemies(std::shared_ptr<Entity> &entity, const float &deltaTime) {
+    const float ENEMY_SPEED = 2.0f;
     if (entity == nullptr) {
       throw std::runtime_error("Entity is null");
     }
@@ -28,7 +29,7 @@ namespace MovementHelpers {
       velocity.y = static_cast<float>(rand() % 3 - 1);
     }
 
-    position += velocity * deltaTime * 50;
+    position += velocity * deltaTime * 50 * ENEMY_SPEED;
   }
   void moveSpeedBoosts(std::shared_ptr<Entity> &entity, const float &deltaTime) {
     if (entity == nullptr) {

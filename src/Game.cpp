@@ -116,6 +116,7 @@ void Game::mainLoop(void *arg) {
     game->sLifespan();
     game->sEffects();
     game->sRender();
+    game->sTimer();
   }
 
   game->m_lastFrameTime = currentTime;
@@ -197,10 +198,19 @@ void Game::renderText() {
   const Vec2        scorePos   = {10, 10};
   TextHelpers::renderLineOfText(m_renderer, m_font_big, scoreText, scoreColor, scorePos);
 
+  const Uint64     &timeRemaining = m_timeRemaining;
+  const Uint64      minutes       = timeRemaining / 60000;
+  const Uint64      seconds       = (timeRemaining % 60000) / 1000;
+  const SDL_Color   timeColor     = {255, 255, 255, 255};
+  const std::string timeText      = "Time: " + std::to_string(minutes) + ":" +
+                               (seconds < 10 ? "0" : "") + std::to_string(seconds);
+  const Vec2 timePos = {10, 40};
+  TextHelpers::renderLineOfText(m_renderer, m_font_big, timeText, timeColor, timePos);
+
   if (m_player->cEffects->hasEffect(EffectTypes::Speed)) {
     const SDL_Color   speedBoostColor = {0, 255, 0, 255};
     const std::string speedBoostText  = "Speed Boost Active!";
-    const Vec2        speedBoostPos   = {10, 50};
+    const Vec2        speedBoostPos   = {10, 90};
     TextHelpers::renderLineOfText(m_renderer, m_font_small, speedBoostText, speedBoostColor,
                                   speedBoostPos);
   };
@@ -208,7 +218,7 @@ void Game::renderText() {
   if (m_player->cEffects->hasEffect(EffectTypes::Slowness)) {
     const SDL_Color   slownessColor = {255, 0, 0, 255};
     const std::string slownessText  = "Slowness Active!";
-    const Vec2        slownessPos   = {10, 70};
+    const Vec2        slownessPos   = {10, 0};
     TextHelpers::renderLineOfText(m_renderer, m_font_small, slownessText, slownessColor,
                                   slownessPos);
   };
@@ -348,6 +358,18 @@ void Game::sEffects() {
   }
 }
 
+void Game::sTimer() {
+  const Uint64 currentTime = SDL_GetTicks64();
+  const Uint64 elapsedTime = currentTime - m_lastFrameTime;
+
+  if (m_timeRemaining < elapsedTime) {
+    m_timeRemaining = 0;
+    setGameOver();
+    return;
+  }
+
+  m_timeRemaining -= elapsedTime;
+}
 void Game::sLifespan() {
   for (auto &entity : m_entities.getEntities()) {
     if (entity->tag() == EntityTags::Player) {

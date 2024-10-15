@@ -31,6 +31,7 @@ private:
   Uint64                  m_lastFrameTime      = 0;
   TTF_Font               *m_font_big;
   TTF_Font               *m_font_small;
+  Uint64                  m_timeRemaining = 60 * 1000; // 60 seconds
 
   GameConfig m_gameConfig = {
       {1366, 768}, "C++ SDL2 Window", "./assets/fonts/Sixtyfour/static/Sixtyfour-Regular.ttf"};
@@ -48,6 +49,7 @@ public:
   void sSpawner();
   void sLifespan();
   void sEffects();
+  void sTimer();
 
   void renderText();
 
