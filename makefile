@@ -1,33 +1,39 @@
 SRC_FILES = $(wildcard src/*.cpp)
-OBJ_FILES = $(patsubst src/%.cpp, objects/%.o, $(SRC_FILES))  # Change the object file directory
+OBJ_FILES = $(patsubst src/%.cpp, $(OBJ_DIR)/%.o, $(SRC_FILES))
 
-
-OBJ_NAME = index.js
+OBJ_NAME = wasm.out.js
 BUILD_DIR = build
+OBJ_DIR = objects
 ASSETS_DIR = assets
 
 CC = em++
 COMPILER_FLAGS = -O2 -std=c++17 -Isrc -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 --preload-file $(ASSETS_DIR)
 LINKER_FLAGS = -s ALLOW_MEMORY_GROWTH=1 -s WASM=1
 
-# Ensure build and objects directories are created before building anything
-all: $(BUILD_DIR) objects $(OBJ_FILES) $(BUILD_DIR)/index.html 
+# Build all targets
+all: $(BUILD_DIR) $(OBJ_DIR) $(OBJ_FILES) $(BUILD_DIR)/index.html $(BUILD_DIR)/style.css $(BUILD_DIR)/script.js
 	$(CC) $(OBJ_FILES) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(BUILD_DIR)/$(OBJ_NAME)
 
-# Rule to copy template.html to build directory and rename it to index.html
-$(BUILD_DIR)/index.html: template.html | $(BUILD_DIR)
+# Copy HTML, CSS, and JS files to build directory
+$(BUILD_DIR)/index.html: template/index.html | $(BUILD_DIR)
 	cp $< $@
 
-# Update the object file rule to point to the 'objects' directory
-objects/%.o: src/%.cpp | objects
+$(BUILD_DIR)/style.css: template/style.css | $(BUILD_DIR)
+	cp $< $@
+
+$(BUILD_DIR)/script.js: template/script.js | $(BUILD_DIR)
+	cp $< $@
+
+# Compile C++ source files to object files in the 'objects' directory
+$(OBJ_DIR)/%.o: src/%.cpp | $(OBJ_DIR)
 	$(CC) $(COMPILER_FLAGS) -c $< -o $@
 
-# Create the 'build' directory and 'objects' directory
+# Create build and objects directories if they don't exist
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-objects:
-	mkdir -p objects
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
 
 # Run the server after building everything
 run: serve
@@ -37,6 +43,4 @@ serve: all
 
 # Clean up build artifacts
 clean:
-	rm -f $(BUILD_DIR)/$(OBJ_NAME)
-	rm -rf $(BUILD_DIR)
-	rm -rf objects
+	rm -rf $(BUILD_DIR) $(OBJ_DIR)
