@@ -43,8 +43,11 @@ Game::Game() {
   std::cout << "Fonts loaded successfully!" << std::endl;
 
   const std::string &WINDOW_TITLE = m_configManager.getGameConfig().windowTitle;
-  m_window = SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED,
-                              SDL_WINDOWPOS_CENTERED, 1366, 768, SDL_WINDOW_SHOWN);
+  const Vec2        &WINDOW_SIZE  = m_configManager.getGameConfig().windowSize;
+
+  m_window =
+      SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                       WINDOW_SIZE.x, WINDOW_SIZE.y, SDL_WINDOW_SHOWN);
   if (m_window == nullptr) {
     std::cerr << "Window could not be created: " << SDL_GetError() << std::endl;
     SDL_Quit();
@@ -116,13 +119,15 @@ void Game::mainLoop(void *arg) {
   game->sInput();
 
   if (!game->m_paused) {
-    game->sMovement();
-    game->sCollision();
-    game->sSpawner();
-    game->sLifespan();
-    game->sEffects();
+    if (!game->m_gameOver) {
+      game->sMovement();
+      game->sCollision();
+      game->sSpawner();
+      game->sLifespan();
+      game->sEffects();
+      game->sTimer();
+    }
     game->sRender();
-    game->sTimer();
   }
 
   game->m_lastFrameTime = currentTime;
@@ -228,6 +233,14 @@ void Game::renderText() {
     TextHelpers::renderLineOfText(m_renderer, m_font_small, slownessText, slownessColor,
                                   slownessPos);
   };
+
+  if (m_gameOver) {
+    const SDL_Color   gameOverColor = {255, 0, 0, 255};
+    const std::string gameOverText  = "Game Over!";
+    const Vec2        gameOverPos   = {10, 100};
+    TextHelpers::renderLineOfText(m_renderer, m_font_big, gameOverText, gameOverColor,
+                                  gameOverPos);
+  }
 }
 
 void Game::sRender() {
@@ -257,7 +270,7 @@ void Game::sRender() {
 }
 
 void Game::sCollision() {
-  const Vec2 windowSize = Vec2(1366, 768);
+  const Vec2 &windowSize = m_configManager.getGameConfig().windowSize;
 
   for (auto &entity : m_entities.getEntities()) {
     if (entity->tag() == EntityTags::SpeedBoost) {

@@ -5,9 +5,10 @@ OBJ_NAME = wasm.out.js
 BUILD_DIR = build
 OBJ_DIR = objects
 ASSETS_DIR = assets
+CONFIG_DIR = config
 
 CC = em++
-COMPILER_FLAGS = -O2 -std=c++17 -Isrc -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 --preload-file $(ASSETS_DIR)
+COMPILER_FLAGS = -O2 -std=c++17 -Isrc -Ideps -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 --preload-file $(ASSETS_DIR) --preload-file $(CONFIG_DIR)
 LINKER_FLAGS = -s ALLOW_MEMORY_GROWTH=1 -s WASM=1
 
 # Build all targets

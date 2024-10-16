@@ -23,6 +23,7 @@ private:
   TTF_Font               *m_font_small;
   Uint64                  m_timeRemaining = 60 * 1000; // 60 seconds
   ConfigManager           m_configManager;
+  bool                    m_gameOver = false;
 
 public:
   Game();
@@ -70,12 +71,12 @@ public:
   void spawnEnemy();
   void spawnSpeedBoost();
   void setGameOver() {
-    if (!m_isRunning) {
-      throw std::runtime_error("Game is already over.");
+
+    if (m_gameOver) {
       return;
     }
+    m_gameOver = true;
 
-    m_isRunning = false;
     std::cout << "Game over! 😭" << std::endl;
   }
 };

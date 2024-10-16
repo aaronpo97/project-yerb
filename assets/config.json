@@ -1,0 +1,38 @@
+{
+  "gameConfig": {
+    "windowSize": {
+      "height": 900,
+      "width": 1600
+    },
+    "windowTitle": "Yerb's Game",
+    "fontPath": "./assets/fonts/Sixtyfour/static/Sixtyfour-Regular.ttf"
+  },
+  "playerConfig": {
+    "baseSpeed": 4.5,
+    "speedBoostMultiplier": 2.0,
+    "slownessMultiplier": 0.8,
+    "shape": {
+      "height": 80,
+      "width": 80,
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 255,
+        "a": 255
+      }
+    }
+  },
+  "enemyConfig": {
+    "speed": 4.0,
+    "shape": {
+      "height": 40,
+      "width": 40,
+      "color": {
+        "r": 255,
+        "g": 0,
+        "b": 0,
+        "a": 255
+      }
+    }
+  }
+}
