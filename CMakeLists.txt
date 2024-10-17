@@ -1,0 +1,73 @@
+cmake_minimum_required(VERSION 3.21...3.28)
+project(SDL_GAME VERSION 1.0 LANGUAGES CXX)
+
+include(FetchContent)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
+
+
+if(NOT EMSCRIPTEN)
+  FetchContent_Declare(
+    SDL2
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+    GIT_TAG release-2.30.8
+  )
+
+  FetchContent_MakeAvailable(SDL2)
+
+  FetchContent_Declare(
+    SDL_ttf
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
+    GIT_TAG release-2.22.0
+  )
+
+  FetchContent_MakeAvailable(SDL_ttf)
+endif()
+
+set(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
+set(OBJ_DIR "${CMAKE_BINARY_DIR}/objects")
+
+file(GLOB_RECURSE SRC_FILES "${SRC_DIR}/*.cpp")
+
+add_executable(${PROJECT_NAME} ${SRC_FILES})
+
+if(EMSCRIPTEN)
+  set_target_properties(${PROJECT_NAME} PROPERTIES
+    CMAKE_EXECUTABLE_SUFFIX ".js"
+  )
+
+  target_compile_options(${PROJECT_NAME} PRIVATE
+    "-sUSE_SDL=2"
+    "-sUSE_SDL_IMAGE=2"
+    "-sUSE_SDL_TTF=2"
+  )
+
+  target_link_options(${PROJECT_NAME} PRIVATE
+    "-sUSE_SDL=2"
+    "-sUSE_SDL_IMAGE=2"
+    "-sUSE_SDL_TTF=2"
+    "-sALLOW_MEMORY_GROWTH=1"
+    "--preload-file=${CMAKE_SOURCE_DIR}/assets@assets"
+  )
+
+  target_link_libraries(${PROJECT_NAME})
+  target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
+
+  add_custom_target(copy_templates ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_SOURCE_DIR}/template"
+    "${CMAKE_BINARY_DIR}/build"
+    COMMENT "Copying template directory to build directory"
+  )
+else()
+  target_link_libraries(${PROJECT_NAME} SDL2 SDL2_ttf)
+endif()
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build"
+)

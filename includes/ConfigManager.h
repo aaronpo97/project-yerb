@@ -1,10 +1,10 @@
 #ifndef CONFIG_MANAGER_H
 #define CONFIG_MANAGER_H
-#include "../deps/json.hpp"
-#include <fstream>
-using json = nlohmann::json;
 #include "./Config.h"
+#include <fstream>
+#include <nlohmann/json.hpp>
 
+using json = nlohmann::json;
 class ConfigManager {
 private:
   GameConfig   m_gameConfig;
