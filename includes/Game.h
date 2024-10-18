@@ -45,10 +45,6 @@ public:
   void        setScore(const int score);
   void        setPaused(const bool paused);
   static void mainLoop(void *arg);
-  void        spawnPlayer();
-  void        spawnEnemy();
-  void        spawnSpeedBoostEntity();
-  void        spawnSlownessEntity();
   void        setGameOver();
 };
 
