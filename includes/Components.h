@@ -112,7 +112,7 @@ public:
     effects.push_back(effect);
   }
 
-  const std::vector<Effect> &getEffects() {
+  const std::vector<Effect> &getEffects() const {
     return effects;
   }
 
@@ -122,10 +122,14 @@ public:
                   effects.end());
   }
 
-  const bool hasEffect(const EffectTypes type) {
+  const bool hasEffect(const EffectTypes type) const {
     return std::find_if(effects.begin(), effects.end(), [type](const Effect &effect) {
              return effect.type == type;
            }) != effects.end();
+  }
+
+  void clearEffects() {
+    effects.clear();
   }
 };
 #endif // COMPONENTS_H

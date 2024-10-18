@@ -7,19 +7,13 @@
       name="description"
       content="A game made with SDL2 and compiled for the web using Emscripten"
     />
+    <link rel="stylesheet" href="style.css" />
   </head>
-
-  <script src="https://cdn.tailwindcss.com"></script>
   <body>
-    <main
-      class="flex flex-col w-dvh items-center justify-center h-dvh bg-neutral-800"
-    >
-      <canvas
-        id="canvas"
-        class="w-dvw"
-        oncontextmenu="event.preventDefault()"
-      ></canvas>
+    <main>
+      <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
     </main>
+
     <script src="./script.js"></script>
     <script src="./SDL_GAME.js"></script>
   </body>

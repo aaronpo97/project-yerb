@@ -43,6 +43,7 @@ public:
 
 class EnemyConfig {
 public:
+  Uint64      lifespan;
   float       speed;
   ShapeConfig shape;
 
@@ -51,4 +52,17 @@ public:
       speed(s), shape(sh) {}
 };
 
+class SpeedBoostEffectConfig {
+public:
+  Uint64      lifespan;
+  float       speed;
+  ShapeConfig shape;
+};
+
+class SlownessEffectConfig {
+public:
+  Uint64      lifespan;
+  float       speed;
+  ShapeConfig shape;
+};
 #endif // CONFIG_H

@@ -3,106 +3,135 @@
 #include "./Config.h"
 #include <fstream>
 #include <nlohmann/json.hpp>
-
 using json = nlohmann::json;
 class ConfigManager {
 private:
-  GameConfig   m_gameConfig;
-  PlayerConfig m_playerConfig;
-  EnemyConfig  m_enemyConfig;
+  GameConfig             m_gameConfig;
+  PlayerConfig           m_playerConfig;
+  EnemyConfig            m_enemyConfig;
+  SpeedBoostEffectConfig m_speedBoostEffectConfig;
+  SlownessEffectConfig   m_slownessEffectConfig;
+  json                   m_json;
+  std::string            m_configPath;
 
-public:
-  ConfigManager() {}
-  // void loadConfig() {
+  void parseGameConfig() {
+    m_gameConfig.windowSize  = Vec2(m_json["gameConfig"]["windowSize"]["width"],
+                                    m_json["gameConfig"]["windowSize"]["height"]);
+    m_gameConfig.windowTitle = m_json["gameConfig"]["windowTitle"];
+    m_gameConfig.fontPath    = m_json["gameConfig"]["fontPath"];
+  }
 
-  //   m_gameConfig   = GameConfig();
-  //   m_playerConfig = PlayerConfig();
-  //   m_enemyConfig  = EnemyConfig();
+  void parsePlayerConfig() {
+    m_playerConfig.baseSpeed            = m_json["playerConfig"]["baseSpeed"];
+    m_playerConfig.speedBoostMultiplier = m_json["playerConfig"]["speedBoostMultiplier"];
+    m_playerConfig.slownessMultiplier   = m_json["playerConfig"]["slownessMultiplier"];
+    const SDL_Color playerColor = SDL_Color{m_json["playerConfig"]["shape"]["color"]["r"],
+                                            m_json["playerConfig"]["shape"]["color"]["g"],
+                                            m_json["playerConfig"]["shape"]["color"]["b"],
+                                            m_json["playerConfig"]["shape"]["color"]["a"]};
+    m_playerConfig.shape        = ShapeConfig{m_json["playerConfig"]["shape"]["height"],
+                                       m_json["playerConfig"]["shape"]["width"], playerColor};
+  }
 
-  //   // TODO: Load configuration from a file
-  //   // Mock Configuration Values
-  //   m_gameConfig.windowSize  = Vec2(1366, 768);
-  //   m_gameConfig.windowTitle = "C++ SDL2 Window";
-  //   m_gameConfig.fontPath    = "./assets/fonts/Sixtyfour/static/Sixtyfour-Regular.ttf";
+  void parseEnemyConfig() {
+    m_enemyConfig.speed        = m_json["enemyConfig"]["speed"];
+    m_enemyConfig.lifespan     = m_json["enemyConfig"]["lifespan"];
+    const SDL_Color enemyColor = SDL_Color{m_json["enemyConfig"]["shape"]["color"]["r"],
+                                           m_json["enemyConfig"]["shape"]["color"]["g"],
+                                           m_json["enemyConfig"]["shape"]["color"]["b"],
+                                           m_json["enemyConfig"]["shape"]["color"]["a"]};
+    m_enemyConfig.shape        = ShapeConfig{m_json["enemyConfig"]["shape"]["height"],
+                                      m_json["enemyConfig"]["shape"]["width"], enemyColor};
+  }
 
-  //   m_playerConfig.baseSpeed            = 4.0f;
-  //   m_playerConfig.speedBoostMultiplier = 2.0f;
-  //   m_playerConfig.slownessMultiplier   = 0.8f;
-  //   m_playerConfig.shape                = ShapeConfig{80, 80, SDL_Color{0, 0, 255, 255}};
+  void parseSpeedBoostEffectConfig() {
+    m_speedBoostEffectConfig.speed    = m_json["speedBoostEffectConfig"]["speed"];
+    m_speedBoostEffectConfig.lifespan = m_json["speedBoostEffectConfig"]["lifespan"];
+    const SDL_Color speedBoostColor =
+        SDL_Color{m_json["speedBoostEffectConfig"]["shape"]["color"]["r"],
+                  m_json["speedBoostEffectConfig"]["shape"]["color"]["g"],
+                  m_json["speedBoostEffectConfig"]["shape"]["color"]["b"],
+                  m_json["speedBoostEffectConfig"]["shape"]["color"]["a"]};
+    m_speedBoostEffectConfig.shape =
+        ShapeConfig{m_json["speedBoostEffectConfig"]["shape"]["height"],
+                    m_json["speedBoostEffectConfig"]["shape"]["width"], speedBoostColor};
+  }
 
-  //   m_enemyConfig.speed = 2.0f;
-  //   m_enemyConfig.shape = ShapeConfig{40, 40, SDL_Color{255, 0, 0, 255}};
-  // }
+  void parseSlownessEffectConfig() {
+    m_slownessEffectConfig.speed    = m_json["slownessEffectConfig"]["speed"];
+    m_slownessEffectConfig.lifespan = m_json["slownessEffectConfig"]["lifespan"];
+    const SDL_Color slownessColor =
+        SDL_Color{m_json["slownessEffectConfig"]["shape"]["color"]["r"],
+                  m_json["slownessEffectConfig"]["shape"]["color"]["g"],
+                  m_json["slownessEffectConfig"]["shape"]["color"]["b"],
+                  m_json["slownessEffectConfig"]["shape"]["color"]["a"]};
+    m_slownessEffectConfig.shape =
+        ShapeConfig{m_json["slownessEffectConfig"]["shape"]["height"],
+                    m_json["slownessEffectConfig"]["shape"]["width"], slownessColor};
+  }
+
+  void parseConfig() {
+    parseGameConfig();
+    parsePlayerConfig();
+    parseEnemyConfig();
+    parseSpeedBoostEffectConfig();
+    parseSlownessEffectConfig();
+  }
 
   void loadConfig() {
-    std::ifstream configFile("./assets/config.json"); // Open your JSON config file
-    if (configFile.is_open()) {
-      json j;
-      configFile >> j; // Parse the JSON file into the json object
-
-      // Access gameConfig
-      m_gameConfig.windowSize  = Vec2(j["gameConfig"]["windowSize"]["width"],
-                                      j["gameConfig"]["windowSize"]["height"]);
-      m_gameConfig.windowTitle = j["gameConfig"]["windowTitle"];
-      m_gameConfig.fontPath    = j["gameConfig"]["fontPath"];
-
-      // Access playerConfig
-      m_playerConfig.baseSpeed            = j["playerConfig"]["baseSpeed"];
-      m_playerConfig.speedBoostMultiplier = j["playerConfig"]["speedBoostMultiplier"];
-      m_playerConfig.slownessMultiplier   = j["playerConfig"]["slownessMultiplier"];
-      m_playerConfig.shape                = ShapeConfig{j["playerConfig"]["shape"]["width"],
-                                         j["playerConfig"]["shape"]["height"],
-                                         SDL_Color{j["playerConfig"]["shape"]["color"]["r"],
-                                                   j["playerConfig"]["shape"]["color"]["g"],
-                                                   j["playerConfig"]["shape"]["color"]["b"],
-                                                   j["playerConfig"]["shape"]["color"]["a"]}};
-
-      // Access enemyConfig
-      m_enemyConfig.speed = j["enemyConfig"]["speed"];
-      m_enemyConfig.shape =
-          ShapeConfig{j["enemyConfig"]["shape"]["width"], j["enemyConfig"]["shape"]["height"],
-                      SDL_Color{j["enemyConfig"]["shape"]["color"]["r"],
-                                j["enemyConfig"]["shape"]["color"]["g"],
-                                j["enemyConfig"]["shape"]["color"]["b"],
-                                j["enemyConfig"]["shape"]["color"]["a"]}};
-
-      configFile.close(); // Close the file
-    } else {
+    std::ifstream configFile("./assets/config.json");
+    if (!configFile.is_open()) {
+      throw std::runtime_error("Could not open config file");
     }
+    configFile >> m_json;
+    parseConfig();
+    configFile.close();
+  }
+
+public:
+  ConfigManager(std::string configPath = "./assets/config.json") :
+      m_configPath(configPath) {
+    loadConfig();
   }
 
   const GameConfig &getGameConfig() const {
     return m_gameConfig;
   }
-
   const PlayerConfig &getPlayerConfig() const {
     return m_playerConfig;
   }
-
   const EnemyConfig &getEnemyConfig() const {
     return m_enemyConfig;
   }
-
+  const SpeedBoostEffectConfig &getSpeedBoostEffectConfig() const {
+    return m_speedBoostEffectConfig;
+  }
+  const SlownessEffectConfig &getSlownessEffectConfig() const {
+    return m_slownessEffectConfig;
+  }
   void updatePlayerShape(const ShapeConfig &shape) {
     m_playerConfig.shape = shape;
   }
   void updatePlayerSpeed(const float speed) {
     m_playerConfig.baseSpeed = speed;
   }
-
   void updateEnemyShape(const ShapeConfig &shape) {
     m_enemyConfig.shape = shape;
   }
   void updateEnemySpeed(const float speed) {
     m_enemyConfig.speed = speed;
   }
-
   void updateGameWindowSize(const Vec2 &size) {
     m_gameConfig.windowSize = size;
   }
   void updateGameWindowTitle(const std::string &title) {
     m_gameConfig.windowTitle = title;
   }
+  void updateSpeedBoostEffectSpeed(const float speed) {
+    m_speedBoostEffectConfig.speed = speed;
+  }
+  void updateSlownessEffectSpeed(const float speed) {
+    m_slownessEffectConfig.speed = speed;
+  }
 };
-
 #endif // CONFIG_MANAGER_H

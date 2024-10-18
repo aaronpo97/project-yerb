@@ -1,8 +1,8 @@
+#include "../includes/MovementHelpers.h"
 #include "../includes/Entity.h"
 #include "../includes/EntityTags.h"
 #include "../includes/Game.h"
 #include <memory>
-
 const float BASE_MOVEMENT_MULTIPLIER = 50.0f;
 
 namespace MovementHelpers {
@@ -35,7 +35,9 @@ namespace MovementHelpers {
 
     position += velocity * ((enemyConfig.speed) * (deltaTime * BASE_MOVEMENT_MULTIPLIER));
   }
-  void moveSpeedBoosts(std::shared_ptr<Entity> &entity, const float &deltaTime) {
+  void moveSpeedBoosts(std::shared_ptr<Entity>      &entity,
+                       const SpeedBoostEffectConfig &speedBoostEffectConfig,
+                       const float                  &deltaTime) {
     if (entity == nullptr) {
       throw std::runtime_error("Entity is null");
     }
@@ -62,7 +64,7 @@ namespace MovementHelpers {
       velocity.y = static_cast<float>(rand() % 3 - 1);
     }
 
-    position += velocity * deltaTime * BASE_MOVEMENT_MULTIPLIER;
+    position += velocity * deltaTime * speedBoostEffectConfig.speed * BASE_MOVEMENT_MULTIPLIER;
   }
 
   void movePlayer(std::shared_ptr<Entity> &entity,
@@ -119,4 +121,41 @@ namespace MovementHelpers {
     position += velocity * ((playerConfig.baseSpeed * effectMultiplier) *
                             (deltaTime * BASE_MOVEMENT_MULTIPLIER));
   }
+
+  void moveSlownessDebuffs(std::shared_ptr<Entity>    &entity,
+                           const SlownessEffectConfig &slownessEffectConfig,
+                           const float                &deltaTime) {
+
+    if (entity == nullptr) {
+      throw std::runtime_error("Entity is null");
+    }
+
+    const std::string &entityTag = entity->tag();
+    if (entityTag != EntityTags::SlownessDebuff) {
+      return;
+    }
+
+    const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
+    const std::shared_ptr<CShape>     &entityCShape     = entity->cShape;
+
+    if (entityCTransform == nullptr) {
+      throw std::runtime_error("Entity " + entity->tag() + ", with ID " +
+                               std::to_string(entity->id()) + " lacks a transform component.");
+    }
+
+    if (entityCShape == nullptr) {
+      throw std::runtime_error("Entity " + entity->tag() + ", with ID " +
+                               std::to_string(entity->id()) + " lacks a shape component.");
+    }
+
+    Vec2 &position = entityCTransform->topLeftCornerPos;
+    Vec2 &velocity = entityCTransform->velocity;
+
+    while (velocity == Vec2{0, 0}) {
+      velocity.x = static_cast<float>(rand() % 3 - 1);
+      velocity.y = static_cast<float>(rand() % 3 - 1);
+    }
+
+    position += velocity * deltaTime * slownessEffectConfig.speed * BASE_MOVEMENT_MULTIPLIER;
+  };
 } // namespace MovementHelpers
