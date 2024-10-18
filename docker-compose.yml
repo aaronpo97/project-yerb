@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  sdl_game:
+    container_name: sdl_game
+    image: sdl_game
+    build: .
+    ports:
+      - "3333:3333"
