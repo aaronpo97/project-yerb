@@ -6,6 +6,7 @@
 #include <SDL2/SDL.h>
 #include <SDL_ttf.h>
 #include <iostream>
+#include <random>
 
 class Game {
 private:
@@ -24,6 +25,8 @@ private:
   Uint64                  m_timeRemaining = 60 * 1000; // 60 seconds
   ConfigManager           m_configManager;
   bool                    m_gameOver = false;
+  std::random_device      m_rd;
+  std::mt19937            m_randomGenerator = std::mt19937(m_rd());
 
 public:
   Game();

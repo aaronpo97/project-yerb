@@ -271,6 +271,8 @@ void Game::sRender() {
 
 void Game::sCollision() {
   const Vec2 &windowSize = m_configManager.getGameConfig().windowSize;
+  std::uniform_int_distribution<Uint64> randomSlownessDuration(5000, 10000);
+  std::uniform_int_distribution<Uint64> randomSpeedBoostDuration(9000, 15000);
 
   for (auto &entity : m_entities.getEntities()) {
     if (entity->tag() == EntityTags::SpeedBoost) {
@@ -312,7 +314,7 @@ void Game::sCollision() {
           std::cout << "Player collided with slowness debuff!" << std::endl;
 
           const Uint64 startTime = SDL_GetTicks64();
-          const Uint64 duration  = 7000 + (rand() % 5000);
+          const Uint64 duration  = randomSlownessDuration(m_randomGenerator);
           entity->cEffects->addEffect({startTime, duration, EffectTypes::Slowness});
 
           const EntityVector &slownessDebuffs = m_entities.getEntities("SlownessDebuff");
@@ -332,7 +334,7 @@ void Game::sCollision() {
           std::cout << "Player collided with speed boost!" << std::endl;
 
           const Uint64 startTime = SDL_GetTicks64();
-          const Uint64 duration  = 7000 + (rand() % 5000);
+          const Uint64 duration  = randomSpeedBoostDuration(m_randomGenerator);
           entity->cEffects->addEffect({startTime, duration, EffectTypes::Speed});
 
           const EntityVector &slownessDebuffs = m_entities.getEntities("SlownessDebuff");
@@ -381,13 +383,18 @@ void Game::sSpawner() {
 
   // Spawns a speed boost with a 15% chance and while speed boost and slowness debuff are not
   // active
-  const bool willSpawnSpeedBoost = rand() % 100 < 15 && !hasSpeedBoost && !hasSlowness;
+
+  std::uniform_int_distribution<int> randomChance(0, 100);
+  const bool                         willSpawnSpeedBoost =
+      randomChance(m_randomGenerator) < 15 && !hasSpeedBoost && !hasSlowness;
+
   if (willSpawnSpeedBoost) {
     spawnSpeedBoostEntity();
   }
   // Spawns a slowness debuff with a 30% chance and while slowness debuff and speed boost are
   // not active
-  const bool willSpawnSlownessDebuff = rand() % 100 < 15 && !hasSlowness && !hasSpeedBoost;
+  const bool willSpawnSlownessDebuff =
+      randomChance(m_randomGenerator) < 30 && !hasSlowness && !hasSpeedBoost;
   if (willSpawnSlownessDebuff) {
     std::cout << "Slowness debuff spawned!" << std::endl;
     spawnSlownessEntity();
@@ -498,15 +505,25 @@ void Game::spawnEnemy() {
 
   const GameConfig &gameConfig = m_configManager.getGameConfig();
   const Vec2       &windowSize = gameConfig.windowSize;
-  const int         x          = rand() % static_cast<int>(windowSize.x);
-  const int         y          = rand() % static_cast<int>(windowSize.y);
+
+  std::uniform_int_distribution<int> randomXPos(0, windowSize.x);
+  std::uniform_int_distribution<int> randomYPos(0, windowSize.y);
+
+  std::uniform_int_distribution<int> randomXVel(-1, 1);
+  std::uniform_int_distribution<int> randomYVel(-1, 1);
+
+  const int xPos = randomXPos(m_randomGenerator);
+  const int yPos = randomYPos(m_randomGenerator);
+
+  const int xVel = randomXVel(m_randomGenerator);
+  const int yVel = randomYVel(m_randomGenerator);
 
   std::shared_ptr<Entity>      enemy            = m_entities.addEntity(EntityTags::Enemy);
   std::shared_ptr<CTransform> &entityCTransform = enemy->cTransform;
   std::shared_ptr<CShape>     &entityCShape     = enemy->cShape;
   std::shared_ptr<CLifespan>  &entityLifespan   = enemy->cLifespan;
 
-  entityCTransform = std::make_shared<CTransform>(Vec2(x, y), Vec2(0, 0), 0);
+  entityCTransform = std::make_shared<CTransform>(Vec2(xPos, yPos), Vec2(xVel, yVel), 0);
 
   const EnemyConfig &enemyConfig = m_configManager.getEnemyConfig();
   entityCShape                   = std::make_shared<CShape>(m_renderer, enemyConfig.shape);
@@ -521,15 +538,24 @@ void Game::spawnEnemy() {
     }
   }
 
+  bool isValidVelocity = !(xVel == 0 && yVel == 0);
+  while (!isValidVelocity) {
+    const int newXVel = randomXVel(m_randomGenerator);
+    const int newYVel = randomYVel(m_randomGenerator);
+
+    enemy->cTransform->velocity = Vec2(newXVel, newYVel);
+    isValidVelocity             = !(newXVel == 0 && newYVel == 0);
+  }
+
   bool      isValidSpawn       = !touchesBoundary && !touchesOtherEntities;
   const int MAX_SPAWN_ATTEMPTS = 10;
   int       spawnAttempt       = 1;
 
   while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
-    const int randomX = rand() % static_cast<int>(windowSize.x);
-    const int randomY = rand() % static_cast<int>(windowSize.y);
+    const int newX = randomXPos(m_randomGenerator);
+    const int newY = randomYPos(m_randomGenerator);
 
-    enemy->cTransform->topLeftCornerPos = Vec2(randomX, randomY);
+    enemy->cTransform->topLeftCornerPos = Vec2(newX, newY);
     touchesBoundary      = CollisionHelpers::detectOutOfBounds(enemy, windowSize).any();
     touchesOtherEntities = false;
 
@@ -552,10 +578,19 @@ void Game::spawnEnemy() {
 }
 
 void Game::spawnSpeedBoostEntity() {
-  const GameConfig &gameConfig = m_configManager.getGameConfig();
-  const Vec2       &windowSize = gameConfig.windowSize;
-  const int         x          = rand() % static_cast<int>(windowSize.x);
-  const int         y          = rand() % static_cast<int>(windowSize.y);
+  const GameConfig                  &gameConfig = m_configManager.getGameConfig();
+  const Vec2                        &windowSize = gameConfig.windowSize;
+  std::uniform_int_distribution<int> randomXPos(0, windowSize.x);
+  std::uniform_int_distribution<int> randomYPos(0, windowSize.y);
+
+  std::uniform_int_distribution<int> randomXVel(-1, 1);
+  std::uniform_int_distribution<int> randomYVel(-1, 1);
+
+  const int xPos = randomXPos(m_randomGenerator);
+  const int yPos = randomYPos(m_randomGenerator);
+
+  const int xVel = randomXVel(m_randomGenerator);
+  const int yVel = randomYVel(m_randomGenerator);
 
   std::shared_ptr<Entity>      speedBoost       = m_entities.addEntity(EntityTags::SpeedBoost);
   std::shared_ptr<CTransform> &entityCTransform = speedBoost->cTransform;
@@ -565,7 +600,7 @@ void Game::spawnSpeedBoostEntity() {
   const SpeedBoostEffectConfig &speedBoostEffectConfig =
       m_configManager.getSpeedBoostEffectConfig();
 
-  entityCTransform = std::make_shared<CTransform>(Vec2(x, y), Vec2(0, 0), 0);
+  entityCTransform = std::make_shared<CTransform>(Vec2(xPos, yPos), Vec2(xVel, yVel), 0);
   entityCShape     = std::make_shared<CShape>(m_renderer, speedBoostEffectConfig.shape);
   entityLifespan   = std::make_shared<CLifespan>(speedBoostEffectConfig.lifespan);
 
@@ -579,15 +614,25 @@ void Game::spawnSpeedBoostEntity() {
     }
   }
 
+  bool isValidVelocity = !(xVel == 0 && yVel == 0);
+
+  while (!isValidVelocity) {
+    const int newXVel = randomXVel(m_randomGenerator);
+    const int newYVel = randomYVel(m_randomGenerator);
+
+    speedBoost->cTransform->velocity = Vec2(newXVel, newYVel);
+    isValidVelocity                  = !(newXVel == 0 && newYVel == 0);
+  }
+
   bool      isValidSpawn       = !touchesBoundary && !touchesOtherEntities;
   const int MAX_SPAWN_ATTEMPTS = 10;
   int       spawnAttempt       = 1;
 
   while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
-    const int randomX = rand() % static_cast<int>(windowSize.x);
-    const int randomY = rand() % static_cast<int>(windowSize.y);
+    const int newXPos = randomXPos(m_randomGenerator);
+    const int newYPos = randomYPos(m_randomGenerator);
 
-    speedBoost->cTransform->topLeftCornerPos = Vec2(randomX, randomY);
+    speedBoost->cTransform->topLeftCornerPos = Vec2(newXPos, newYPos);
     touchesBoundary      = CollisionHelpers::detectOutOfBounds(speedBoost, windowSize).any();
     touchesOtherEntities = false;
 
@@ -609,10 +654,19 @@ void Game::spawnSpeedBoostEntity() {
 }
 
 void Game::spawnSlownessEntity() {
-  const GameConfig &gameConfig = m_configManager.getGameConfig();
-  const Vec2       &windowSize = gameConfig.windowSize;
-  const int         x          = rand() % static_cast<int>(windowSize.x);
-  const int         y          = rand() % static_cast<int>(windowSize.y);
+  const GameConfig                  &gameConfig = m_configManager.getGameConfig();
+  const Vec2                        &windowSize = gameConfig.windowSize;
+  std::uniform_int_distribution<int> randomXPos(0, windowSize.x);
+  std::uniform_int_distribution<int> randomYPos(0, windowSize.y);
+
+  std::uniform_int_distribution<int> randomXVel(-1, 1);
+  std::uniform_int_distribution<int> randomYVel(-1, 1);
+
+  const int xPos = randomXPos(m_randomGenerator);
+  const int yPos = randomYPos(m_randomGenerator);
+
+  const int xVel = randomXVel(m_randomGenerator);
+  const int yVel = randomYVel(m_randomGenerator);
 
   std::shared_ptr<Entity> slownessEntity = m_entities.addEntity(EntityTags::SlownessDebuff);
   std::shared_ptr<CTransform> &entityCTransform = slownessEntity->cTransform;
@@ -622,7 +676,7 @@ void Game::spawnSlownessEntity() {
   const SlownessEffectConfig &slownessEffectConfig = m_configManager.getSlownessEffectConfig();
   std::cout << slownessEffectConfig.lifespan << std::endl;
 
-  entityCTransform = std::make_shared<CTransform>(Vec2(x, y), Vec2(0, 0), 0);
+  entityCTransform = std::make_shared<CTransform>(Vec2(xPos, yPos), Vec2(xVel, yVel), 0);
   entityCShape     = std::make_shared<CShape>(m_renderer, slownessEffectConfig.shape);
   entityLifespan   = std::make_shared<CLifespan>(slownessEffectConfig.lifespan);
 
@@ -637,14 +691,23 @@ void Game::spawnSlownessEntity() {
   }
 
   bool      isValidSpawn       = !touchesBoundary && !touchesOtherEntities;
+  bool      isValidVelocity    = !(xVel == 0 && yVel == 0);
   const int MAX_SPAWN_ATTEMPTS = 10;
   int       spawnAttempt       = 1;
 
-  while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
-    const int randomX = rand() % static_cast<int>(windowSize.x);
-    const int randomY = rand() % static_cast<int>(windowSize.y);
+  while (!isValidVelocity) {
+    const int newXVel = randomXVel(m_randomGenerator);
+    const int newYVel = randomYVel(m_randomGenerator);
 
-    slownessEntity->cTransform->topLeftCornerPos = Vec2(randomX, randomY);
+    slownessEntity->cTransform->velocity = Vec2(newXVel, newYVel);
+    isValidVelocity                      = !(newXVel == 0 && newYVel == 0);
+  }
+
+  while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
+    const int newXPos = randomXPos(m_randomGenerator);
+    const int newYPos = randomYPos(m_randomGenerator);
+
+    slownessEntity->cTransform->topLeftCornerPos = Vec2(newXPos, newYPos);
     touchesBoundary = CollisionHelpers::detectOutOfBounds(slownessEntity, windowSize).any();
     touchesOtherEntities = false;
 

@@ -7,3 +7,6 @@ _deps
 CMakeCache.txt
 cmake_install.cmake
 makefile
+
+# Local Netlify folder
+.netlify

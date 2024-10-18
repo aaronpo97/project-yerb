@@ -6,9 +6,12 @@
 const float BASE_MOVEMENT_MULTIPLIER = 50.0f;
 
 namespace MovementHelpers {
+
   void moveEnemies(std::shared_ptr<Entity> &entity,
                    const EnemyConfig       &enemyConfig,
                    const float             &deltaTime) {
+
+    std::uniform_int_distribution<int> randomVelocityX(-1, 1);
 
     if (entity == nullptr) {
       throw std::runtime_error("Entity is null");
@@ -27,11 +30,6 @@ namespace MovementHelpers {
 
     Vec2 &position = entityCTransform->topLeftCornerPos;
     Vec2 &velocity = entityCTransform->velocity;
-
-    while (velocity == Vec2{0, 0}) {
-      velocity.x = static_cast<float>(rand() % 3 - 1);
-      velocity.y = static_cast<float>(rand() % 3 - 1);
-    }
 
     position += velocity * ((enemyConfig.speed) * (deltaTime * BASE_MOVEMENT_MULTIPLIER));
   }
@@ -55,14 +53,6 @@ namespace MovementHelpers {
 
     Vec2 &position = entityCTransform->topLeftCornerPos;
     Vec2 &velocity = entityCTransform->velocity;
-
-    while (velocity == Vec2{0, 0}) {
-      // Randomize velocity x and velocity y with any value between -1 and 1, if it's still {0,
-      // 0}, then keep randomizing
-
-      velocity.x = static_cast<float>(rand() % 3 - 1);
-      velocity.y = static_cast<float>(rand() % 3 - 1);
-    }
 
     position += velocity * deltaTime * speedBoostEffectConfig.speed * BASE_MOVEMENT_MULTIPLIER;
   }
@@ -150,11 +140,6 @@ namespace MovementHelpers {
 
     Vec2 &position = entityCTransform->topLeftCornerPos;
     Vec2 &velocity = entityCTransform->velocity;
-
-    while (velocity == Vec2{0, 0}) {
-      velocity.x = static_cast<float>(rand() % 3 - 1);
-      velocity.y = static_cast<float>(rand() % 3 - 1);
-    }
 
     position += velocity * deltaTime * slownessEffectConfig.speed * BASE_MOVEMENT_MULTIPLIER;
   };
