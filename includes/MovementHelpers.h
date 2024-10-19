@@ -4,7 +4,7 @@
 #include "../includes/Config.h"
 #include "../includes/Entity.h"
 #include "../includes/EntityTags.h"
-#include "../includes/Game.h"
+#include "../includes/MainScene.h"
 #include <memory>
 
 namespace MovementHelpers {

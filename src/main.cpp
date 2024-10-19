@@ -1,6 +1,5 @@
-#include "../includes/Game.h"
-#include <time.h>
+#include "../includes/GameEngine.h"
 int main(int argc, char *argv[]) {
-  Game game = Game();
-  game.run();
+  GameEngine gameEngine = GameEngine();
+  gameEngine.run();
 }

@@ -1,7 +1,7 @@
 #include "../includes/MovementHelpers.h"
 #include "../includes/Entity.h"
 #include "../includes/EntityTags.h"
-#include "../includes/Game.h"
+
 #include <memory>
 const float BASE_MOVEMENT_MULTIPLIER = 50.0f;
 

@@ -8,203 +8,105 @@
 #include "../includes/CollisionHelpers.h"
 #include "../includes/EntityManager.h"
 #include "../includes/EntityTags.h"
-#include "../includes/Game.h"
+#include "../includes/MainScene.h"
 #include "../includes/MovementHelpers.h"
 #include "../includes/SpawnHelpers.h"
 #include "../includes/TextHelpers.h"
 
-Game::Game() {
-  if (!std::filesystem::exists("./assets")) {
-    std::cerr << "Assets folder not found." << std::endl;
-    return;
-  }
+MainScene::MainScene(GameEngine *gameEngine) :
+    Scene(gameEngine) {
 
-  m_configManager = ConfigManager();
-
-  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-    std::cerr << "SDL video system is not ready to go: " << SDL_GetError() << std::endl;
-    return;
-  }
-  std::cout << "SDL video system is ready to go" << std::endl;
-
-  if (TTF_Init() != 0) {
-    std::cerr << "TTF_Init: " << TTF_GetError() << std::endl;
-    return;
-  }
-
-  const std::string &fontPath = m_configManager.getGameConfig().fontPath;
-
-  m_font_big   = TTF_OpenFont(fontPath.c_str(), 28);
-  m_font_small = TTF_OpenFont(fontPath.c_str(), 14);
-
-  if (!m_font_big || !m_font_small) {
-    std::cerr << "Failed to load fonts: " << TTF_GetError() << std::endl;
-    return;
-  }
-  std::cout << "Fonts loaded successfully!" << std::endl;
-
-  const std::string &WINDOW_TITLE = m_configManager.getGameConfig().windowTitle;
-  const Vec2        &WINDOW_SIZE  = m_configManager.getGameConfig().windowSize;
-
-  m_window =
-      SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                       WINDOW_SIZE.x, WINDOW_SIZE.y, SDL_WINDOW_SHOWN);
-  if (m_window == nullptr) {
-    std::cerr << "Window could not be created: " << SDL_GetError() << std::endl;
-    SDL_Quit();
-    return;
-  }
-  std::cout << "Window created successfully!" << std::endl;
-
-  m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
-  if (m_renderer == nullptr) {
-    std::cerr << "Renderer could not be created: " << SDL_GetError() << std::endl;
-    SDL_DestroyWindow(m_window);
-    SDL_Quit();
-    return;
-  }
-  std::cout << "Renderer created successfully!" << std::endl;
-
-  SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
-  SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
-  SDL_RenderClear(m_renderer);
-  SDL_RenderPresent(m_renderer);
-
-  m_isRunning = true; // Set isRunning to true after successful initialization
-
-  std::cout << "Game initialized successfully! 🥰" << std::endl;
-  std::cout << "Spawning player entity..." << std::endl;
-
-  m_player = SpawnHelpers::spawnPlayer(m_renderer, m_configManager, m_entities);
+  m_entities           = EntityManager();
+  auto m_renderer      = gameEngine->getRenderer();
+  auto m_window        = gameEngine->getWindow();
+  auto m_configManager = gameEngine->getConfigManager();
+  m_player             = SpawnHelpers::spawnPlayer(m_renderer, m_configManager, m_entities);
   std::cout << "You just spawned in the game! 🎉" << std::endl;
   std::cout << "Press W to move forward, S to move backward, A to move left, D to move right, "
                "and P to pause/unpause the game."
             << std::endl;
 }
-Game::~Game() {
-  if (m_renderer != nullptr) {
-    SDL_DestroyRenderer(m_renderer);
-    m_renderer = nullptr;
-  }
-  if (m_window != nullptr) {
-    SDL_DestroyWindow(m_window);
-    m_window = nullptr;
-  }
 
-  if (m_font_big != nullptr) {
-    TTF_CloseFont(m_font_big);
-    m_font_big = nullptr;
+void MainScene::update() {
+  if (!m_paused) {
+    sCollision();
+    sMovement();
+    sSpawner();
+    sLifespan();
+    sEffects();
+    sTimer();
   }
-
-  if (m_font_small != nullptr) {
-    TTF_CloseFont(m_font_small);
-    m_font_small = nullptr;
-  }
-  TTF_Quit();
-  SDL_Quit();
-  std::cout << "Cleanup completed, SDL exited." << std::endl;
+  sRender();
 }
 
-void Game::mainLoop(void *arg) {
-  Game *game = static_cast<Game *>(arg);
+// void MainScene::sInput() {
+//   SDL_Event event;
+//   while (SDL_PollEvent(&event)) {
 
-  const Uint64 currentTime = SDL_GetTicks64();
-  game->m_deltaTime        = (currentTime - game->m_lastFrameTime) / 1000.0f;
+//     if (event.type == SDL_QUIT) {
+//       m_isRunning = false; // Stop the game loop
+//       return;
+//     }
 
-#ifdef __EMSCRIPTEN__
-  if (!game->m_isRunning) {
-    emscripten_cancel_main_loop();
-  }
-#endif
+//     if (event.type == SDL_KEYDOWN) {
+//       switch (event.key.keysym.sym) {
+//         case SDLK_w: {
+//           m_player->cInput->forward = true;
+//           break;
+//         }
+//         case SDLK_s: {
+//           m_player->cInput->backward = true;
+//           break;
+//         }
 
-  game->sInput();
+//         case SDLK_a: {
+//           m_player->cInput->left = true;
+//           break;
+//         }
 
-  if (!game->m_paused) {
-    if (!game->m_gameOver) {
-      game->sMovement();
-      game->sCollision();
-      game->sSpawner();
-      game->sLifespan();
-      game->sEffects();
-      game->sTimer();
-    }
-    game->sRender();
-  }
+//         case SDLK_d: {
+//           m_player->cInput->right = true;
+//           break;
+//         }
 
-  game->m_lastFrameTime = currentTime;
-}
+//         case SDLK_p: {
+//           setPaused(!m_paused);
+//           break;
+//         }
+//       }
+//     }
 
-void Game::run() {
-#ifdef __EMSCRIPTEN__
-  emscripten_set_main_loop_arg(Game::mainLoop, this, 0, 1);
-#else
-  while (m_isRunning) {
-    mainLoop(this);
-  }
-#endif
-}
+//     if (event.type == SDL_KEYUP) {
+//       switch (event.key.keysym.sym) {
+//         case SDLK_w: {
+//           m_player->cInput->forward = false;
+//           break;
+//         }
+//         case SDLK_s: {
+//           m_player->cInput->backward = false;
+//           break;
+//         }
+//         case SDLK_a: {
+//           m_player->cInput->left = false;
+//           break;
+//         }
+//         case SDLK_d: {
+//           m_player->cInput->right = false;
+//           break;
+//         }
+//       }
+//     }
+//   }
+// }
 
-void Game::sInput() {
-  SDL_Event event;
-  while (SDL_PollEvent(&event)) {
+void MainScene::sDoAction() {}
 
-    if (event.type == SDL_QUIT) {
-      m_isRunning = false; // Stop the game loop
-      return;
-    }
+void MainScene::renderText() {
 
-    if (event.type == SDL_KEYDOWN) {
-      switch (event.key.keysym.sym) {
-        case SDLK_w: {
-          m_player->cInput->forward = true;
-          break;
-        }
-        case SDLK_s: {
-          m_player->cInput->backward = true;
-          break;
-        }
+  auto m_renderer   = m_gameEngine->getRenderer();
+  auto m_font_big   = m_gameEngine->getFontBig();
+  auto m_font_small = m_gameEngine->getFontSmall();
 
-        case SDLK_a: {
-          m_player->cInput->left = true;
-          break;
-        }
-
-        case SDLK_d: {
-          m_player->cInput->right = true;
-          break;
-        }
-
-        case SDLK_p: {
-          setPaused(!m_paused);
-          break;
-        }
-      }
-    }
-
-    if (event.type == SDL_KEYUP) {
-      switch (event.key.keysym.sym) {
-        case SDLK_w: {
-          m_player->cInput->forward = false;
-          break;
-        }
-        case SDLK_s: {
-          m_player->cInput->backward = false;
-          break;
-        }
-        case SDLK_a: {
-          m_player->cInput->left = false;
-          break;
-        }
-        case SDLK_d: {
-          m_player->cInput->right = false;
-          break;
-        }
-      }
-    }
-  }
-}
-
-void Game::renderText() {
   const SDL_Color   scoreColor = {255, 255, 255, 255};
   const std::string scoreText  = "Score: " + std::to_string(m_score);
   const Vec2        scorePos   = {10, 10};
@@ -244,7 +146,9 @@ void Game::renderText() {
   }
 }
 
-void Game::sRender() {
+void MainScene::sRender() {
+
+  auto m_renderer = m_gameEngine->getRenderer();
   // Clear the renderer with a black color
   SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
   SDL_RenderClear(m_renderer);
@@ -270,8 +174,9 @@ void Game::sRender() {
   SDL_RenderPresent(m_renderer);
 }
 
-void Game::sCollision() {
-  const Vec2 &windowSize = m_configManager.getGameConfig().windowSize;
+void MainScene::sCollision() {
+  auto        m_configManager = m_gameEngine->getConfigManager();
+  const Vec2 &windowSize      = m_configManager.getGameConfig().windowSize;
   std::uniform_int_distribution<Uint64> randomSlownessDuration(5000, 10000);
   std::uniform_int_distribution<Uint64> randomSpeedBoostDuration(9000, 15000);
 
@@ -356,7 +261,9 @@ void Game::sCollision() {
   m_entities.update();
 }
 
-void Game::sMovement() {
+void MainScene::sMovement() {
+
+  auto                        m_configManager      = m_gameEngine->getConfigManager();
   const PlayerConfig         &playerConfig         = m_configManager.getPlayerConfig();
   const EnemyConfig          &enemyConfig          = m_configManager.getEnemyConfig();
   const SlownessEffectConfig &slownessEffectConfig = m_configManager.getSlownessEffectConfig();
@@ -371,8 +278,11 @@ void Game::sMovement() {
   }
 }
 
-void Game::sSpawner() {
-  const Uint64 ticks = SDL_GetTicks64();
+void MainScene::sSpawner() {
+
+  auto         m_configManager = m_gameEngine->getConfigManager();
+  auto         m_renderer      = m_gameEngine->getRenderer();
+  const Uint64 ticks           = SDL_GetTicks64();
   if (ticks - m_lastEnemySpawnTime < 2500) {
     return;
   }
@@ -404,7 +314,7 @@ void Game::sSpawner() {
   }
 }
 
-void Game::sEffects() {
+void MainScene::sEffects() {
   const auto effects = m_player->cEffects->getEffects();
   if (effects.empty()) {
     return;
@@ -424,7 +334,7 @@ void Game::sEffects() {
   }
 }
 
-void Game::sTimer() {
+void MainScene::sTimer() {
   const Uint64 currentTime = SDL_GetTicks64();
   const Uint64 elapsedTime = currentTime - m_lastFrameTime;
 
@@ -436,7 +346,7 @@ void Game::sTimer() {
 
   m_timeRemaining -= elapsedTime;
 }
-void Game::sLifespan() {
+void MainScene::sLifespan() {
   for (auto &entity : m_entities.getEntities()) {
     if (entity->tag() == EntityTags::Player) {
       continue;
@@ -474,7 +384,7 @@ void Game::sLifespan() {
   }
 }
 
-void Game::setGameOver() {
+void MainScene::setGameOver() {
   if (m_gameOver) {
     return;
   }
@@ -484,12 +394,7 @@ void Game::setGameOver() {
   std::cout << "Game over! 😭" << std::endl;
 }
 
-void Game::setPaused(const bool paused) {
-  std::cout << "Game is " << (paused ? "paused" : "unpaused") << std::endl;
-  m_paused = paused;
-}
-
-void Game::setScore(const int score) {
+void MainScene::setScore(const int score) {
   const int previousScore = m_score;
   m_score                 = score;
 
@@ -507,4 +412,9 @@ void Game::setScore(const int score) {
             << (diff > 1 ? "s" : "") << "! " << emoji << std::endl;
 
   std::cout << "Your score is now " << m_score << "." << std::endl;
+}
+
+void MainScene::onEnd() {
+  m_entities = EntityManager();
+  m_gameEngine->switchScene("MainMenu");
 }
