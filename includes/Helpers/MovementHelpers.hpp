@@ -1,10 +1,10 @@
-#ifndef MOVEMENT_HELPERS_H
-#define MOVEMENT_HELPERS_H
+#pragma once
 
-#include "../includes/Config.h"
-#include "../includes/Entity.h"
-#include "../includes/EntityTags.h"
-#include "../includes/MainScene.h"
+#include "../Configuration/Config.hpp"
+#include "../EntityManagement/Components.hpp"
+#include "../EntityManagement/Entity.hpp"
+#include "../Helpers/Vec2.hpp"
+#include <SDL2/SDL.h>
 #include <memory>
 
 namespace MovementHelpers {
@@ -22,5 +22,3 @@ namespace MovementHelpers {
                            const SlownessEffectConfig &slownessEffectConfig,
                            const float                &deltaTime);
 } // namespace MovementHelpers
-
-#endif // MOVEMENT_HELPERS_H

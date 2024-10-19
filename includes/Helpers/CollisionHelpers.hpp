@@ -1,9 +1,7 @@
 #pragma once
-#ifndef COLLISION_HELPERS_H
-#define COLLISION_HELPERS_H
 
-#include "./Entity.h"
-#include "./EntityManager.h"
+#include "../EntityManagement/Entity.hpp"
+#include "../Helpers/Vec2.hpp"
 #include <bitset>
 #include <iostream>
 
@@ -24,5 +22,3 @@ namespace CollisionHelpers {
                                          const std::shared_ptr<Entity> &entityB);
 
 } // namespace CollisionHelpers
-
-#endif // COLLISION_HELPERS_H

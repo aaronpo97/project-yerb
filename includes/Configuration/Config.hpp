@@ -1,8 +1,7 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#pragma once
 
-#include "./Vec2.h"
-#include <SDL.h>
+#include "../Helpers/Vec2.hpp"
+#include <SDL2/SDL.h>
 #include <string>
 
 class ShapeConfig {
@@ -65,4 +64,3 @@ public:
   float       speed;
   ShapeConfig shape;
 };
-#endif // CONFIG_H

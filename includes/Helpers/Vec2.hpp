@@ -1,6 +1,4 @@
-#ifndef VEC2_H
-#define VEC2_H
-
+#pragma once
 class Vec2 {
 public:
   float x, y;
@@ -23,5 +21,3 @@ public:
   Vec2  normalize();
   float length() const;
 };
-
-#endif // VEC2_H

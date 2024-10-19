@@ -1,8 +1,7 @@
-#include "../includes/SpawnHelpers.h"
-#include "../includes/CollisionHelpers.h"
-#include "../includes/ConfigManager.h"
-#include "../includes/EntityManager.h"
-#include "../includes/EntityTags.h"
+#include "../../includes/Helpers/SpawnHelpers.hpp"
+#include "../../includes/EntityManagement/EntityTags.hpp"
+#include "../../includes/Helpers/CollisionHelpers.hpp"
+
 #include <iostream>
 
 namespace SpawnHelpers {

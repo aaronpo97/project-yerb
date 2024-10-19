@@ -1,9 +1,7 @@
-#ifndef ACTION_H
-#define ACTION_H
+#pragma once
 #include <string>
 
-enum class ActionState { START, END }; // Ensure ActionState is defined
-
+enum class ActionState { START, END };
 class Action {
 private:
   std::string m_name;  // Action name, e.g., "SHOOT", "JUMP"
@@ -15,5 +13,3 @@ public:
   const std::string &getName() const;
   const ActionState &getState() const;
 };
-
-#endif // ACTION_H

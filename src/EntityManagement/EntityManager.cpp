@@ -1,6 +1,6 @@
 
-#include "../includes/EntityManager.h"
-#include "../includes/Entity.h"
+#include "../../includes/EntityManagement/EntityManager.hpp"
+#include "../../includes/EntityManagement/Entity.hpp"
 
 #include <iostream>
 

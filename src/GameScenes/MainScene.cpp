@@ -4,14 +4,13 @@
 #include <emscripten/emscripten.h>
 #endif
 
-#include "../includes/Action.h"
-#include "../includes/CollisionHelpers.h"
-#include "../includes/EntityManager.h"
-#include "../includes/EntityTags.h"
-#include "../includes/MainScene.h"
-#include "../includes/MovementHelpers.h"
-#include "../includes/SpawnHelpers.h"
-#include "../includes/TextHelpers.h"
+#include "../../includes/EntityManagement/EntityTags.hpp"
+#include "../../includes/GameScenes/MainScene.hpp"
+#include "../../includes/Helpers/CollisionHelpers.hpp"
+#include "../../includes/Helpers/MovementHelpers.hpp"
+#include "../../includes/Helpers/SpawnHelpers.hpp"
+#include "../../includes/Helpers/TextHelpers.hpp"
+#include "../../includes/Helpers/Vec2.hpp"
 
 MainScene::MainScene(GameEngine *gameEngine) :
     Scene(gameEngine) {

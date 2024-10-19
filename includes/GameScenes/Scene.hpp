@@ -1,8 +1,8 @@
-#ifndef SCENE_H
-#define SCENE_H
-
-#include "./Action.h"
-#include "./GameEngine.h"
+#pragma once
+#include "../GameEngine/Action.hpp"
+#include "../GameEngine/GameEngine.hpp"
+#include <map>
+#include <string>
 
 typedef std::map<int, std::string> ActionMap;
 class GameEngine;
@@ -34,5 +34,3 @@ public:
     return m_actionMap;
   }
 };
-
-#endif // SCENE_H

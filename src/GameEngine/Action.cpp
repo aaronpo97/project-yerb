@@ -1,4 +1,4 @@
-#include "../includes/Action.h"
+#include "../../includes/GameEngine/Action.hpp"
 
 Action::Action(const std::string &name, const ActionState &state) :
     m_name(name), m_state(state) {}

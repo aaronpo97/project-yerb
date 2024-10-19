@@ -1,11 +1,10 @@
-#ifndef SPAWN_HELPERS_H
-#define SPAWN_HELPERS_H
+#pragma once
 
-#include "./CollisionHelpers.h"
-#include "./ConfigManager.h"
-#include "./EntityManager.h"
-#include "./EntityTags.h"
-#include "./Vec2.h"
+#include "../Configuration/ConfigManager.hpp"
+#include "../EntityManagement/Entity.hpp"
+#include "../EntityManagement/EntityManager.hpp"
+#include "../Helpers/Vec2.hpp"
+
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <memory>
@@ -31,5 +30,3 @@ namespace SpawnHelpers {
                            std::mt19937        &m_randomGenerator,
                            EntityManager       &m_entities);
 } // namespace SpawnHelpers
-
-#endif // SPAWN_HELPERS_H

@@ -1,7 +1,5 @@
-#include "../includes/MovementHelpers.h"
-#include "../includes/Entity.h"
-#include "../includes/EntityTags.h"
-
+#include "../../includes/Helpers/MovementHelpers.hpp"
+#include "../../includes/EntityManagement/EntityTags.hpp"
 #include <memory>
 const float BASE_MOVEMENT_MULTIPLIER = 50.0f;
 

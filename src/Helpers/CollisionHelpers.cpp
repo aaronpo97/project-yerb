@@ -1,8 +1,9 @@
 
-#include "../includes/CollisionHelpers.h"
-#include "../includes/EntityTags.h"
-#include "../includes/MathHelpers.h"
+#include "../../includes/Helpers/CollisionHelpers.hpp"
+#include "../../includes/EntityManagement/Entity.hpp"
+#include "../../includes/EntityManagement/EntityTags.hpp"
 #include <bitset>
+#include <iostream>
 
 enum Boundaries { TOP, BOTTOM, LEFT, RIGHT };
 

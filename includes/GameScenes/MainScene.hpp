@@ -1,10 +1,8 @@
-#ifndef GAME_H
-#define GAME_H
+#pragma once
 
-#include "../includes/Action.h"
-#include "../includes/ConfigManager.h"
-#include "../includes/EntityManager.h"
-#include "Scene.h"
+#include "../EntityManagement/EntityManager.hpp"
+#include "../GameScenes/Scene.hpp"
+
 #include <SDL2/SDL.h>
 #include <SDL_ttf.h>
 #include <iostream>
@@ -42,5 +40,3 @@ public:
   void setScore(const int score);
   void setGameOver();
 };
-
-#endif // GAME_H

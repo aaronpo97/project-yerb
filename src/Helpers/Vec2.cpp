@@ -1,4 +1,4 @@
-#include "../includes/Vec2.h"
+#include "../../includes/Helpers/Vec2.hpp"
 #include <cmath>
 
 Vec2::Vec2(float x, float y) :

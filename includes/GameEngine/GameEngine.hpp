@@ -1,7 +1,6 @@
-#ifndef GAME_ENGINE_H
-#define GAME_ENGINE_H
-#include "ConfigManager.h"
-#include "Scene.h"
+#pragma once
+
+#include "../Configuration/ConfigManager.hpp"
 #include <SDL2/SDL.h>
 #include <SDL_ttf.h>
 #include <map>
@@ -49,5 +48,3 @@ public:
 
   void sUserInput();
 };
-
-#endif
