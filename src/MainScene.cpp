@@ -1,10 +1,10 @@
 #include <filesystem>
 
 #ifdef __EMSCRIPTEN__
-
 #include <emscripten/emscripten.h>
 #endif
 
+#include "../includes/Action.h"
 #include "../includes/CollisionHelpers.h"
 #include "../includes/EntityManager.h"
 #include "../includes/EntityTags.h"
@@ -21,18 +21,23 @@ MainScene::MainScene(GameEngine *gameEngine) :
   auto m_window        = gameEngine->getWindow();
   auto m_configManager = gameEngine->getConfigManager();
   m_player             = SpawnHelpers::spawnPlayer(m_renderer, m_configManager, m_entities);
-  std::cout << "You just spawned in the game! 🎉" << std::endl;
-  std::cout << "Press W to move forward, S to move backward, A to move left, D to move right, "
-               "and P to pause/unpause the game."
-            << std::endl;
-}
+
+  // WASD
+  registerAction(SDLK_w, "FORWARD");
+  registerAction(SDLK_s, "BACKWARD");
+  registerAction(SDLK_a, "LEFT");
+  registerAction(SDLK_d, "RIGHT");
+
+  // Pause
+  registerAction(SDLK_p, "PAUSE");
+};
 
 void MainScene::update() {
   const Uint64 currentTime = SDL_GetTicks64();
   m_deltaTime              = (currentTime - m_lastFrameTime) / 1000.0f;
   std::cout << "Delta time: " << m_deltaTime << std::endl;
 
-  if (!m_paused) {
+  if (!m_paused && !m_gameOver) {
     sCollision();
     sMovement();
     sSpawner();
@@ -45,13 +50,50 @@ void MainScene::update() {
   m_lastFrameTime = currentTime;
 }
 
-void MainScene::sDoAction() {}
+void MainScene::sDoAction(Action &action) {
+
+  const std::string &actionName  = action.getName();
+  const ActionState &actionState = action.getState();
+
+  if (m_player == nullptr) {
+    std::cerr << "Player entity is null." << std::endl;
+    return;
+  }
+
+  if (m_player->cInput == nullptr) {
+    std::cerr << "Player entity lacks an input component." << std::endl;
+    return;
+  }
+
+  bool &forward  = m_player->cInput->forward;
+  bool &backward = m_player->cInput->backward;
+  bool &left     = m_player->cInput->left;
+  bool &right    = m_player->cInput->right;
+
+  const bool actionStateStart = actionState == ActionState::START;
+  const bool actionStateEnd   = actionState == ActionState::END;
+
+  if (action.getName() == "FORWARD") {
+    forward = actionStateStart;
+  }
+  if (action.getName() == "BACKWARD") {
+    backward = actionStateStart;
+  }
+  if (action.getName() == "LEFT") {
+    left = actionStateStart;
+  }
+  if (action.getName() == "RIGHT") {
+    right = actionStateStart;
+  }
+  if (action.getName() == "PAUSE") {
+    m_paused = !m_paused;
+  }
+}
 
 void MainScene::renderText() {
-
-  auto m_renderer   = m_gameEngine->getRenderer();
-  auto m_font_big   = m_gameEngine->getFontBig();
-  auto m_font_small = m_gameEngine->getFontSmall();
+  SDL_Renderer *m_renderer   = m_gameEngine->getRenderer();
+  TTF_Font     *m_font_big   = m_gameEngine->getFontBig();
+  TTF_Font     *m_font_small = m_gameEngine->getFontSmall();
 
   const SDL_Color   scoreColor = {255, 255, 255, 255};
   const std::string scoreText  = "Score: " + std::to_string(m_score);
@@ -93,7 +135,6 @@ void MainScene::renderText() {
 }
 
 void MainScene::sRender() {
-
   auto m_renderer = m_gameEngine->getRenderer();
   // Clear the renderer with a black color
   SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
@@ -225,7 +266,6 @@ void MainScene::sMovement() {
 }
 
 void MainScene::sSpawner() {
-
   auto         m_configManager = m_gameEngine->getConfigManager();
   auto         m_renderer      = m_gameEngine->getRenderer();
   const Uint64 ticks           = SDL_GetTicks64();

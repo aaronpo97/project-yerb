@@ -1,6 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "../includes/Action.h"
 #include "../includes/ConfigManager.h"
 #include "../includes/EntityManager.h"
 #include "Scene.h"
@@ -29,7 +30,7 @@ public:
   void update() override;
   void onEnd() override;
   void sRender() override;
-  void sDoAction() override;
+  void sDoAction(Action &action) override;
 
   void sCollision();
   void sMovement();

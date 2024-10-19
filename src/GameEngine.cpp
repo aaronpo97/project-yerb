@@ -156,26 +156,30 @@ ConfigManager &GameEngine::getConfigManager() {
 }
 
 void GameEngine::sUserInput() {
-  SDL_Event event;
+  SDL_Event  event;
+  const auto activeScene = m_scenes[m_currentScene];
+
   while (SDL_PollEvent(&event)) {
-    switch (event.type) {
-      case SDL_QUIT:
-        quit();
-        break;
-      case SDL_KEYDOWN:
-        switch (event.key.keysym.sym) {
-          case SDLK_ESCAPE:
-            quit();
-            break;
-          default:
-            break;
-        }
-        break;
-      default:
-        break;
+    if (event.type == SDL_QUIT) {
+      quit();
+    } else if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
+      // If current scene doesn't have an action associated with this key, skip it
+      if (activeScene->getActionMap().find(event.key.keysym.sym) ==
+          activeScene->getActionMap().end()) {
+        continue;
+      }
+
+      // Determine start or end action by whether key was pressed or released
+      const ActionState actionState =
+          event.type == SDL_KEYDOWN ? ActionState::START : ActionState::END;
+
+      const auto &action = activeScene->getActionMap().at(event.key.keysym.sym);
+      Action      actionObj(action, actionState);
+      activeScene->sDoAction(actionObj);
     }
   }
 }
+
 void GameEngine::mainLoop(void *arg) {
   auto *gameEngine = static_cast<GameEngine *>(arg);
   gameEngine->sUserInput();
