@@ -100,7 +100,7 @@ GameEngine::~GameEngine() {
 }
 
 void GameEngine::update() {
-  const auto activeScene = m_scenes[m_currentScene];
+  const std::shared_ptr<Scene> activeScene = m_scenes[m_currentScene];
   if (activeScene != nullptr) {
     m_scenes[m_currentScene]->update();
   }
@@ -142,7 +142,7 @@ void GameEngine::switchScene(const std::string &name) {
     return;
   }
 
-  auto scene = m_scenes[name];
+  const std::shared_ptr<Scene> scene = m_scenes[name];
   if (scene == nullptr) {
     std::cerr << "Scene with name " << name << " is null." << std::endl;
     return;
@@ -156,8 +156,9 @@ ConfigManager &GameEngine::getConfigManager() {
 }
 
 void GameEngine::sUserInput() {
-  SDL_Event  event;
-  const auto activeScene = m_scenes[m_currentScene];
+  SDL_Event event;
+
+  const std::shared_ptr<Scene> activeScene = m_scenes[m_currentScene];
 
   while (SDL_PollEvent(&event)) {
     if (event.type == SDL_QUIT) {
@@ -173,9 +174,9 @@ void GameEngine::sUserInput() {
       const ActionState actionState =
           event.type == SDL_KEYDOWN ? ActionState::START : ActionState::END;
 
-      const auto &action = activeScene->getActionMap().at(event.key.keysym.sym);
-      Action      actionObj(action, actionState);
-      activeScene->sDoAction(actionObj);
+      const std::string &actionName = activeScene->getActionMap().at(event.key.keysym.sym);
+      Action             action(actionName, actionState);
+      activeScene->sDoAction(action);
     }
   }
 }

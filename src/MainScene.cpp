@@ -15,12 +15,12 @@
 
 MainScene::MainScene(GameEngine *gameEngine) :
     Scene(gameEngine) {
+  SDL_Renderer  *m_renderer      = gameEngine->getRenderer();
+  SDL_Window    *m_window        = gameEngine->getWindow();
+  ConfigManager &m_configManager = gameEngine->getConfigManager();
 
-  m_entities           = EntityManager();
-  auto m_renderer      = gameEngine->getRenderer();
-  auto m_window        = gameEngine->getWindow();
-  auto m_configManager = gameEngine->getConfigManager();
-  m_player             = SpawnHelpers::spawnPlayer(m_renderer, m_configManager, m_entities);
+  m_entities = EntityManager();
+  m_player   = SpawnHelpers::spawnPlayer(m_renderer, m_configManager, m_entities);
 
   // WASD
   registerAction(SDLK_w, "FORWARD");
@@ -51,7 +51,6 @@ void MainScene::update() {
 }
 
 void MainScene::sDoAction(Action &action) {
-
   const std::string &actionName  = action.getName();
   const ActionState &actionState = action.getState();
 
@@ -135,7 +134,7 @@ void MainScene::renderText() {
 }
 
 void MainScene::sRender() {
-  auto m_renderer = m_gameEngine->getRenderer();
+  SDL_Renderer *m_renderer = m_gameEngine->getRenderer();
   // Clear the renderer with a black color
   SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
   SDL_RenderClear(m_renderer);
@@ -162,8 +161,8 @@ void MainScene::sRender() {
 }
 
 void MainScene::sCollision() {
-  auto        m_configManager = m_gameEngine->getConfigManager();
-  const Vec2 &windowSize      = m_configManager.getGameConfig().windowSize;
+  const ConfigManager &m_configManager = m_gameEngine->getConfigManager();
+  const Vec2          &windowSize      = m_configManager.getGameConfig().windowSize;
   std::uniform_int_distribution<Uint64> randomSlownessDuration(5000, 10000);
   std::uniform_int_distribution<Uint64> randomSpeedBoostDuration(9000, 15000);
 
@@ -249,8 +248,7 @@ void MainScene::sCollision() {
 }
 
 void MainScene::sMovement() {
-
-  auto                        m_configManager      = m_gameEngine->getConfigManager();
+  const ConfigManager        &m_configManager      = m_gameEngine->getConfigManager();
   const PlayerConfig         &playerConfig         = m_configManager.getPlayerConfig();
   const EnemyConfig          &enemyConfig          = m_configManager.getEnemyConfig();
   const SlownessEffectConfig &slownessEffectConfig = m_configManager.getSlownessEffectConfig();
@@ -266,9 +264,9 @@ void MainScene::sMovement() {
 }
 
 void MainScene::sSpawner() {
-  auto         m_configManager = m_gameEngine->getConfigManager();
-  auto         m_renderer      = m_gameEngine->getRenderer();
-  const Uint64 ticks           = SDL_GetTicks64();
+  ConfigManager m_configManager = m_gameEngine->getConfigManager();
+  SDL_Renderer *m_renderer      = m_gameEngine->getRenderer();
+  const Uint64  ticks           = SDL_GetTicks64();
   if (ticks - m_lastEnemySpawnTime < 2500) {
     return;
   }
@@ -301,7 +299,7 @@ void MainScene::sSpawner() {
 }
 
 void MainScene::sEffects() {
-  const auto effects = m_player->cEffects->getEffects();
+  const std::vector<Effect> effects = m_player->cEffects->getEffects();
   if (effects.empty()) {
     return;
   }
