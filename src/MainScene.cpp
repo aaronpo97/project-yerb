@@ -28,6 +28,10 @@ MainScene::MainScene(GameEngine *gameEngine) :
 }
 
 void MainScene::update() {
+  const Uint64 currentTime = SDL_GetTicks64();
+  m_deltaTime              = (currentTime - m_lastFrameTime) / 1000.0f;
+  std::cout << "Delta time: " << m_deltaTime << std::endl;
+
   if (!m_paused) {
     sCollision();
     sMovement();
@@ -37,67 +41,9 @@ void MainScene::update() {
     sTimer();
   }
   sRender();
+
+  m_lastFrameTime = currentTime;
 }
-
-// void MainScene::sInput() {
-//   SDL_Event event;
-//   while (SDL_PollEvent(&event)) {
-
-//     if (event.type == SDL_QUIT) {
-//       m_isRunning = false; // Stop the game loop
-//       return;
-//     }
-
-//     if (event.type == SDL_KEYDOWN) {
-//       switch (event.key.keysym.sym) {
-//         case SDLK_w: {
-//           m_player->cInput->forward = true;
-//           break;
-//         }
-//         case SDLK_s: {
-//           m_player->cInput->backward = true;
-//           break;
-//         }
-
-//         case SDLK_a: {
-//           m_player->cInput->left = true;
-//           break;
-//         }
-
-//         case SDLK_d: {
-//           m_player->cInput->right = true;
-//           break;
-//         }
-
-//         case SDLK_p: {
-//           setPaused(!m_paused);
-//           break;
-//         }
-//       }
-//     }
-
-//     if (event.type == SDL_KEYUP) {
-//       switch (event.key.keysym.sym) {
-//         case SDLK_w: {
-//           m_player->cInput->forward = false;
-//           break;
-//         }
-//         case SDLK_s: {
-//           m_player->cInput->backward = false;
-//           break;
-//         }
-//         case SDLK_a: {
-//           m_player->cInput->left = false;
-//           break;
-//         }
-//         case SDLK_d: {
-//           m_player->cInput->right = false;
-//           break;
-//         }
-//       }
-//     }
-//   }
-// }
 
 void MainScene::sDoAction() {}
 
