@@ -1,6 +1,6 @@
 # Project Yerb
 
-Project Yerb is a custom game/game engine build using SDL2. The game engine is designed with an _Entity-Component-System_ (ECS) architecture is currently able to be compiled for `Emscripten` and `MacOS (Darwin)`.
+Project Yerb is a custom game/game engine built using SDL2. The game engine is designed with an _Entity-Component-System_ (ECS) architecture is currently able to be compiled for `Emscripten` and `MacOS (Darwin)`.
 
 ## Features
 
