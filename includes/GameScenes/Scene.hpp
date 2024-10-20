@@ -5,7 +5,7 @@
 #include <string>
 
 typedef std::map<int, std::string> ActionMap;
-class GameEngine;
+class GameEngine; // Resolve circular dependency with forward declaration
 class Scene {
 protected:
   GameEngine *m_gameEngine;

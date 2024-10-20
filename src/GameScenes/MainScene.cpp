@@ -86,14 +86,14 @@ void MainScene::sDoAction(Action &action) {
 }
 
 void MainScene::renderText() {
-  SDL_Renderer *m_renderer   = m_gameEngine->getRenderer();
-  TTF_Font     *m_font_big   = m_gameEngine->getFontBig();
-  TTF_Font     *m_font_small = m_gameEngine->getFontSmall();
+  SDL_Renderer *m_renderer = m_gameEngine->getRenderer();
+  TTF_Font     *fontMd     = m_gameEngine->getFontMd();
+  TTF_Font     *fontSm     = m_gameEngine->getFontSm();
 
   const SDL_Color   scoreColor = {255, 255, 255, 255};
   const std::string scoreText  = "Score: " + std::to_string(m_score);
   const Vec2        scorePos   = {10, 10};
-  TextHelpers::renderLineOfText(m_renderer, m_font_big, scoreText, scoreColor, scorePos);
+  TextHelpers::renderLineOfText(m_renderer, fontMd, scoreText, scoreColor, scorePos);
 
   const Uint64     &timeRemaining = m_timeRemaining;
   const Uint64      minutes       = timeRemaining / 60000;
@@ -102,13 +102,13 @@ void MainScene::renderText() {
   const std::string timeText      = "Time: " + std::to_string(minutes) + ":" +
                                (seconds < 10 ? "0" : "") + std::to_string(seconds);
   const Vec2 timePos = {10, 40};
-  TextHelpers::renderLineOfText(m_renderer, m_font_big, timeText, timeColor, timePos);
+  TextHelpers::renderLineOfText(m_renderer, fontMd, timeText, timeColor, timePos);
 
   if (m_player->cEffects->hasEffect(EffectTypes::Speed)) {
     const SDL_Color   speedBoostColor = {0, 255, 0, 255};
     const std::string speedBoostText  = "Speed Boost Active!";
     const Vec2        speedBoostPos   = {10, 90};
-    TextHelpers::renderLineOfText(m_renderer, m_font_small, speedBoostText, speedBoostColor,
+    TextHelpers::renderLineOfText(m_renderer, fontSm, speedBoostText, speedBoostColor,
                                   speedBoostPos);
   };
 
@@ -116,7 +116,7 @@ void MainScene::renderText() {
     const SDL_Color   slownessColor = {255, 0, 0, 255};
     const std::string slownessText  = "Slowness Active!";
     const Vec2        slownessPos   = {10, 90};
-    TextHelpers::renderLineOfText(m_renderer, m_font_small, slownessText, slownessColor,
+    TextHelpers::renderLineOfText(m_renderer, fontSm, slownessText, slownessColor,
                                   slownessPos);
   };
 
@@ -124,7 +124,7 @@ void MainScene::renderText() {
     const SDL_Color   gameOverColor = {255, 0, 0, 255};
     const std::string gameOverText  = "Game Over!";
     const Vec2        gameOverPos   = {10, 100};
-    TextHelpers::renderLineOfText(m_renderer, m_font_big, gameOverText, gameOverColor,
+    TextHelpers::renderLineOfText(m_renderer, fontMd, gameOverText, gameOverColor,
                                   gameOverPos);
   }
 }
@@ -367,11 +367,7 @@ void MainScene::setGameOver() {
 }
 
 void MainScene::setScore(const int score) {
-  const int previousScore = m_score;
-  m_score                 = score;
-
-  const int diff = m_score - previousScore;
-
+  m_score = score;
   if (m_score < 0) {
     setGameOver();
     return;

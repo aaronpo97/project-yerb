@@ -1,5 +1,6 @@
 #include "../../includes/GameEngine/GameEngine.hpp"
 #include "../../includes/GameScenes/MainScene.hpp"
+#include "../../includes/GameScenes/MenuScene.hpp"
 #include <filesystem>
 #include <iostream>
 
@@ -30,10 +31,11 @@ GameEngine::GameEngine() {
 
   const std::string &fontPath = m_configManager.getGameConfig().fontPath;
 
-  m_font_big   = TTF_OpenFont(fontPath.c_str(), 28);
-  m_font_small = TTF_OpenFont(fontPath.c_str(), 14);
+  m_font_sm = TTF_OpenFont(fontPath.c_str(), 14);
+  m_font_md = TTF_OpenFont(fontPath.c_str(), 28);
+  m_font_lg = TTF_OpenFont(fontPath.c_str(), 48);
 
-  if (!m_font_big || !m_font_small) {
+  if (!m_font_md || !m_font_sm) {
     std::cerr << "Failed to load fonts: " << TTF_GetError() << std::endl;
     return;
   }
@@ -69,7 +71,8 @@ GameEngine::GameEngine() {
   m_isRunning = true; // Set isRunning to true after successful initialization
 
   addScene("main", std::make_shared<MainScene>(this));
-  switchScene("main");
+  addScene("menu", std::make_shared<MenuScene>(this));
+  switchScene("menu");
   std::cout << "Game initialized successfully!" << std::endl;
 }
 
@@ -83,14 +86,14 @@ GameEngine::~GameEngine() {
     m_window = nullptr;
   }
 
-  if (m_font_big != nullptr) {
-    TTF_CloseFont(m_font_big);
-    m_font_big = nullptr;
+  if (m_font_md != nullptr) {
+    TTF_CloseFont(m_font_md);
+    m_font_md = nullptr;
   }
 
-  if (m_font_small != nullptr) {
-    TTF_CloseFont(m_font_small);
-    m_font_small = nullptr;
+  if (m_font_sm != nullptr) {
+    TTF_CloseFont(m_font_sm);
+    m_font_sm = nullptr;
   }
   TTF_Quit();
   SDL_Quit();
