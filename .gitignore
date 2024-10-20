@@ -1,14 +1,5 @@
-build
-objects
-.vscode
+dist-macos
+dist-web
+.vscode/
 .DS_Store
-CMakeFiles
-_deps
-CMakeCache.txt
-cmake_install.cmake
-makefile
-
-# Local Netlify folder
 .netlify
-
-*.log
