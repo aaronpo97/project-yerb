@@ -66,13 +66,11 @@ GameEngine::GameEngine() {
   SDL_RenderClear(m_renderer);
   SDL_RenderPresent(m_renderer);
 
-  // TODO: Add scenes to the game engine
-
   m_isRunning = true; // Set isRunning to true after successful initialization
 
   addScene("main", std::make_shared<MainScene>(this));
   switchScene("main");
-  std::cout << "Game initialized successfully! 🥰" << std::endl;
+  std::cout << "Game initialized successfully!" << std::endl;
 }
 
 GameEngine::~GameEngine() {

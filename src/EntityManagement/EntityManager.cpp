@@ -4,8 +4,7 @@
 
 #include <iostream>
 
-EntityManager::EntityManager() :
-    m_totalEntities(0) {}
+EntityManager::EntityManager() = default;
 
 std::shared_ptr<Entity> EntityManager::addEntity(const std::string &tag) {
   auto e = std::shared_ptr<Entity>(new Entity(m_totalEntities++, tag));

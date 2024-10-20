@@ -106,8 +106,6 @@ public:
       }
     }
 
-    std::cout << "Effect added: " << effectType << " for " << effect.duration << "ms."
-              << effectEmoji << std::endl;
     effects.push_back(effect);
   }
 

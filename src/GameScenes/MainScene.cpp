@@ -14,12 +14,11 @@
 
 MainScene::MainScene(GameEngine *gameEngine) :
     Scene(gameEngine) {
-  SDL_Renderer  *m_renderer      = gameEngine->getRenderer();
-  SDL_Window    *m_window        = gameEngine->getWindow();
-  ConfigManager &m_configManager = gameEngine->getConfigManager();
+  SDL_Renderer  *renderer      = gameEngine->getRenderer();
+  ConfigManager &configManager = gameEngine->getConfigManager();
 
   m_entities = EntityManager();
-  m_player   = SpawnHelpers::spawnPlayer(m_renderer, m_configManager, m_entities);
+  m_player   = SpawnHelpers::spawnPlayer(renderer, configManager, m_entities);
 
   // WASD
   registerAction(SDLK_w, "FORWARD");
@@ -34,7 +33,6 @@ MainScene::MainScene(GameEngine *gameEngine) :
 void MainScene::update() {
   const Uint64 currentTime = SDL_GetTicks64();
   m_deltaTime              = (currentTime - m_lastFrameTime) / 1000.0f;
-  std::cout << "Delta time: " << m_deltaTime << std::endl;
 
   if (!m_paused && !m_gameOver) {
     sCollision();
@@ -69,7 +67,6 @@ void MainScene::sDoAction(Action &action) {
   bool &right    = m_player->cInput->right;
 
   const bool actionStateStart = actionState == ActionState::START;
-  const bool actionStateEnd   = actionState == ActionState::END;
 
   if (action.getName() == "FORWARD") {
     forward = actionStateStart;
@@ -195,18 +192,17 @@ void MainScene::sCollision() {
 
       if (CollisionHelpers::calculateCollisionBetweenEntities(entity, otherEntity)) {
         if (entity->tag() == EntityTags::Player && otherEntity->tag() == EntityTags::Enemy) {
-          std::cout << "Player caught an enemy!" << std::endl;
           setScore(m_score + 1);
           otherEntity->destroy();
         }
 
         if (entity->tag() == EntityTags::Player &&
             otherEntity->tag() == EntityTags::SlownessDebuff) {
-          std::cout << "Player collided with slowness debuff!" << std::endl;
 
           const Uint64 startTime = SDL_GetTicks64();
           const Uint64 duration  = randomSlownessDuration(m_randomGenerator);
-          entity->cEffects->addEffect({startTime, duration, EffectTypes::Slowness});
+          entity->cEffects->addEffect(
+              {.startTime = startTime, .duration = duration, .type = EffectTypes::Slowness});
 
           const EntityVector &slownessDebuffs = m_entities.getEntities("SlownessDebuff");
           const EntityVector &speedBoosts     = m_entities.getEntities("SpeedBoost");
@@ -222,11 +218,11 @@ void MainScene::sCollision() {
 
         if (entity->tag() == EntityTags::Player &&
             otherEntity->tag() == EntityTags::SpeedBoost) {
-          std::cout << "Player collided with speed boost!" << std::endl;
 
           const Uint64 startTime = SDL_GetTicks64();
           const Uint64 duration  = randomSpeedBoostDuration(m_randomGenerator);
-          entity->cEffects->addEffect({startTime, duration, EffectTypes::Speed});
+          entity->cEffects->addEffect(
+              {.startTime = startTime, .duration = duration, .type = EffectTypes::Speed});
 
           const EntityVector &slownessDebuffs = m_entities.getEntities("SlownessDebuff");
           const EntityVector &speedBoosts     = m_entities.getEntities("SpeedBoost");
@@ -291,7 +287,6 @@ void MainScene::sSpawner() {
   const bool willSpawnSlownessDebuff =
       randomChance(m_randomGenerator) < 30 && !hasSlowness && !hasSpeedBoost;
   if (willSpawnSlownessDebuff) {
-    std::cout << "Slowness debuff spawned!" << std::endl;
     SpawnHelpers::spawnSlownessEntity(m_renderer, m_configManager, m_randomGenerator,
                                       m_entities);
   }
@@ -311,9 +306,6 @@ void MainScene::sEffects() {
     }
 
     m_player->cEffects->removeEffect(effect.type);
-    if (effect.type == EffectTypes::Speed) {
-      std::cout << "Your speed boost expired. 😔" << std::endl;
-    }
   }
 }
 
@@ -349,17 +341,16 @@ void MainScene::sLifespan() {
     const bool entityExpired = elapsedTime > entity->cLifespan->lifespan;
     if (!entityExpired) {
       const float MAX_COLOR_VALUE = 255.0f;
-      const Uint8 colorValue      = std::max(
+      const Uint8 alpha           = std::max(
           0.0f, std::min(MAX_COLOR_VALUE, MAX_COLOR_VALUE * (1.0f - lifespanPercentage)));
 
       SDL_Color &color = entity->cShape->color;
-      color            = {color.r, color.g, color.b, colorValue};
+      color            = {.r = color.r, .g = color.g, .b = color.b, .a = alpha};
 
       continue;
     }
 
     if (entity->tag() == EntityTags::Enemy) {
-      std::cout << "You missed an enemy! 😢" << std::endl;
       setScore(m_score - 1);
     }
 
@@ -373,8 +364,6 @@ void MainScene::setGameOver() {
   }
   m_player->cEffects->clearEffects();
   m_gameOver = true;
-
-  std::cout << "Game over! 😭" << std::endl;
 }
 
 void MainScene::setScore(const int score) {
@@ -384,17 +373,9 @@ void MainScene::setScore(const int score) {
   const int diff = m_score - previousScore;
 
   if (m_score < 0) {
-    std::cout << "Your score dipped below 0! 😬" << std::endl;
     setGameOver();
     return;
   }
-  const std::string scoreChange = diff > 0 ? "increased" : "decreased";
-  const std::string emoji       = diff > 0 ? "😃" : "😔";
-
-  std::cout << "Score " << scoreChange << " by " << std::abs(diff) << " point"
-            << (diff > 1 ? "s" : "") << "! " << emoji << std::endl;
-
-  std::cout << "Your score is now " << m_score << "." << std::endl;
 }
 
 void MainScene::onEnd() {

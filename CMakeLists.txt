@@ -25,6 +25,9 @@ if(NOT EMSCRIPTEN)
   )
 
   FetchContent_MakeAvailable(SDL_ttf)
+
+  set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=google-*,modernize-*")
+
 endif()
 
 set(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
