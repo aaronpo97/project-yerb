@@ -1,7 +1,6 @@
-#ifndef ENTITY_MANAGER_H
-#define ENTITY_MANAGER_H
+#pragma once
 
-#include "Entity.h"
+#include "./Entity.hpp"
 #include <map>
 #include <memory>
 #include <vector>
@@ -25,5 +24,3 @@ public:
   EntityVector           &getEntities(const std::string &tag);
   void                    update();
 };
-
-#endif // ENTITY_MANAGER_H

@@ -1,4 +1,4 @@
-#include "../includes/Entity.h"
+#include "../../includes/EntityManagement/Entity.hpp"
 #include <iostream>
 
 bool Entity::isActive() const {

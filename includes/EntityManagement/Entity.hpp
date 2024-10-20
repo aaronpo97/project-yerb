@@ -1,7 +1,6 @@
-#ifndef ENTITY_H
-#define ENTITY_H
+#pragma once
 
-#include "Components.h"
+#include "./Components.hpp"
 #include <memory>
 #include <string>
 
@@ -29,5 +28,3 @@ public:
   size_t             id() const;
   void               destroy();
 };
-
-#endif // ENTITY_H

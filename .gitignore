@@ -10,3 +10,5 @@ makefile
 
 # Local Netlify folder
 .netlify
+
+*.log

@@ -1,8 +1,7 @@
-#include "../includes/SpawnHelpers.h"
-#include "../includes/CollisionHelpers.h"
-#include "../includes/ConfigManager.h"
-#include "../includes/EntityManager.h"
-#include "../includes/EntityTags.h"
+#include "../../includes/Helpers/SpawnHelpers.hpp"
+#include "../../includes/EntityManagement/EntityTags.hpp"
+#include "../../includes/Helpers/CollisionHelpers.hpp"
+
 #include <iostream>
 
 namespace SpawnHelpers {
@@ -32,8 +31,6 @@ namespace SpawnHelpers {
     playerCTransform          = std::make_shared<CTransform>(playerPosition, Vec2(0, 0), 0);
     playerCInput              = std::make_shared<CInput>();
     playerCEffects            = std::make_shared<CEffects>();
-
-    std::cout << "Player entity created!" << std::endl;
 
     m_entities.update();
 
@@ -223,7 +220,6 @@ namespace SpawnHelpers {
 
     const SlownessEffectConfig &slownessEffectConfig =
         m_configManager.getSlownessEffectConfig();
-    std::cout << slownessEffectConfig.lifespan << std::endl;
 
     entityCTransform = std::make_shared<CTransform>(Vec2(xPos, yPos), Vec2(xVel, yVel), 0);
     entityCShape     = std::make_shared<CShape>(m_renderer, slownessEffectConfig.shape);
@@ -272,7 +268,7 @@ namespace SpawnHelpers {
       isValidSpawn = !touchesBoundary && !touchesOtherEntities;
     }
     if (!isValidSpawn) {
-      std::cout << "Slowness debuff could not be spawned." << std::endl;
+
       slownessEntity->destroy();
     }
 

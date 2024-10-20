@@ -1,12 +1,11 @@
-#ifndef COMPONENTS_H
-#define COMPONENTS_H
+#pragma once
 
-#include "./Vec2.h"
-
-#include "./Config.h"
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <vector>
+
+#include "../Configuration/Config.hpp"
+#include "../Helpers/Vec2.hpp"
 
 class CTransform {
 public:
@@ -107,8 +106,6 @@ public:
       }
     }
 
-    std::cout << "Effect added: " << effectType << " for " << effect.duration << "ms."
-              << effectEmoji << std::endl;
     effects.push_back(effect);
   }
 
@@ -132,4 +129,3 @@ public:
     effects.clear();
   }
 };
-#endif // COMPONENTS_H

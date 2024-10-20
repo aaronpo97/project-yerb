@@ -1,9 +1,10 @@
-#ifndef CONFIG_MANAGER_H
-#define CONFIG_MANAGER_H
-#include "./Config.h"
+#pragma once
+
+#include "./Config.hpp"
 #include <fstream>
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
+
 class ConfigManager {
 private:
   GameConfig             m_gameConfig;
@@ -134,4 +135,3 @@ public:
     m_slownessEffectConfig.speed = speed;
   }
 };
-#endif // CONFIG_MANAGER_H

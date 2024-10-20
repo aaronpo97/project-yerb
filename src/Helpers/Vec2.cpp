@@ -1,4 +1,4 @@
-#include "../includes/Vec2.h"
+#include "../../includes/Helpers/Vec2.hpp"
 #include <cmath>
 
 Vec2::Vec2(float x, float y) :
@@ -13,19 +13,19 @@ bool Vec2::operator!=(const Vec2 &rhs) const {
 }
 
 Vec2 Vec2::operator-(const Vec2 &rhs) const {
-  return Vec2(x - rhs.x, y - rhs.y);
+  return {x - rhs.x, y - rhs.y};
 }
 
 Vec2 Vec2::operator+(const Vec2 &rhs) const {
-  return Vec2(x + rhs.x, y + rhs.y);
+  return {x + rhs.x, y + rhs.y};
 }
 
 Vec2 Vec2::operator*(const float val) const {
-  return Vec2(x * val, y * val);
+  return {x * val, y * val};
 }
 
 Vec2 Vec2::operator/(const float val) const {
-  return Vec2(x / val, y / val);
+  return {x / val, y / val};
 }
 
 void Vec2::operator+=(const Vec2 &rhs) {

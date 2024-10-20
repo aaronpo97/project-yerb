@@ -9,8 +9,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 FetchContent_MakeAvailable(json)
 
-
-
 if(NOT EMSCRIPTEN)
   FetchContent_Declare(
     SDL2
@@ -27,6 +25,9 @@ if(NOT EMSCRIPTEN)
   )
 
   FetchContent_MakeAvailable(SDL_ttf)
+
+  set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=google-*,modernize-*")
+
 endif()
 
 set(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
@@ -55,9 +56,6 @@ if(EMSCRIPTEN)
     "--preload-file=${CMAKE_SOURCE_DIR}/assets@assets"
   )
 
-  target_link_libraries(${PROJECT_NAME})
-  target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
-
   add_custom_target(copy_templates ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${CMAKE_SOURCE_DIR}/template"
@@ -65,8 +63,10 @@ if(EMSCRIPTEN)
     COMMENT "Copying template directory to build directory"
   )
 else()
-  target_link_libraries(${PROJECT_NAME} SDL2 SDL2_ttf)
+  target_link_libraries(${PROJECT_NAME} PRIVATE SDL2 SDL2_ttf)
 endif()
+
+target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build"
