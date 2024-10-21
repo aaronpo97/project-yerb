@@ -143,12 +143,15 @@ void GameEngine::switchScene(const std::string &name) {
     return;
   }
 
-  const std::shared_ptr<Scene> scene = m_scenes[name];
+  const std::shared_ptr<Scene> &scene = m_scenes[name];
   if (scene == nullptr) {
     std::cerr << "Scene with name " << name << " is null." << std::endl;
     return;
   }
 
+  scene->setStartTime(SDL_GetTicks64());
+  std::cout << scene->getStartTime() << std::endl;
+  std::cout << "Switching to scene " << name << std::endl;
   m_currentScene = name;
 }
 

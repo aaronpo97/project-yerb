@@ -311,7 +311,11 @@ void MainScene::sEffects() {
 
 void MainScene::sTimer() {
   const Uint64 currentTime = SDL_GetTicks64();
-  const Uint64 elapsedTime = currentTime - m_lastFrameTime;
+
+  // Check if the timer was recently operated by comparing the current time
+  // with the last frame time and the scene's start time.
+  const bool   wasTimerRecentlyOperated = currentTime - m_lastFrameTime < m_SceneStartTime;
+  const Uint64 elapsedTime = !wasTimerRecentlyOperated ? 0 : currentTime - m_lastFrameTime;
 
   if (m_timeRemaining < elapsedTime) {
     m_timeRemaining = 0;
