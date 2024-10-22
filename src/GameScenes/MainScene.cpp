@@ -368,17 +368,12 @@ void MainScene::setGameOver() {
 void MainScene::setScore(const int score) {
   m_score = score;
   if (m_score < 0) {
+    m_score = 0;
     setGameOver();
     return;
   }
 }
 
 void MainScene::onEnd() {
-  m_player->cEffects->clearEffects();
-  for (auto &entity : m_entities.getEntities()) {
-    entity->destroy();
-  }
-
-  m_entities.update();
   m_gameEngine->loadScene("ScoreScene", std::make_shared<ScoreScene>(m_gameEngine, m_score));
 }

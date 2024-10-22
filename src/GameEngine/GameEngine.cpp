@@ -167,10 +167,6 @@ void GameEngine::sUserInput() {
       const std::string &actionName = activeScene->getActionMap().at(event.key.keysym.sym);
       Action             action(actionName, actionState);
       activeScene->sDoAction(action);
-      std::cout << "ACTION NAME: " << action.getName() << std::endl;
-      std::cout << "ACTION STATE: (0: START, 1: END) " << action.getState() << std::endl;
-      std::cout << "ACTION KEY: " << event.key.keysym.sym << std::endl;
-      std::cout << "SCENE NAME: " << m_currentSceneName << std::endl;
     }
   }
 }

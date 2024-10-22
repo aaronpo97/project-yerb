@@ -34,10 +34,11 @@ void MenuScene::sRender() {
 }
 
 void MenuScene::renderText() {
-  SDL_Renderer *renderer  = m_gameEngine->getRenderer();
-  TTF_Font     *fontLg    = m_gameEngine->getFontLg();
-  TTF_Font     *fontMd    = m_gameEngine->getFontMd();
-  SDL_Color     textColor = {255, 255, 255, 255};
+  SDL_Renderer *renderer      = m_gameEngine->getRenderer();
+  TTF_Font     *fontLg        = m_gameEngine->getFontLg();
+  TTF_Font     *fontMd        = m_gameEngine->getFontMd();
+  SDL_Color     textColor     = {255, 255, 255, 255};
+  SDL_Color     selectedColor = {0, 255, 0, 255};
 
   if (fontLg == nullptr || fontMd == nullptr) {
     std::cerr << "Failed to load font" << std::endl;
@@ -45,29 +46,39 @@ void MenuScene::renderText() {
   }
 
   const std::string titleText = "Yerb's Game";
-  Vec2              titlePos  = {100, 100};
+  const Vec2        titlePos  = {100, 100};
   TextHelpers::renderLineOfText(renderer, fontLg, titleText, textColor, titlePos);
 
-  const std::string playText = "Play";
-  Vec2              playPos  = {100, 200};
-  TextHelpers::renderLineOfText(renderer, fontMd, playText, textColor, playPos);
+  const std::string playText  = "Play";
+  const Vec2        playPos   = {100, 200};
+  const SDL_Color   playColor = m_selectedIndex == 0 ? selectedColor : textColor;
+  TextHelpers::renderLineOfText(renderer, fontMd, playText, playColor, playPos);
 
-  const std::string instructionsText = "How to Play";
-  Vec2              instructionsPos  = {100, 250};
-  TextHelpers::renderLineOfText(renderer, fontMd, instructionsText, textColor,
+  const std::string instructionsText  = "How to Play";
+  const Vec2        instructionsPos   = {100, 250};
+  const SDL_Color   instructionsColor = m_selectedIndex == 1 ? selectedColor : textColor;
+  TextHelpers::renderLineOfText(renderer, fontMd, instructionsText, instructionsColor,
                                 instructionsPos);
 }
 
 void MenuScene::sDoAction(Action &action) {
-  if (action.getName() == "SELECT" && action.getState() == ActionState::START) {
+  if (action.getState() == ActionState::END) {
+    return;
+  }
+
+  if (action.getName() == "SELECT") {
     onEnd();
-  } else if (action.getName() == "UP") {
-    if (m_selectedIndex > 0) {
-      m_selectedIndex--;
-    }
-  } else if (action.getName() == "DOWN") {
-    if (m_selectedIndex < 1) {
-      m_selectedIndex++;
-    }
+    return;
+  }
+
+  // UP takes precedence over DOWN if both are pressed
+  if (action.getName() == "UP") {
+    m_selectedIndex > 0 ? m_selectedIndex -= 1 : m_selectedIndex = 1;
+    return;
+  }
+
+  if (action.getName() == "DOWN") {
+    m_selectedIndex < 1 ? m_selectedIndex += 1 : m_selectedIndex = 0;
+    return;
   }
 }

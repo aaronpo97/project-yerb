@@ -6,6 +6,7 @@
 class ScoreScene : public Scene {
 private:
   int m_score;
+  int m_selectedIndex = 0;
 
 public:
   ScoreScene(GameEngine *gameEngine, int score);
