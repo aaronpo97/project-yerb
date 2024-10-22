@@ -1,5 +1,8 @@
 #include "../../includes/GameScenes/MenuScene.hpp"
+#include "../../includes/GameScenes/HowToPlayScene.hpp"
+#include "../../includes/GameScenes/MainScene.hpp"
 #include "../../includes/Helpers/TextHelpers.hpp"
+
 #include <SDL2/SDL.h>
 
 MenuScene::MenuScene(GameEngine *gameEngine) :
@@ -16,9 +19,9 @@ void MenuScene::update() {
 
 void MenuScene::onEnd() {
   if (m_selectedIndex == 0) {
-    m_gameEngine->switchScene("main");
+    m_gameEngine->loadScene("Main", std::make_shared<MainScene>(m_gameEngine));
   } else if (m_selectedIndex == 1) {
-    // m_gameEngine->switchScene("InstructionsScene");
+    m_gameEngine->loadScene("HowToPlay", std::make_shared<HowToPlayScene>(m_gameEngine));
   }
 }
 
@@ -56,7 +59,7 @@ void MenuScene::renderText() {
 }
 
 void MenuScene::sDoAction(Action &action) {
-  if (action.getName() == "SELECT") {
+  if (action.getName() == "SELECT" && action.getState() == ActionState::START) {
     onEnd();
   } else if (action.getName() == "UP") {
     if (m_selectedIndex > 0) {

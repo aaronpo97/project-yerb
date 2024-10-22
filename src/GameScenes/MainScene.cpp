@@ -6,11 +6,14 @@
 
 #include "../../includes/EntityManagement/EntityTags.hpp"
 #include "../../includes/GameScenes/MainScene.hpp"
+#include "../../includes/GameScenes/MenuScene.hpp"
+#include "../../includes/GameScenes/ScoreScene.hpp"
 #include "../../includes/Helpers/CollisionHelpers.hpp"
 #include "../../includes/Helpers/MovementHelpers.hpp"
 #include "../../includes/Helpers/SpawnHelpers.hpp"
 #include "../../includes/Helpers/TextHelpers.hpp"
 #include "../../includes/Helpers/Vec2.hpp"
+#include <memory>
 
 MainScene::MainScene(GameEngine *gameEngine) :
     Scene(gameEngine) {
@@ -95,7 +98,7 @@ void MainScene::renderText() {
   const Vec2        scorePos   = {10, 10};
   TextHelpers::renderLineOfText(m_renderer, fontMd, scoreText, scoreColor, scorePos);
 
-  const Uint64     &timeRemaining = m_timeRemaining;
+  const Uint64      timeRemaining = m_timeRemaining;
   const Uint64      minutes       = timeRemaining / 60000;
   const Uint64      seconds       = (timeRemaining % 60000) / 1000;
   const SDL_Color   timeColor     = {255, 255, 255, 255};
@@ -119,14 +122,6 @@ void MainScene::renderText() {
     TextHelpers::renderLineOfText(m_renderer, fontSm, slownessText, slownessColor,
                                   slownessPos);
   };
-
-  if (m_gameOver) {
-    const SDL_Color   gameOverColor = {255, 0, 0, 255};
-    const std::string gameOverText  = "Game Over!";
-    const Vec2        gameOverPos   = {10, 100};
-    TextHelpers::renderLineOfText(m_renderer, fontMd, gameOverText, gameOverColor,
-                                  gameOverPos);
-  }
 }
 
 void MainScene::sRender() {
@@ -366,8 +361,8 @@ void MainScene::setGameOver() {
   if (m_gameOver) {
     return;
   }
-  m_player->cEffects->clearEffects();
   m_gameOver = true;
+  onEnd();
 }
 
 void MainScene::setScore(const int score) {
@@ -379,6 +374,11 @@ void MainScene::setScore(const int score) {
 }
 
 void MainScene::onEnd() {
-  m_entities = EntityManager();
-  m_gameEngine->switchScene("MainMenu");
+  m_player->cEffects->clearEffects();
+  for (auto &entity : m_entities.getEntities()) {
+    entity->destroy();
+  }
+
+  m_entities.update();
+  m_gameEngine->loadScene("ScoreScene", std::make_shared<ScoreScene>(m_gameEngine, m_score));
 }

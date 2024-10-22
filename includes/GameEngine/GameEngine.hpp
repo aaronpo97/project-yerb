@@ -10,7 +10,7 @@ class Scene; // Resolve circular dependency with forward declaration
 class GameEngine {
 protected:
   std::map<std::string, std::shared_ptr<Scene>> m_scenes;
-  std::string                                   m_currentScene;
+  std::string                                   m_currentSceneName;
   SDL_Renderer                                 *m_renderer  = nullptr;
   SDL_Window                                   *m_window    = nullptr;
   TTF_Font                                     *m_font_lg   = nullptr;
@@ -34,8 +34,7 @@ public:
   void run();
   void quit();
 
-  void addScene(const std::string &name, std::shared_ptr<Scene> scene);
-  void switchScene(const std::string &name);
+  void loadScene(const std::string &name, std::shared_ptr<Scene> scene);
 
   TTF_Font *getFontLg() {
     return m_font_lg;

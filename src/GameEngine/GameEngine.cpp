@@ -70,10 +70,10 @@ GameEngine::GameEngine() {
 
   m_isRunning = true; // Set isRunning to true after successful initialization
 
-  addScene("main", std::make_shared<MainScene>(this));
-  addScene("menu", std::make_shared<MenuScene>(this));
-  switchScene("menu");
   std::cout << "Game initialized successfully!" << std::endl;
+
+  std::shared_ptr<Scene> menuScene = std::make_shared<MenuScene>(this);
+  loadScene("Menu", menuScene);
 }
 
 GameEngine::~GameEngine() {
@@ -101,9 +101,9 @@ GameEngine::~GameEngine() {
 }
 
 void GameEngine::update() {
-  const std::shared_ptr<Scene> activeScene = m_scenes[m_currentScene];
+  const std::shared_ptr<Scene> activeScene = m_scenes[m_currentSceneName];
   if (activeScene != nullptr) {
-    m_scenes[m_currentScene]->update();
+    m_scenes[m_currentSceneName]->update();
   }
 }
 
@@ -133,26 +133,12 @@ void GameEngine::quit() {
   m_isRunning = false;
 }
 
-void GameEngine::addScene(const std::string &name, std::shared_ptr<Scene> scene) {
-  m_scenes[name] = scene;
-}
-
-void GameEngine::switchScene(const std::string &name) {
-  if (m_scenes.find(name) == m_scenes.end()) {
-    std::cerr << "Scene with name " << name << " not found." << std::endl;
-    return;
-  }
-
-  const std::shared_ptr<Scene> &scene = m_scenes[name];
-  if (scene == nullptr) {
-    std::cerr << "Scene with name " << name << " is null." << std::endl;
-    return;
-  }
+void GameEngine::loadScene(const std::string &sceneName, std::shared_ptr<Scene> scene) {
+  SDL_FlushEvents(SDL_EventType::SDL_KEYDOWN, SDL_EventType::SDL_KEYUP);
+  m_scenes[sceneName] = scene;
 
   scene->setStartTime(SDL_GetTicks64());
-  std::cout << scene->getStartTime() << std::endl;
-  std::cout << "Switching to scene " << name << std::endl;
-  m_currentScene = name;
+  m_currentSceneName = sceneName;
 }
 
 ConfigManager &GameEngine::getConfigManager() {
@@ -162,7 +148,7 @@ ConfigManager &GameEngine::getConfigManager() {
 void GameEngine::sUserInput() {
   SDL_Event event;
 
-  const std::shared_ptr<Scene> activeScene = m_scenes[m_currentScene];
+  const std::shared_ptr<Scene> activeScene = m_scenes[m_currentSceneName];
 
   while (SDL_PollEvent(&event)) {
     if (event.type == SDL_QUIT) {
@@ -181,6 +167,10 @@ void GameEngine::sUserInput() {
       const std::string &actionName = activeScene->getActionMap().at(event.key.keysym.sym);
       Action             action(actionName, actionState);
       activeScene->sDoAction(action);
+      std::cout << "ACTION NAME: " << action.getName() << std::endl;
+      std::cout << "ACTION STATE: (0: START, 1: END) " << action.getState() << std::endl;
+      std::cout << "ACTION KEY: " << event.key.keysym.sym << std::endl;
+      std::cout << "SCENE NAME: " << m_currentSceneName << std::endl;
     }
   }
 }
