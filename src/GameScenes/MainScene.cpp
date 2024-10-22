@@ -83,7 +83,7 @@ void MainScene::sDoAction(Action &action) {
   if (action.getName() == "RIGHT") {
     right = actionStateStart;
   }
-  if (action.getName() == "PAUSE") {
+  if (action.getName() == "PAUSE" && actionState == ActionState::START) {
     m_paused = !m_paused;
   }
 }
