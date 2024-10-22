@@ -3,3 +3,4 @@ dist-web
 .vscode/
 .DS_Store
 .netlify
+makefile
