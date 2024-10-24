@@ -1,5 +1,6 @@
 #include "../../includes/GameEngine/GameEngine.hpp"
 #include "../../includes/GameScenes/MainScene.hpp"
+#include "../../includes/GameScenes/MenuScene.hpp"
 #include <filesystem>
 #include <iostream>
 
@@ -30,10 +31,11 @@ GameEngine::GameEngine() {
 
   const std::string &fontPath = m_configManager.getGameConfig().fontPath;
 
-  m_font_big   = TTF_OpenFont(fontPath.c_str(), 28);
-  m_font_small = TTF_OpenFont(fontPath.c_str(), 14);
+  m_font_sm = TTF_OpenFont(fontPath.c_str(), 14);
+  m_font_md = TTF_OpenFont(fontPath.c_str(), 28);
+  m_font_lg = TTF_OpenFont(fontPath.c_str(), 48);
 
-  if (!m_font_big || !m_font_small) {
+  if (!m_font_md || !m_font_sm) {
     std::cerr << "Failed to load fonts: " << TTF_GetError() << std::endl;
     return;
   }
@@ -68,9 +70,10 @@ GameEngine::GameEngine() {
 
   m_isRunning = true; // Set isRunning to true after successful initialization
 
-  addScene("main", std::make_shared<MainScene>(this));
-  switchScene("main");
   std::cout << "Game initialized successfully!" << std::endl;
+
+  std::shared_ptr<Scene> menuScene = std::make_shared<MenuScene>(this);
+  loadScene("Menu", menuScene);
 }
 
 GameEngine::~GameEngine() {
@@ -83,14 +86,14 @@ GameEngine::~GameEngine() {
     m_window = nullptr;
   }
 
-  if (m_font_big != nullptr) {
-    TTF_CloseFont(m_font_big);
-    m_font_big = nullptr;
+  if (m_font_md != nullptr) {
+    TTF_CloseFont(m_font_md);
+    m_font_md = nullptr;
   }
 
-  if (m_font_small != nullptr) {
-    TTF_CloseFont(m_font_small);
-    m_font_small = nullptr;
+  if (m_font_sm != nullptr) {
+    TTF_CloseFont(m_font_sm);
+    m_font_sm = nullptr;
   }
   TTF_Quit();
   SDL_Quit();
@@ -98,9 +101,9 @@ GameEngine::~GameEngine() {
 }
 
 void GameEngine::update() {
-  const std::shared_ptr<Scene> activeScene = m_scenes[m_currentScene];
+  const std::shared_ptr<Scene> activeScene = m_scenes[m_currentSceneName];
   if (activeScene != nullptr) {
-    m_scenes[m_currentScene]->update();
+    m_scenes[m_currentSceneName]->update();
   }
 }
 
@@ -130,23 +133,11 @@ void GameEngine::quit() {
   m_isRunning = false;
 }
 
-void GameEngine::addScene(const std::string &name, std::shared_ptr<Scene> scene) {
-  m_scenes[name] = scene;
-}
+void GameEngine::loadScene(const std::string &sceneName, std::shared_ptr<Scene> scene) {
+  m_scenes[sceneName] = scene;
 
-void GameEngine::switchScene(const std::string &name) {
-  if (m_scenes.find(name) == m_scenes.end()) {
-    std::cerr << "Scene with name " << name << " not found." << std::endl;
-    return;
-  }
-
-  const std::shared_ptr<Scene> scene = m_scenes[name];
-  if (scene == nullptr) {
-    std::cerr << "Scene with name " << name << " is null." << std::endl;
-    return;
-  }
-
-  m_currentScene = name;
+  scene->setStartTime(SDL_GetTicks64());
+  m_currentSceneName = sceneName;
 }
 
 ConfigManager &GameEngine::getConfigManager() {
@@ -156,7 +147,7 @@ ConfigManager &GameEngine::getConfigManager() {
 void GameEngine::sUserInput() {
   SDL_Event event;
 
-  const std::shared_ptr<Scene> activeScene = m_scenes[m_currentScene];
+  const std::shared_ptr<Scene> activeScene = m_scenes[m_currentSceneName];
 
   while (SDL_PollEvent(&event)) {
     if (event.type == SDL_QUIT) {

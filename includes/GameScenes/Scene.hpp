@@ -5,14 +5,15 @@
 #include <string>
 
 typedef std::map<int, std::string> ActionMap;
-class GameEngine;
+class GameEngine; // Resolve circular dependency with forward declaration
 class Scene {
 protected:
   GameEngine *m_gameEngine;
-  Uint64      m_lastFrameTime = 0;
-  float       m_deltaTime     = 0;
-  bool        m_hasEnded      = false;
-  bool        m_paused        = false;
+  Uint64      m_lastFrameTime  = 0;
+  float       m_deltaTime      = 0;
+  bool        m_hasEnded       = false;
+  bool        m_paused         = false;
+  Uint64      m_SceneStartTime = 0;
   ActionMap   m_actionMap;
 
 public:
@@ -32,5 +33,11 @@ public:
   }
   const ActionMap &getActionMap() const {
     return m_actionMap;
+  }
+  void setStartTime(const Uint64 startTime) {
+    m_SceneStartTime = startTime;
+  }
+  const Uint64 &getStartTime() const {
+    return m_SceneStartTime;
   }
 };

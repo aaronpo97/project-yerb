@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-enum class ActionState { START, END };
+enum ActionState { START, END };
 class Action {
 private:
   std::string m_name;  // Action name, e.g., "SHOOT", "JUMP"

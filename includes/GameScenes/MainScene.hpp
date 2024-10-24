@@ -21,6 +21,7 @@ private:
   bool                    m_gameOver      = false;
   std::random_device      m_rd;
   std::mt19937            m_randomGenerator = std::mt19937(m_rd());
+  void                    renderText();
 
 public:
   MainScene(GameEngine *gameEngine);
@@ -36,7 +37,7 @@ public:
   void sLifespan();
   void sEffects();
   void sTimer();
-  void renderText();
+
   void setScore(const int score);
   void setGameOver();
 };

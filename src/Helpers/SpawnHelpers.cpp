@@ -5,24 +5,24 @@
 #include <iostream>
 
 namespace SpawnHelpers {
-  std::shared_ptr<Entity> spawnPlayer(SDL_Renderer  *m_renderer,
-                                      ConfigManager &m_configManager,
-                                      EntityManager &m_entities) {
+  std::shared_ptr<Entity> spawnPlayer(SDL_Renderer  *renderer,
+                                      ConfigManager &configManager,
+                                      EntityManager &entityManager) {
 
-    const PlayerConfig &playerConfig = m_configManager.getPlayerConfig();
-    const GameConfig   &gameConfig   = m_configManager.getGameConfig();
+    const PlayerConfig &playerConfig = configManager.getPlayerConfig();
+    const GameConfig   &gameConfig   = configManager.getGameConfig();
 
-    std::shared_ptr<Entity> m_player = m_entities.addEntity(EntityTags::Player);
+    std::shared_ptr<Entity> player = entityManager.addEntity(EntityTags::Player);
 
-    std::shared_ptr<CTransform> &playerCTransform = m_player->cTransform;
-    std::shared_ptr<CShape>     &playerCShape     = m_player->cShape;
-    std::shared_ptr<CInput>     &playerCInput     = m_player->cInput;
-    std::shared_ptr<CEffects>   &playerCEffects   = m_player->cEffects;
+    std::shared_ptr<CTransform> &playerCTransform = player->cTransform;
+    std::shared_ptr<CShape>     &playerCShape     = player->cShape;
+    std::shared_ptr<CInput>     &playerCInput     = player->cInput;
+    std::shared_ptr<CEffects>   &playerCEffects   = player->cEffects;
 
     // set the player's initial position to the center of the screen
     const Vec2 &windowSize = gameConfig.windowSize;
 
-    playerCShape = std::make_shared<CShape>(m_renderer, playerConfig.shape);
+    playerCShape = std::make_shared<CShape>(renderer, playerConfig.shape);
 
     const int playerHeight = playerCShape->rect.h;
     const int playerWidth  = playerCShape->rect.w;
@@ -32,17 +32,17 @@ namespace SpawnHelpers {
     playerCInput              = std::make_shared<CInput>();
     playerCEffects            = std::make_shared<CEffects>();
 
-    m_entities.update();
+    entityManager.update();
 
-    return m_player;
+    return player;
   }
 
-  void spawnEnemy(SDL_Renderer  *m_renderer,
-                  ConfigManager &m_configManager,
-                  std::mt19937  &m_randomGenerator,
-                  EntityManager &m_entities) {
+  void spawnEnemy(SDL_Renderer  *renderer,
+                  ConfigManager &configManager,
+                  std::mt19937  &randomGenerator,
+                  EntityManager &entityManager) {
 
-    const GameConfig &gameConfig = m_configManager.getGameConfig();
+    const GameConfig &gameConfig = configManager.getGameConfig();
     const Vec2       &windowSize = gameConfig.windowSize;
 
     std::uniform_int_distribution<int> randomXPos(0, windowSize.x);
@@ -51,26 +51,26 @@ namespace SpawnHelpers {
     std::uniform_int_distribution<int> randomXVel(-1, 1);
     std::uniform_int_distribution<int> randomYVel(-1, 1);
 
-    const int xPos = randomXPos(m_randomGenerator);
-    const int yPos = randomYPos(m_randomGenerator);
+    const int xPos = randomXPos(randomGenerator);
+    const int yPos = randomYPos(randomGenerator);
 
-    const int xVel = randomXVel(m_randomGenerator);
-    const int yVel = randomYVel(m_randomGenerator);
+    const int xVel = randomXVel(randomGenerator);
+    const int yVel = randomYVel(randomGenerator);
 
-    std::shared_ptr<Entity>      enemy            = m_entities.addEntity(EntityTags::Enemy);
+    std::shared_ptr<Entity>      enemy            = entityManager.addEntity(EntityTags::Enemy);
     std::shared_ptr<CTransform> &entityCTransform = enemy->cTransform;
     std::shared_ptr<CShape>     &entityCShape     = enemy->cShape;
     std::shared_ptr<CLifespan>  &entityLifespan   = enemy->cLifespan;
 
     entityCTransform = std::make_shared<CTransform>(Vec2(xPos, yPos), Vec2(xVel, yVel), 0);
 
-    const EnemyConfig &enemyConfig = m_configManager.getEnemyConfig();
-    entityCShape                   = std::make_shared<CShape>(m_renderer, enemyConfig.shape);
+    const EnemyConfig &enemyConfig = configManager.getEnemyConfig();
+    entityCShape                   = std::make_shared<CShape>(renderer, enemyConfig.shape);
     entityLifespan                 = std::make_shared<CLifespan>(enemyConfig.lifespan);
     bool touchesBoundary      = CollisionHelpers::detectOutOfBounds(enemy, windowSize).any();
     bool touchesOtherEntities = false;
 
-    for (auto &entity : m_entities.getEntities()) {
+    for (auto &entity : entityManager.getEntities()) {
       if (CollisionHelpers::calculateCollisionBetweenEntities(entity, enemy)) {
         touchesOtherEntities = true;
         break;
@@ -79,8 +79,8 @@ namespace SpawnHelpers {
 
     bool isValidVelocity = !(xVel == 0 && yVel == 0);
     while (!isValidVelocity) {
-      const int newXVel = randomXVel(m_randomGenerator);
-      const int newYVel = randomYVel(m_randomGenerator);
+      const int newXVel = randomXVel(randomGenerator);
+      const int newYVel = randomYVel(randomGenerator);
 
       enemy->cTransform->velocity = Vec2(newXVel, newYVel);
       isValidVelocity             = !(newXVel == 0 && newYVel == 0);
@@ -91,14 +91,14 @@ namespace SpawnHelpers {
     int       spawnAttempt       = 1;
 
     while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
-      const int newX = randomXPos(m_randomGenerator);
-      const int newY = randomYPos(m_randomGenerator);
+      const int newX = randomXPos(randomGenerator);
+      const int newY = randomYPos(randomGenerator);
 
       enemy->cTransform->topLeftCornerPos = Vec2(newX, newY);
       touchesBoundary      = CollisionHelpers::detectOutOfBounds(enemy, windowSize).any();
       touchesOtherEntities = false;
 
-      for (auto &entity : m_entities.getEntities()) {
+      for (auto &entity : entityManager.getEntities()) {
         if (CollisionHelpers::calculateCollisionBetweenEntities(entity, enemy)) {
           touchesOtherEntities = true;
           break;
@@ -113,14 +113,14 @@ namespace SpawnHelpers {
       enemy->destroy();
     }
 
-    m_entities.update();
+    entityManager.update();
   }
 
-  void spawnSpeedBoostEntity(SDL_Renderer  *m_renderer,
-                             ConfigManager &m_configManager,
-                             std::mt19937  &m_randomGenerator,
-                             EntityManager &m_entities) {
-    const GameConfig                  &gameConfig = m_configManager.getGameConfig();
+  void spawnSpeedBoostEntity(SDL_Renderer  *renderer,
+                             ConfigManager &configManager,
+                             std::mt19937  &randomGenerator,
+                             EntityManager &entityManager) {
+    const GameConfig                  &gameConfig = configManager.getGameConfig();
     const Vec2                        &windowSize = gameConfig.windowSize;
     std::uniform_int_distribution<int> randomXPos(0, windowSize.x);
     std::uniform_int_distribution<int> randomYPos(0, windowSize.y);
@@ -128,28 +128,28 @@ namespace SpawnHelpers {
     std::uniform_int_distribution<int> randomXVel(-1, 1);
     std::uniform_int_distribution<int> randomYVel(-1, 1);
 
-    const int xPos = randomXPos(m_randomGenerator);
-    const int yPos = randomYPos(m_randomGenerator);
+    const int xPos = randomXPos(randomGenerator);
+    const int yPos = randomYPos(randomGenerator);
 
-    const int xVel = randomXVel(m_randomGenerator);
-    const int yVel = randomYVel(m_randomGenerator);
+    const int xVel = randomXVel(randomGenerator);
+    const int yVel = randomYVel(randomGenerator);
 
-    std::shared_ptr<Entity>      speedBoost = m_entities.addEntity(EntityTags::SpeedBoost);
+    std::shared_ptr<Entity>      speedBoost = entityManager.addEntity(EntityTags::SpeedBoost);
     std::shared_ptr<CTransform> &entityCTransform = speedBoost->cTransform;
     std::shared_ptr<CShape>     &entityCShape     = speedBoost->cShape;
     std::shared_ptr<CLifespan>  &entityLifespan   = speedBoost->cLifespan;
 
     const SpeedBoostEffectConfig &speedBoostEffectConfig =
-        m_configManager.getSpeedBoostEffectConfig();
+        configManager.getSpeedBoostEffectConfig();
 
     entityCTransform = std::make_shared<CTransform>(Vec2(xPos, yPos), Vec2(xVel, yVel), 0);
-    entityCShape     = std::make_shared<CShape>(m_renderer, speedBoostEffectConfig.shape);
+    entityCShape     = std::make_shared<CShape>(renderer, speedBoostEffectConfig.shape);
     entityLifespan   = std::make_shared<CLifespan>(speedBoostEffectConfig.lifespan);
 
     bool touchesBoundary = CollisionHelpers::detectOutOfBounds(speedBoost, windowSize).any();
     bool touchesOtherEntities = false;
 
-    for (auto &entity : m_entities.getEntities()) {
+    for (auto &entity : entityManager.getEntities()) {
       if (CollisionHelpers::calculateCollisionBetweenEntities(entity, speedBoost)) {
         touchesOtherEntities = true;
         break;
@@ -159,8 +159,8 @@ namespace SpawnHelpers {
     bool isValidVelocity = !(xVel == 0 && yVel == 0);
 
     while (!isValidVelocity) {
-      const int newXVel = randomXVel(m_randomGenerator);
-      const int newYVel = randomYVel(m_randomGenerator);
+      const int newXVel = randomXVel(randomGenerator);
+      const int newYVel = randomYVel(randomGenerator);
 
       speedBoost->cTransform->velocity = Vec2(newXVel, newYVel);
       isValidVelocity                  = !(newXVel == 0 && newYVel == 0);
@@ -171,14 +171,14 @@ namespace SpawnHelpers {
     int       spawnAttempt       = 1;
 
     while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
-      const int newXPos = randomXPos(m_randomGenerator);
-      const int newYPos = randomYPos(m_randomGenerator);
+      const int newXPos = randomXPos(randomGenerator);
+      const int newYPos = randomYPos(randomGenerator);
 
       speedBoost->cTransform->topLeftCornerPos = Vec2(newXPos, newYPos);
       touchesBoundary      = CollisionHelpers::detectOutOfBounds(speedBoost, windowSize).any();
       touchesOtherEntities = false;
 
-      for (auto &entity : m_entities.getEntities()) {
+      for (auto &entity : entityManager.getEntities()) {
         if (CollisionHelpers::calculateCollisionBetweenEntities(entity, speedBoost)) {
           touchesOtherEntities = true;
           break;
@@ -192,14 +192,14 @@ namespace SpawnHelpers {
     if (!isValidSpawn) {
       speedBoost->destroy();
     }
-    m_entities.update();
+    entityManager.update();
   }
 
-  void spawnSlownessEntity(SDL_Renderer        *m_renderer,
-                           const ConfigManager &m_configManager,
-                           std::mt19937        &m_randomGenerator,
-                           EntityManager       &m_entities) {
-    const GameConfig                  &gameConfig = m_configManager.getGameConfig();
+  void spawnSlownessEntity(SDL_Renderer        *renderer,
+                           const ConfigManager &configManager,
+                           std::mt19937        &randomGenerator,
+                           EntityManager       &entityManager) {
+    const GameConfig                  &gameConfig = configManager.getGameConfig();
     const Vec2                        &windowSize = gameConfig.windowSize;
     std::uniform_int_distribution<int> randomXPos(0, windowSize.x);
     std::uniform_int_distribution<int> randomYPos(0, windowSize.y);
@@ -207,29 +207,29 @@ namespace SpawnHelpers {
     std::uniform_int_distribution<int> randomXVel(-1, 1);
     std::uniform_int_distribution<int> randomYVel(-1, 1);
 
-    const int xPos = randomXPos(m_randomGenerator);
-    const int yPos = randomYPos(m_randomGenerator);
+    const int xPos = randomXPos(randomGenerator);
+    const int yPos = randomYPos(randomGenerator);
 
-    const int xVel = randomXVel(m_randomGenerator);
-    const int yVel = randomYVel(m_randomGenerator);
+    const int xVel = randomXVel(randomGenerator);
+    const int yVel = randomYVel(randomGenerator);
 
-    std::shared_ptr<Entity> slownessEntity = m_entities.addEntity(EntityTags::SlownessDebuff);
+    std::shared_ptr<Entity> slownessEntity =
+        entityManager.addEntity(EntityTags::SlownessDebuff);
     std::shared_ptr<CTransform> &entityCTransform = slownessEntity->cTransform;
     std::shared_ptr<CShape>     &entityCShape     = slownessEntity->cShape;
     std::shared_ptr<CLifespan>  &entityLifespan   = slownessEntity->cLifespan;
 
-    const SlownessEffectConfig &slownessEffectConfig =
-        m_configManager.getSlownessEffectConfig();
+    const SlownessEffectConfig &slownessEffectConfig = configManager.getSlownessEffectConfig();
 
     entityCTransform = std::make_shared<CTransform>(Vec2(xPos, yPos), Vec2(xVel, yVel), 0);
-    entityCShape     = std::make_shared<CShape>(m_renderer, slownessEffectConfig.shape);
+    entityCShape     = std::make_shared<CShape>(renderer, slownessEffectConfig.shape);
     entityLifespan   = std::make_shared<CLifespan>(slownessEffectConfig.lifespan);
 
     bool touchesBoundary =
         CollisionHelpers::detectOutOfBounds(slownessEntity, windowSize).any();
     bool touchesOtherEntities = false;
 
-    for (auto &entity : m_entities.getEntities()) {
+    for (auto &entity : entityManager.getEntities()) {
       if (CollisionHelpers::calculateCollisionBetweenEntities(entity, slownessEntity)) {
         touchesOtherEntities = true;
         break;
@@ -242,22 +242,22 @@ namespace SpawnHelpers {
     int       spawnAttempt       = 1;
 
     while (!isValidVelocity) {
-      const int newXVel = randomXVel(m_randomGenerator);
-      const int newYVel = randomYVel(m_randomGenerator);
+      const int newXVel = randomXVel(randomGenerator);
+      const int newYVel = randomYVel(randomGenerator);
 
       slownessEntity->cTransform->velocity = Vec2(newXVel, newYVel);
       isValidVelocity                      = !(newXVel == 0 && newYVel == 0);
     }
 
     while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
-      const int newXPos = randomXPos(m_randomGenerator);
-      const int newYPos = randomYPos(m_randomGenerator);
+      const int newXPos = randomXPos(randomGenerator);
+      const int newYPos = randomYPos(randomGenerator);
 
       slownessEntity->cTransform->topLeftCornerPos = Vec2(newXPos, newYPos);
       touchesBoundary = CollisionHelpers::detectOutOfBounds(slownessEntity, windowSize).any();
       touchesOtherEntities = false;
 
-      for (auto &entity : m_entities.getEntities()) {
+      for (auto &entity : entityManager.getEntities()) {
         if (CollisionHelpers::calculateCollisionBetweenEntities(entity, slownessEntity)) {
           touchesOtherEntities = true;
           break;
@@ -272,6 +272,6 @@ namespace SpawnHelpers {
       slownessEntity->destroy();
     }
 
-    m_entities.update();
+    entityManager.update();
   }
 } // namespace SpawnHelpers

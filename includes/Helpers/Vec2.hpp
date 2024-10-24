@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 class Vec2 {
 public:
   float x, y;
@@ -17,6 +18,8 @@ public:
   void operator-=(const Vec2 &rhs);
   void operator*=(const float val);
   void operator/=(const float val);
+
+  friend std::ostream &operator<<(std::ostream &os, const Vec2 &vec2);
 
   Vec2  normalize();
   float length() const;

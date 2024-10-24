@@ -6,11 +6,14 @@
 
 #include "../../includes/EntityManagement/EntityTags.hpp"
 #include "../../includes/GameScenes/MainScene.hpp"
+#include "../../includes/GameScenes/MenuScene.hpp"
+#include "../../includes/GameScenes/ScoreScene.hpp"
 #include "../../includes/Helpers/CollisionHelpers.hpp"
 #include "../../includes/Helpers/MovementHelpers.hpp"
 #include "../../includes/Helpers/SpawnHelpers.hpp"
 #include "../../includes/Helpers/TextHelpers.hpp"
 #include "../../includes/Helpers/Vec2.hpp"
+#include <memory>
 
 MainScene::MainScene(GameEngine *gameEngine) :
     Scene(gameEngine) {
@@ -28,6 +31,9 @@ MainScene::MainScene(GameEngine *gameEngine) :
 
   // Pause
   registerAction(SDLK_p, "PAUSE");
+
+  // Go to menu
+  registerAction(SDLK_BACKSPACE, "GO_BACK");
 };
 
 void MainScene::update() {
@@ -80,35 +86,44 @@ void MainScene::sDoAction(Action &action) {
   if (action.getName() == "RIGHT") {
     right = actionStateStart;
   }
+
+  if (!actionStateStart) {
+    return;
+  }
+
   if (action.getName() == "PAUSE") {
     m_paused = !m_paused;
+  }
+
+  if (action.getName() == "GO_BACK") {
+    onEnd();
   }
 }
 
 void MainScene::renderText() {
-  SDL_Renderer *m_renderer   = m_gameEngine->getRenderer();
-  TTF_Font     *m_font_big   = m_gameEngine->getFontBig();
-  TTF_Font     *m_font_small = m_gameEngine->getFontSmall();
+  SDL_Renderer *renderer = m_gameEngine->getRenderer();
+  TTF_Font     *fontMd   = m_gameEngine->getFontMd();
+  TTF_Font     *fontSm   = m_gameEngine->getFontSm();
 
   const SDL_Color   scoreColor = {255, 255, 255, 255};
   const std::string scoreText  = "Score: " + std::to_string(m_score);
   const Vec2        scorePos   = {10, 10};
-  TextHelpers::renderLineOfText(m_renderer, m_font_big, scoreText, scoreColor, scorePos);
+  TextHelpers::renderLineOfText(renderer, fontMd, scoreText, scoreColor, scorePos);
 
-  const Uint64     &timeRemaining = m_timeRemaining;
+  const Uint64      timeRemaining = m_timeRemaining;
   const Uint64      minutes       = timeRemaining / 60000;
   const Uint64      seconds       = (timeRemaining % 60000) / 1000;
   const SDL_Color   timeColor     = {255, 255, 255, 255};
   const std::string timeText      = "Time: " + std::to_string(minutes) + ":" +
                                (seconds < 10 ? "0" : "") + std::to_string(seconds);
   const Vec2 timePos = {10, 40};
-  TextHelpers::renderLineOfText(m_renderer, m_font_big, timeText, timeColor, timePos);
+  TextHelpers::renderLineOfText(renderer, fontMd, timeText, timeColor, timePos);
 
   if (m_player->cEffects->hasEffect(EffectTypes::Speed)) {
     const SDL_Color   speedBoostColor = {0, 255, 0, 255};
     const std::string speedBoostText  = "Speed Boost Active!";
     const Vec2        speedBoostPos   = {10, 90};
-    TextHelpers::renderLineOfText(m_renderer, m_font_small, speedBoostText, speedBoostColor,
+    TextHelpers::renderLineOfText(renderer, fontSm, speedBoostText, speedBoostColor,
                                   speedBoostPos);
   };
 
@@ -116,24 +131,14 @@ void MainScene::renderText() {
     const SDL_Color   slownessColor = {255, 0, 0, 255};
     const std::string slownessText  = "Slowness Active!";
     const Vec2        slownessPos   = {10, 90};
-    TextHelpers::renderLineOfText(m_renderer, m_font_small, slownessText, slownessColor,
-                                  slownessPos);
+    TextHelpers::renderLineOfText(renderer, fontSm, slownessText, slownessColor, slownessPos);
   };
-
-  if (m_gameOver) {
-    const SDL_Color   gameOverColor = {255, 0, 0, 255};
-    const std::string gameOverText  = "Game Over!";
-    const Vec2        gameOverPos   = {10, 100};
-    TextHelpers::renderLineOfText(m_renderer, m_font_big, gameOverText, gameOverColor,
-                                  gameOverPos);
-  }
 }
 
 void MainScene::sRender() {
-  SDL_Renderer *m_renderer = m_gameEngine->getRenderer();
-  // Clear the renderer with a black color
-  SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
-  SDL_RenderClear(m_renderer);
+  SDL_Renderer *renderer = m_gameEngine->getRenderer();
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+  SDL_RenderClear(renderer);
 
   for (auto &entity : m_entities.getEntities()) {
     if (entity->cShape == nullptr) {
@@ -147,13 +152,13 @@ void MainScene::sRender() {
     rect.y = static_cast<int>(pos.y);
 
     const SDL_Color &color = entity->cShape->color;
-    SDL_SetRenderDrawColor(m_renderer, color.r, color.g, color.b, color.a);
-    SDL_RenderFillRect(m_renderer, &rect);
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    SDL_RenderFillRect(renderer, &rect);
   }
 
   renderText();
   // Update the screen
-  SDL_RenderPresent(m_renderer);
+  SDL_RenderPresent(renderer);
 }
 
 void MainScene::sCollision() {
@@ -260,13 +265,13 @@ void MainScene::sMovement() {
 
 void MainScene::sSpawner() {
   ConfigManager m_configManager = m_gameEngine->getConfigManager();
-  SDL_Renderer *m_renderer      = m_gameEngine->getRenderer();
+  SDL_Renderer *renderer        = m_gameEngine->getRenderer();
   const Uint64  ticks           = SDL_GetTicks64();
   if (ticks - m_lastEnemySpawnTime < 2500) {
     return;
   }
   m_lastEnemySpawnTime = ticks;
-  SpawnHelpers::spawnEnemy(m_renderer, m_configManager, m_randomGenerator, m_entities);
+  SpawnHelpers::spawnEnemy(renderer, m_configManager, m_randomGenerator, m_entities);
 
   const bool hasSpeedBoost = m_player->cEffects->hasEffect(EffectTypes::Speed);
   const bool hasSlowness   = m_player->cEffects->hasEffect(EffectTypes::Slowness);
@@ -279,7 +284,7 @@ void MainScene::sSpawner() {
       randomChance(m_randomGenerator) < 15 && !hasSpeedBoost && !hasSlowness;
 
   if (willSpawnSpeedBoost) {
-    SpawnHelpers::spawnSpeedBoostEntity(m_renderer, m_configManager, m_randomGenerator,
+    SpawnHelpers::spawnSpeedBoostEntity(renderer, m_configManager, m_randomGenerator,
                                         m_entities);
   }
   // Spawns a slowness debuff with a 30% chance and while slowness debuff and speed boost are
@@ -287,7 +292,7 @@ void MainScene::sSpawner() {
   const bool willSpawnSlownessDebuff =
       randomChance(m_randomGenerator) < 30 && !hasSlowness && !hasSpeedBoost;
   if (willSpawnSlownessDebuff) {
-    SpawnHelpers::spawnSlownessEntity(m_renderer, m_configManager, m_randomGenerator,
+    SpawnHelpers::spawnSlownessEntity(renderer, m_configManager, m_randomGenerator,
                                       m_entities);
   }
 }
@@ -311,7 +316,11 @@ void MainScene::sEffects() {
 
 void MainScene::sTimer() {
   const Uint64 currentTime = SDL_GetTicks64();
-  const Uint64 elapsedTime = currentTime - m_lastFrameTime;
+
+  // Check if the timer was recently operated by comparing the current time
+  // with the last frame time and the scene's start time.
+  const bool   wasTimerRecentlyOperated = currentTime - m_lastFrameTime < m_SceneStartTime;
+  const Uint64 elapsedTime = !wasTimerRecentlyOperated ? 0 : currentTime - m_lastFrameTime;
 
   if (m_timeRemaining < elapsedTime) {
     m_timeRemaining = 0;
@@ -362,23 +371,23 @@ void MainScene::setGameOver() {
   if (m_gameOver) {
     return;
   }
-  m_player->cEffects->clearEffects();
   m_gameOver = true;
+  onEnd();
 }
 
 void MainScene::setScore(const int score) {
-  const int previousScore = m_score;
-  m_score                 = score;
-
-  const int diff = m_score - previousScore;
-
+  m_score = score;
   if (m_score < 0) {
+    m_score = 0;
     setGameOver();
     return;
   }
 }
 
 void MainScene::onEnd() {
-  m_entities = EntityManager();
-  m_gameEngine->switchScene("MainMenu");
+  if (!m_gameOver) {
+    m_gameEngine->loadScene("Menu", std::make_shared<MenuScene>(m_gameEngine));
+    return;
+  }
+  m_gameEngine->loadScene("ScoreScene", std::make_shared<ScoreScene>(m_gameEngine, m_score));
 }

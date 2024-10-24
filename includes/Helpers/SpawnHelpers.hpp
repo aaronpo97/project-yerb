@@ -11,22 +11,22 @@
 #include <random>
 
 namespace SpawnHelpers {
-  std::shared_ptr<Entity> spawnPlayer(SDL_Renderer  *m_renderer,
-                                      ConfigManager &m_configManager,
-                                      EntityManager &m_entities);
+  std::shared_ptr<Entity> spawnPlayer(SDL_Renderer  *renderer,
+                                      ConfigManager &configManager,
+                                      EntityManager &entityManager);
 
-  void spawnEnemy(SDL_Renderer  *m_renderer,
-                  ConfigManager &m_configManager,
-                  std::mt19937  &m_randomGenerator,
-                  EntityManager &m_entities);
+  void spawnEnemy(SDL_Renderer  *renderer,
+                  ConfigManager &configManager,
+                  std::mt19937  &randomGenerator,
+                  EntityManager &entityManager);
 
-  void spawnSpeedBoostEntity(SDL_Renderer  *m_renderer,
-                             ConfigManager &m_configManager,
-                             std::mt19937  &m_randomGenerator,
-                             EntityManager &m_entities);
+  void spawnSpeedBoostEntity(SDL_Renderer  *renderer,
+                             ConfigManager &configManager,
+                             std::mt19937  &randomGenerator,
+                             EntityManager &entityManager);
 
-  void spawnSlownessEntity(SDL_Renderer        *m_renderer,
-                           const ConfigManager &m_configManager,
-                           std::mt19937        &m_randomGenerator,
-                           EntityManager       &m_entities);
+  void spawnSlownessEntity(SDL_Renderer        *renderer,
+                           const ConfigManager &configManager,
+                           std::mt19937        &randomGenerator,
+                           EntityManager       &entityManager);
 } // namespace SpawnHelpers
