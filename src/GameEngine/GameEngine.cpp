@@ -134,7 +134,6 @@ void GameEngine::quit() {
 }
 
 void GameEngine::loadScene(const std::string &sceneName, std::shared_ptr<Scene> scene) {
-  SDL_FlushEvents(SDL_EventType::SDL_KEYDOWN, SDL_EventType::SDL_KEYUP);
   m_scenes[sceneName] = scene;
 
   scene->setStartTime(SDL_GetTicks64());

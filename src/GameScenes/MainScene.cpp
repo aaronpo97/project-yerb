@@ -101,14 +101,14 @@ void MainScene::sDoAction(Action &action) {
 }
 
 void MainScene::renderText() {
-  SDL_Renderer *m_renderer = m_gameEngine->getRenderer();
-  TTF_Font     *fontMd     = m_gameEngine->getFontMd();
-  TTF_Font     *fontSm     = m_gameEngine->getFontSm();
+  SDL_Renderer *renderer = m_gameEngine->getRenderer();
+  TTF_Font     *fontMd   = m_gameEngine->getFontMd();
+  TTF_Font     *fontSm   = m_gameEngine->getFontSm();
 
   const SDL_Color   scoreColor = {255, 255, 255, 255};
   const std::string scoreText  = "Score: " + std::to_string(m_score);
   const Vec2        scorePos   = {10, 10};
-  TextHelpers::renderLineOfText(m_renderer, fontMd, scoreText, scoreColor, scorePos);
+  TextHelpers::renderLineOfText(renderer, fontMd, scoreText, scoreColor, scorePos);
 
   const Uint64      timeRemaining = m_timeRemaining;
   const Uint64      minutes       = timeRemaining / 60000;
@@ -117,13 +117,13 @@ void MainScene::renderText() {
   const std::string timeText      = "Time: " + std::to_string(minutes) + ":" +
                                (seconds < 10 ? "0" : "") + std::to_string(seconds);
   const Vec2 timePos = {10, 40};
-  TextHelpers::renderLineOfText(m_renderer, fontMd, timeText, timeColor, timePos);
+  TextHelpers::renderLineOfText(renderer, fontMd, timeText, timeColor, timePos);
 
   if (m_player->cEffects->hasEffect(EffectTypes::Speed)) {
     const SDL_Color   speedBoostColor = {0, 255, 0, 255};
     const std::string speedBoostText  = "Speed Boost Active!";
     const Vec2        speedBoostPos   = {10, 90};
-    TextHelpers::renderLineOfText(m_renderer, fontSm, speedBoostText, speedBoostColor,
+    TextHelpers::renderLineOfText(renderer, fontSm, speedBoostText, speedBoostColor,
                                   speedBoostPos);
   };
 
@@ -131,16 +131,14 @@ void MainScene::renderText() {
     const SDL_Color   slownessColor = {255, 0, 0, 255};
     const std::string slownessText  = "Slowness Active!";
     const Vec2        slownessPos   = {10, 90};
-    TextHelpers::renderLineOfText(m_renderer, fontSm, slownessText, slownessColor,
-                                  slownessPos);
+    TextHelpers::renderLineOfText(renderer, fontSm, slownessText, slownessColor, slownessPos);
   };
 }
 
 void MainScene::sRender() {
-  SDL_Renderer *m_renderer = m_gameEngine->getRenderer();
-  // Clear the renderer with a black color
-  SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
-  SDL_RenderClear(m_renderer);
+  SDL_Renderer *renderer = m_gameEngine->getRenderer();
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+  SDL_RenderClear(renderer);
 
   for (auto &entity : m_entities.getEntities()) {
     if (entity->cShape == nullptr) {
@@ -154,13 +152,13 @@ void MainScene::sRender() {
     rect.y = static_cast<int>(pos.y);
 
     const SDL_Color &color = entity->cShape->color;
-    SDL_SetRenderDrawColor(m_renderer, color.r, color.g, color.b, color.a);
-    SDL_RenderFillRect(m_renderer, &rect);
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    SDL_RenderFillRect(renderer, &rect);
   }
 
   renderText();
   // Update the screen
-  SDL_RenderPresent(m_renderer);
+  SDL_RenderPresent(renderer);
 }
 
 void MainScene::sCollision() {
@@ -267,13 +265,13 @@ void MainScene::sMovement() {
 
 void MainScene::sSpawner() {
   ConfigManager m_configManager = m_gameEngine->getConfigManager();
-  SDL_Renderer *m_renderer      = m_gameEngine->getRenderer();
+  SDL_Renderer *renderer        = m_gameEngine->getRenderer();
   const Uint64  ticks           = SDL_GetTicks64();
   if (ticks - m_lastEnemySpawnTime < 2500) {
     return;
   }
   m_lastEnemySpawnTime = ticks;
-  SpawnHelpers::spawnEnemy(m_renderer, m_configManager, m_randomGenerator, m_entities);
+  SpawnHelpers::spawnEnemy(renderer, m_configManager, m_randomGenerator, m_entities);
 
   const bool hasSpeedBoost = m_player->cEffects->hasEffect(EffectTypes::Speed);
   const bool hasSlowness   = m_player->cEffects->hasEffect(EffectTypes::Slowness);
@@ -286,7 +284,7 @@ void MainScene::sSpawner() {
       randomChance(m_randomGenerator) < 15 && !hasSpeedBoost && !hasSlowness;
 
   if (willSpawnSpeedBoost) {
-    SpawnHelpers::spawnSpeedBoostEntity(m_renderer, m_configManager, m_randomGenerator,
+    SpawnHelpers::spawnSpeedBoostEntity(renderer, m_configManager, m_randomGenerator,
                                         m_entities);
   }
   // Spawns a slowness debuff with a 30% chance and while slowness debuff and speed boost are
@@ -294,7 +292,7 @@ void MainScene::sSpawner() {
   const bool willSpawnSlownessDebuff =
       randomChance(m_randomGenerator) < 30 && !hasSlowness && !hasSpeedBoost;
   if (willSpawnSlownessDebuff) {
-    SpawnHelpers::spawnSlownessEntity(m_renderer, m_configManager, m_randomGenerator,
+    SpawnHelpers::spawnSlownessEntity(renderer, m_configManager, m_randomGenerator,
                                       m_entities);
   }
 }
