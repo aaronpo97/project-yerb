@@ -7,10 +7,10 @@
 
 class MenuScene : public Scene {
 private:
-  void renderText();
-  bool m_playButtonClicked         = false;
-  bool m_instructionsButtonClicked = false;
-  int  m_selectedIndex             = 0;
+  void         renderText();
+  bool         m_playButtonClicked         = false;
+  bool         m_instructionsButtonClicked = false;
+  unsigned int m_selectedIndex             = 0;
 
 public:
   MenuScene(GameEngine *gameEngine);

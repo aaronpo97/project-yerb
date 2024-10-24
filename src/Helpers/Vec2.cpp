@@ -1,5 +1,6 @@
 #include "../../includes/Helpers/Vec2.hpp"
 #include <cmath>
+#include <iostream>
 
 Vec2::Vec2(float x, float y) :
     x(x), y(y) {}
@@ -62,4 +63,9 @@ Vec2 Vec2::normalize() {
   }
 
   return *this;
+}
+
+std::ostream &operator<<(std::ostream &os, const Vec2 &vec2) {
+  os << "Vec2(" << vec2.x << ", " << vec2.y << ")";
+  return os;
 }

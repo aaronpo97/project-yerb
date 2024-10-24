@@ -5,8 +5,9 @@
 
 class ScoreScene : public Scene {
 private:
-  int m_score;
-  int m_selectedIndex = 0;
+  unsigned int m_score;
+  unsigned int m_selectedIndex = 0;
+  void         renderText();
 
 public:
   ScoreScene(GameEngine *gameEngine, int score);
@@ -15,5 +16,4 @@ public:
   void onEnd() override;
   void sRender() override;
   void sDoAction(Action &action) override;
-  void renderText();
 };

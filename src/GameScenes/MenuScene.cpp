@@ -18,10 +18,14 @@ void MenuScene::update() {
 }
 
 void MenuScene::onEnd() {
-  if (m_selectedIndex == 0) {
-    m_gameEngine->loadScene("Main", std::make_shared<MainScene>(m_gameEngine));
-  } else if (m_selectedIndex == 1) {
-    m_gameEngine->loadScene("HowToPlay", std::make_shared<HowToPlayScene>(m_gameEngine));
+  switch (m_selectedIndex) {
+    case 0:
+      m_gameEngine->loadScene("Main", std::make_shared<MainScene>(m_gameEngine));
+      break;
+    case 1:
+    default:
+      m_gameEngine->loadScene("HowToPlay", std::make_shared<HowToPlayScene>(m_gameEngine));
+      break;
   }
 }
 

@@ -7,6 +7,7 @@
 HowToPlayScene::HowToPlayScene(GameEngine *gameEngine) :
     Scene(gameEngine) {
   registerAction(SDLK_RETURN, "SELECT");
+  registerAction(SDLK_BACKSPACE, "GO_BACK");
 }
 
 void HowToPlayScene::update() {
@@ -26,11 +27,11 @@ void HowToPlayScene::sRender() {
 }
 
 void HowToPlayScene::renderText() {
-  SDL_Renderer *renderer  = m_gameEngine->getRenderer();
-  TTF_Font     *fontMd    = m_gameEngine->getFontMd();
-  TTF_Font     *fontLg    = m_gameEngine->getFontLg();
-  TTF_Font     *fontSm    = m_gameEngine->getFontSm();
-  SDL_Color     textColor = {255, 255, 255, 255};
+  SDL_Renderer   *renderer  = m_gameEngine->getRenderer();
+  TTF_Font       *fontMd    = m_gameEngine->getFontMd();
+  TTF_Font       *fontLg    = m_gameEngine->getFontLg();
+  TTF_Font       *fontSm    = m_gameEngine->getFontSm();
+  const SDL_Color textColor = {255, 255, 255, 255};
 
   if (fontMd == nullptr) {
     std::cerr << "Failed to load font" << std::endl;
@@ -38,8 +39,8 @@ void HowToPlayScene::renderText() {
   }
 
   // Instructions text
-  std::string instructionsText = "How to Play";
-  Vec2        instructionsPos  = {100, 100};
+  const std::string instructionsText = "How to Play";
+  const Vec2        instructionsPos  = {100, 100};
   TextHelpers::renderLineOfText(renderer, fontLg, instructionsText, textColor,
                                 instructionsPos);
 
@@ -51,32 +52,33 @@ void HowToPlayScene::renderText() {
   const Vec2        sPos  = {100, 250};
   TextHelpers::renderLineOfText(renderer, fontMd, sText, textColor, sPos);
 
-  std::string aText = "A: Move Left";
-  Vec2        aPos  = {100, 300};
+  const std::string aText = "A: Move Left";
+  const Vec2        aPos  = {100, 300};
   TextHelpers::renderLineOfText(renderer, fontMd, aText, textColor, aPos);
 
-  std::string dText = "D: Move Right";
-  Vec2        dPos  = {100, 350};
+  const std::string dText = "D: Move Right";
+  const Vec2        dPos  = {100, 350};
   TextHelpers::renderLineOfText(renderer, fontMd, dText, textColor, dPos);
 
-  std::string escapeText = "Enter: Select";
-  Vec2        escapePos  = {100, 400};
+  const std::string escapeText = "Enter: Select";
+  const Vec2        escapePos  = {100, 400};
   TextHelpers::renderLineOfText(renderer, fontMd, escapeText, textColor, escapePos);
 
-  // bottom of the screen
-  const float bottomOfScreen = m_gameEngine->getConfigManager().getGameConfig().windowSize.y;
-  std::string backText       = "To go back to the main menu, press the Enter key.";
-  Vec2        backPos        = {100, bottomOfScreen - 50};
-  TextHelpers::renderLineOfText(renderer, fontSm, backText, textColor, backPos);
+  const std::string backText = "Back: Backspace";
+  const Vec2        backPos  = {100, 450};
+  TextHelpers::renderLineOfText(renderer, fontMd, backText, textColor, backPos);
 }
 
 void HowToPlayScene::sDoAction(Action &action) {
-
   if (action.getState() == ActionState::END) {
     return;
   }
 
   if (action.getName() == "SELECT") {
+    onEnd();
+  }
+
+  if (action.getName() == "GO_BACK") {
     onEnd();
   }
 }

@@ -31,6 +31,9 @@ MainScene::MainScene(GameEngine *gameEngine) :
 
   // Pause
   registerAction(SDLK_p, "PAUSE");
+
+  // Go to menu
+  registerAction(SDLK_BACKSPACE, "GO_BACK");
 };
 
 void MainScene::update() {
@@ -83,8 +86,17 @@ void MainScene::sDoAction(Action &action) {
   if (action.getName() == "RIGHT") {
     right = actionStateStart;
   }
-  if (action.getName() == "PAUSE" && actionState == ActionState::START) {
+
+  if (!actionStateStart) {
+    return;
+  }
+
+  if (action.getName() == "PAUSE") {
     m_paused = !m_paused;
+  }
+
+  if (action.getName() == "GO_BACK") {
+    onEnd();
   }
 }
 
@@ -375,5 +387,9 @@ void MainScene::setScore(const int score) {
 }
 
 void MainScene::onEnd() {
+  if (!m_gameOver) {
+    m_gameEngine->loadScene("Menu", std::make_shared<MenuScene>(m_gameEngine));
+    return;
+  }
   m_gameEngine->loadScene("ScoreScene", std::make_shared<ScoreScene>(m_gameEngine, m_score));
 }

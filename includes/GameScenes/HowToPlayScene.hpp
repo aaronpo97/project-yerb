@@ -4,6 +4,9 @@
 #include "./Scene.hpp"
 
 class HowToPlayScene : public Scene {
+private:
+  void renderText();
+
 public:
   HowToPlayScene(GameEngine *gameEngine);
 
@@ -11,5 +14,4 @@ public:
   void onEnd() override;
   void sRender() override;
   void sDoAction(Action &action) override;
-  void renderText();
 };
