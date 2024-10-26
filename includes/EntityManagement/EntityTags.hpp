@@ -5,4 +5,5 @@ namespace EntityTags {
   inline std::string Enemy          = "Enemy";
   inline std::string SpeedBoost     = "SpeedBoost";
   inline std::string SlownessDebuff = "SlownessDebuff";
+  inline std::string Wall           = "Wall";
 } // namespace EntityTags

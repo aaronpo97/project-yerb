@@ -23,6 +23,26 @@ MainScene::MainScene(GameEngine *gameEngine) :
   m_entities = EntityManager();
   m_player   = SpawnHelpers::spawnPlayer(renderer, configManager, m_entities);
 
+  const GameConfig &gameConfig = configManager.getGameConfig();
+
+  // 2% of the window width
+  const int wallWidth = static_cast<int>(gameConfig.windowSize.x * 0.02);
+  // 60% of the window height
+  const int  wallHeight = static_cast<int>(gameConfig.windowSize.y * 0.6);
+  const auto wallColor  = SDL_Color{255, 255, 255, 255};
+
+  std::shared_ptr<Entity> wallLeft = m_entities.addEntity(EntityTags::Wall);
+  wallLeft->cShape =
+      std::make_shared<CShape>(renderer, ShapeConfig(wallHeight, wallWidth, wallColor));
+  wallLeft->cTransform = std::make_shared<CTransform>(Vec2(400, 0), Vec2(0, 0), 0);
+
+  std::shared_ptr<Entity> wallRight = m_entities.addEntity(EntityTags::Wall);
+  wallRight->cShape =
+      std::make_shared<CShape>(renderer, ShapeConfig(wallHeight, wallWidth, wallColor));
+  wallRight->cTransform = std::make_shared<CTransform>(
+      Vec2(gameConfig.windowSize.x * 0.7, gameConfig.windowSize.y - wallHeight), Vec2(0, 0),
+      0);
+
   // WASD
   registerAction(SDLK_w, "FORWARD");
   registerAction(SDLK_s, "BACKWARD");
@@ -41,15 +61,15 @@ void MainScene::update() {
   m_deltaTime              = (currentTime - m_lastFrameTime) / 1000.0f;
 
   if (!m_paused && !m_gameOver) {
-    sCollision();
     sMovement();
+    sCollision();
     sSpawner();
     sLifespan();
     sEffects();
     sTimer();
   }
-  sRender();
 
+  sRender();
   m_lastFrameTime = currentTime;
 }
 
@@ -195,50 +215,63 @@ void MainScene::sCollision() {
         continue;
       }
 
-      if (CollisionHelpers::calculateCollisionBetweenEntities(entity, otherEntity)) {
-        if (entity->tag() == EntityTags::Player && otherEntity->tag() == EntityTags::Enemy) {
-          setScore(m_score + 1);
-          otherEntity->destroy();
+      const bool entitiesCollided =
+          CollisionHelpers::calculateCollisionBetweenEntities(entity, otherEntity);
+
+      if (!entitiesCollided) {
+        continue;
+      }
+
+      if (otherEntity->tag() == EntityTags::Wall) {
+        CollisionHelpers::enforceCollisionWithWall(entity, otherEntity);
+      }
+
+      if (entity->tag() == EntityTags::Enemy && otherEntity->tag() == EntityTags::Enemy) {
+        CollisionHelpers::enforceEntityEntityCollision(entity, otherEntity);
+      }
+
+      if (entity->tag() == EntityTags::Player && otherEntity->tag() == EntityTags::Enemy) {
+        setScore(m_score + 1);
+        otherEntity->destroy();
+      }
+
+      if (entity->tag() == EntityTags::Player &&
+          otherEntity->tag() == EntityTags::SlownessDebuff) {
+
+        const Uint64 startTime = SDL_GetTicks64();
+        const Uint64 duration  = randomSlownessDuration(m_randomGenerator);
+        entity->cEffects->addEffect(
+            {.startTime = startTime, .duration = duration, .type = EffectTypes::Slowness});
+
+        const EntityVector &slownessDebuffs = m_entities.getEntities("SlownessDebuff");
+        const EntityVector &speedBoosts     = m_entities.getEntities("SpeedBoost");
+
+        for (auto &slownessDebuff : slownessDebuffs) {
+          slownessDebuff->destroy();
         }
 
-        if (entity->tag() == EntityTags::Player &&
-            otherEntity->tag() == EntityTags::SlownessDebuff) {
+        for (auto &speedBoost : speedBoosts) {
+          speedBoost->destroy();
+        }
+      }
 
-          const Uint64 startTime = SDL_GetTicks64();
-          const Uint64 duration  = randomSlownessDuration(m_randomGenerator);
-          entity->cEffects->addEffect(
-              {.startTime = startTime, .duration = duration, .type = EffectTypes::Slowness});
+      if (entity->tag() == EntityTags::Player &&
+          otherEntity->tag() == EntityTags::SpeedBoost) {
 
-          const EntityVector &slownessDebuffs = m_entities.getEntities("SlownessDebuff");
-          const EntityVector &speedBoosts     = m_entities.getEntities("SpeedBoost");
+        const Uint64 startTime = SDL_GetTicks64();
+        const Uint64 duration  = randomSpeedBoostDuration(m_randomGenerator);
+        entity->cEffects->addEffect(
+            {.startTime = startTime, .duration = duration, .type = EffectTypes::Speed});
 
-          for (auto &slownessDebuff : slownessDebuffs) {
-            slownessDebuff->destroy();
-          }
+        const EntityVector &slownessDebuffs = m_entities.getEntities("SlownessDebuff");
+        const EntityVector &speedBoosts     = m_entities.getEntities("SpeedBoost");
 
-          for (auto &speedBoost : speedBoosts) {
-            speedBoost->destroy();
-          }
+        for (auto &slownessDebuff : slownessDebuffs) {
+          slownessDebuff->destroy();
         }
 
-        if (entity->tag() == EntityTags::Player &&
-            otherEntity->tag() == EntityTags::SpeedBoost) {
-
-          const Uint64 startTime = SDL_GetTicks64();
-          const Uint64 duration  = randomSpeedBoostDuration(m_randomGenerator);
-          entity->cEffects->addEffect(
-              {.startTime = startTime, .duration = duration, .type = EffectTypes::Speed});
-
-          const EntityVector &slownessDebuffs = m_entities.getEntities("SlownessDebuff");
-          const EntityVector &speedBoosts     = m_entities.getEntities("SpeedBoost");
-
-          for (auto &slownessDebuff : slownessDebuffs) {
-            slownessDebuff->destroy();
-          }
-
-          for (auto &speedBoost : speedBoosts) {
-            speedBoost->destroy();
-          }
+        for (auto &speedBoost : speedBoosts) {
+          speedBoost->destroy();
         }
       }
     }
@@ -267,6 +300,7 @@ void MainScene::sSpawner() {
   ConfigManager m_configManager = m_gameEngine->getConfigManager();
   SDL_Renderer *renderer        = m_gameEngine->getRenderer();
   const Uint64  ticks           = SDL_GetTicks64();
+
   if (ticks - m_lastEnemySpawnTime < 2500) {
     return;
   }
@@ -333,6 +367,9 @@ void MainScene::sTimer() {
 void MainScene::sLifespan() {
   for (auto &entity : m_entities.getEntities()) {
     if (entity->tag() == EntityTags::Player) {
+      continue;
+    }
+    if (entity->tag() == EntityTags::Wall) {
       continue;
     }
     if (entity->cLifespan == nullptr) {

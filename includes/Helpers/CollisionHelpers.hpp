@@ -21,4 +21,15 @@ namespace CollisionHelpers {
   bool calculateCollisionBetweenEntities(const std::shared_ptr<Entity> &entityA,
                                          const std::shared_ptr<Entity> &entityB);
 
+  Vec2 calculateOverlap(const std::shared_ptr<Entity> &entityA,
+                        const std::shared_ptr<Entity> &entityB);
+
+  std::bitset<4> getPositionRelativeToEntity(const std::shared_ptr<Entity> &entityA,
+                                             const std::shared_ptr<Entity> &entityB);
+
+  void enforceCollisionWithWall(const std::shared_ptr<Entity> &entity,
+                                const std::shared_ptr<Entity> &wall);
+
+  void enforceEntityEntityCollision(const std::shared_ptr<Entity> &entityA,
+                                    const std::shared_ptr<Entity> &entityB);
 } // namespace CollisionHelpers
