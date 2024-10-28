@@ -1,5 +1,5 @@
 #include "../../includes/Helpers/MovementHelpers.hpp"
-#include "../../includes/EntityManagement/EntityTags.hpp"
+
 #include <memory>
 const float BASE_MOVEMENT_MULTIPLIER = 50.0f;
 
@@ -15,15 +15,15 @@ namespace MovementHelpers {
       throw std::runtime_error("Entity is null");
     }
 
-    const std::string &entityTag = entity->tag();
+    const EntityTags entityTag = entity->tag();
     if (entityTag != EntityTags::Enemy) {
       return;
     }
 
     const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
     if (entityCTransform == nullptr) {
-      throw std::runtime_error("Entity " + entity->tag() + ", with ID " +
-                               std::to_string(entity->id()) + " lacks a transform component.");
+      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
+                               " lacks a transform component.");
     }
 
     Vec2 &position = entityCTransform->topLeftCornerPos;
@@ -38,15 +38,15 @@ namespace MovementHelpers {
       throw std::runtime_error("Entity is null");
     }
 
-    const std::string &entityTag = entity->tag();
+    const EntityTags entityTag = entity->tag();
     if (entityTag != EntityTags::SpeedBoost) {
       return;
     }
 
     const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
     if (entityCTransform == nullptr) {
-      throw std::runtime_error("Entity " + entity->tag() + ", with ID " +
-                               std::to_string(entity->id()) + " lacks a transform component.");
+      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
+                               " lacks a transform component.");
     }
 
     Vec2 &position = entityCTransform->topLeftCornerPos;
@@ -62,15 +62,15 @@ namespace MovementHelpers {
       throw std::runtime_error("Entity is null");
     }
 
-    const std::string &entityTag = entity->tag();
+    const EntityTags entityTag = entity->tag();
     if (entityTag != EntityTags::Player) {
       return;
     }
 
     const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
     if (entityCTransform == nullptr) {
-      throw std::runtime_error("Entity " + entity->tag() + ", with ID " +
-                               std::to_string(entity->id()) + " lacks a transform component.");
+      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
+                               " lacks a transform component.");
     }
 
     const std::shared_ptr<CInput> &entityCInput = entity->cInput;
@@ -118,7 +118,7 @@ namespace MovementHelpers {
       throw std::runtime_error("Entity is null");
     }
 
-    const std::string &entityTag = entity->tag();
+    const EntityTags entityTag = entity->tag();
     if (entityTag != EntityTags::SlownessDebuff) {
       return;
     }
@@ -127,13 +127,13 @@ namespace MovementHelpers {
     const std::shared_ptr<CShape>     &entityCShape     = entity->cShape;
 
     if (entityCTransform == nullptr) {
-      throw std::runtime_error("Entity " + entity->tag() + ", with ID " +
-                               std::to_string(entity->id()) + " lacks a transform component.");
+      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
+                               " lacks a transform component.");
     }
 
     if (entityCShape == nullptr) {
-      throw std::runtime_error("Entity " + entity->tag() + ", with ID " +
-                               std::to_string(entity->id()) + " lacks a shape component.");
+      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
+                               " lacks a shape component.");
     }
 
     Vec2 &position = entityCTransform->topLeftCornerPos;
@@ -141,4 +141,28 @@ namespace MovementHelpers {
 
     position += velocity * deltaTime * slownessEffectConfig.speed * BASE_MOVEMENT_MULTIPLIER;
   };
+
+  void moveBullets(std::shared_ptr<Entity> &entity, const float &deltaTime) {
+
+    if (entity == nullptr) {
+      throw std::runtime_error("Entity is null");
+    }
+
+    const EntityTags entityTag = entity->tag();
+    if (entityTag != EntityTags::Bullet) {
+      return;
+    }
+
+    const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
+    if (entityCTransform == nullptr) {
+      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
+                               " lacks a transform component.");
+    }
+
+    Vec2 &position = entityCTransform->topLeftCornerPos;
+    Vec2 &velocity = entityCTransform->velocity;
+
+    const float BULLET_MOVEMENT_MULTIPLIER = 3.0f;
+    position += velocity * (deltaTime * BULLET_MOVEMENT_MULTIPLIER * BASE_MOVEMENT_MULTIPLIER);
+  }
 } // namespace MovementHelpers

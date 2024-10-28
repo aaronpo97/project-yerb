@@ -1,6 +1,6 @@
 #include "../../includes/Helpers/SpawnHelpers.hpp"
-#include "../../includes/EntityManagement/EntityTags.hpp"
 #include "../../includes/Helpers/CollisionHelpers.hpp"
+#include "../../includes/Helpers/MathHelpers.hpp"
 
 #include <iostream>
 
@@ -273,5 +273,85 @@ namespace SpawnHelpers {
     }
 
     entityManager.update();
+  }
+
+  void spawnWalls(SDL_Renderer        *renderer,
+                  const ConfigManager &configManager,
+                  std::mt19937        &randomGenerator,
+                  EntityManager       &entityManager) {
+
+    const GameConfig &gameConfig = configManager.getGameConfig();
+
+    // 2% of the window width
+    const int wallWidth = static_cast<int>(gameConfig.windowSize.x * 0.02);
+    // 60% of the window height
+    const int  wallHeight = static_cast<int>(gameConfig.windowSize.y * 0.6);
+    const auto wallColor  = SDL_Color{255, 255, 255, 255};
+
+    std::shared_ptr<Entity> wallLeft = entityManager.addEntity(EntityTags::Wall);
+    wallLeft->cShape =
+        std::make_shared<CShape>(renderer, ShapeConfig(wallHeight, wallWidth, wallColor));
+    wallLeft->cTransform = std::make_shared<CTransform>(Vec2(400, 0), Vec2(0, 0), 0);
+
+    std::shared_ptr<Entity> wallRight = entityManager.addEntity(EntityTags::Wall);
+    wallRight->cShape =
+        std::make_shared<CShape>(renderer, ShapeConfig(wallHeight, wallWidth, wallColor));
+    wallRight->cTransform = std::make_shared<CTransform>(
+        Vec2(gameConfig.windowSize.x * 0.7, gameConfig.windowSize.y - wallHeight), Vec2(0, 0),
+        0);
+  }
+
+  void spawnBullets(SDL_Renderer                  *renderer,
+                    ConfigManager                 &configManager,
+                    EntityManager                 &entityManager,
+                    const std::shared_ptr<Entity> &player,
+                    const Vec2                    &mousePosition) {
+    const GameConfig &gameConfig = configManager.getGameConfig();
+    const Vec2       &windowSize = gameConfig.windowSize;
+
+    // Get player's center position
+    Vec2 playerCenter = player->cTransform->topLeftCornerPos;
+    playerCenter.x += player->cShape->rect.w / 2;
+    playerCenter.y += player->cShape->rect.h / 2;
+
+    // Calculate direction vector from player to mouse
+    Vec2 direction;
+    direction.x = mousePosition.x - playerCenter.x;
+    direction.y = mousePosition.y - playerCenter.y;
+
+    // Normalize the direction vector
+    float length = MathHelpers::pythagoras(direction.x, direction.y);
+    if (length > 0) {
+      direction.x /= length;
+      direction.y /= length;
+    }
+
+    // Set bullet speed (adjust this value as needed)
+    const float bulletSpeed    = 10.0f;
+    Vec2        bulletVelocity = direction * bulletSpeed;
+
+    // Calculate bullet rotation angle in degrees
+    float angle = MathHelpers::radiansToDegrees(atan2(direction.y, direction.x));
+
+    // Create the bullet
+    std::shared_ptr<Entity> bullet = entityManager.addEntity(EntityTags::Bullet);
+
+    // Set bullet shape
+    bullet->cShape =
+        std::make_shared<CShape>(renderer, ShapeConfig(20, 20, SDL_Color{255, 255, 255, 255}));
+
+    // Set bullet position slightly offset from player center in the direction of travel
+
+    const auto  playerHalfWidth = player->cShape->rect.w / 2;
+    const float spawnOffset     = playerHalfWidth + bullet->cShape->rect.w / 2 + 5;
+    Vec2        bulletPos;
+    bulletPos.x = playerCenter.x + direction.x * spawnOffset - bullet->cShape->rect.w / 2;
+    bulletPos.y = playerCenter.y + direction.y * spawnOffset - bullet->cShape->rect.h / 2;
+
+    // Set transform with position, velocity and rotation
+    bullet->cTransform = std::make_shared<CTransform>(bulletPos, bulletVelocity, angle);
+
+    // Set lifespan
+    bullet->cLifespan = std::make_shared<CLifespan>(2000);
   }
 } // namespace SpawnHelpers

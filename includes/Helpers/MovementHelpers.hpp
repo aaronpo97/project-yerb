@@ -21,4 +21,6 @@ namespace MovementHelpers {
   void moveSlownessDebuffs(std::shared_ptr<Entity>    &entity,
                            const SlownessEffectConfig &slownessEffectConfig,
                            const float                &deltaTime);
+
+  void moveBullets(std::shared_ptr<Entity> &entity, const float &deltaTime);
 } // namespace MovementHelpers

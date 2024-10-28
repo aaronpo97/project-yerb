@@ -6,7 +6,7 @@
 
 EntityManager::EntityManager() = default;
 
-std::shared_ptr<Entity> EntityManager::addEntity(const std::string &tag) {
+std::shared_ptr<Entity> EntityManager::addEntity(const EntityTags tag) {
   auto e = std::shared_ptr<Entity>(new Entity(m_totalEntities++, tag));
   m_toAdd.push_back(e);
   return e;
@@ -15,7 +15,7 @@ std::shared_ptr<Entity> EntityManager::addEntity(const std::string &tag) {
 EntityVector &EntityManager::getEntities() {
   return m_entities;
 }
-EntityVector &EntityManager::getEntities(const std::string &tag) {
+EntityVector &EntityManager::getEntities(const EntityTags tag) {
   return m_entityMap[tag];
 }
 

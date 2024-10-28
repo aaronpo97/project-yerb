@@ -152,7 +152,9 @@ void GameEngine::sUserInput() {
   while (SDL_PollEvent(&event)) {
     if (event.type == SDL_QUIT) {
       quit();
-    } else if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
+      return;
+    }
+    if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
       // If current scene doesn't have an action associated with this key, skip it
       if (activeScene->getActionMap().find(event.key.keysym.sym) ==
           activeScene->getActionMap().end()) {
@@ -165,6 +167,24 @@ void GameEngine::sUserInput() {
 
       const std::string &actionName = activeScene->getActionMap().at(event.key.keysym.sym);
       Action             action(actionName, actionState);
+      activeScene->sDoAction(action);
+    }
+
+    if (event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP) {
+      if (activeScene->getActionMap().find(event.button.button) ==
+          activeScene->getActionMap().end()) {
+        continue;
+      }
+
+      const ActionState actionState =
+          event.type == SDL_MOUSEBUTTONDOWN ? ActionState::START : ActionState::END;
+
+      const std::string &actionName = activeScene->getActionMap().at(event.button.button);
+
+      const Vec2 mousePosition = {static_cast<float>(event.button.x),
+                                  static_cast<float>(event.button.y)};
+
+      Action action(actionName, actionState, mousePosition);
       activeScene->sDoAction(action);
     }
   }

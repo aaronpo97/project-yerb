@@ -9,7 +9,7 @@
 typedef std::vector<std::shared_ptr<Entity>> EntityVector;
 
 // Store separate vectors of Entity objects by their tag for quick retrieval.
-typedef std::map<std::string, EntityVector> EntityMap;
+typedef std::map<EntityTags, EntityVector> EntityMap;
 
 class EntityManager {
   EntityVector m_entities;
@@ -19,8 +19,8 @@ class EntityManager {
 
 public:
   EntityManager();
-  std::shared_ptr<Entity> addEntity(const std::string &tag);
+  std::shared_ptr<Entity> addEntity(const EntityTags tag);
   EntityVector           &getEntities();
-  EntityVector           &getEntities(const std::string &tag);
+  EntityVector           &getEntities(const EntityTags tag);
   void                    update();
 };

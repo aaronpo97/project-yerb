@@ -8,7 +8,7 @@
     "fontPath": "./assets/fonts/Sixtyfour/static/Sixtyfour-Regular.ttf"
   },
   "playerConfig": {
-    "baseSpeed": 7.5,
+    "baseSpeed": 9.0,
     "speedBoostMultiplier": 2.0,
     "slownessMultiplier": 0.5,
     "shape": {
@@ -24,13 +24,13 @@
   },
   "enemyConfig": {
     "lifespan": 30000,
-    "speed": 4.0,
+    "speed": 2.0,
     "shape": {
       "height": 40,
       "width": 40,
       "color": {
         "r": 255,
-        "g": 255,
+        "g": 0,
         "b": 0,
         "a": 255
       }
@@ -38,7 +38,7 @@
   },
   "speedBoostEffectConfig": {
     "lifespan": 9000,
-    "speed": 8.0,
+    "speed": 2.0,
     "shape": {
       "height": 25,
       "width": 25,
@@ -52,14 +52,14 @@
   },
   "slownessEffectConfig": {
     "lifespan": 10000,
-    "speed": 8.0,
+    "speed": 2.0,
     "shape": {
       "height": 25,
       "width": 25,
       "color": {
         "r": 255,
-        "g": 0,
-        "b": 0,
+        "g": 20,
+        "b": 255,
         "a": 255
       }
     }

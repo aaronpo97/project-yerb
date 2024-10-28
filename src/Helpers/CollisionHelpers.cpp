@@ -1,7 +1,7 @@
 
 #include "../../includes/Helpers/CollisionHelpers.hpp"
 #include "../../includes/EntityManagement/Entity.hpp"
-#include "../../includes/EntityManagement/EntityTags.hpp"
+
 #include <bitset>
 #include <iostream>
 
@@ -17,8 +17,7 @@ namespace CollisionHelpers {
   std::bitset<4> detectOutOfBounds(const std::shared_ptr<Entity> &entity,
                                    const Vec2                    &window_size) {
     if (hasNullComponentPointers(entity)) {
-      throw std::runtime_error("Entity " + entity->tag() + ", with ID " +
-                               std::to_string(entity->id()) +
+      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
                                " lacks a transform or collision component.");
     }
 
@@ -44,8 +43,7 @@ namespace CollisionHelpers {
                            const std::bitset<4>          &collides,
                            const Vec2                    &window_size) {
     if (hasNullComponentPointers(entity)) {
-      throw std::runtime_error("Entity " + entity->tag() + ", with ID " +
-                               std::to_string(entity->id()) +
+      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
                                " lacks a transform or collision component.");
     }
     const std::shared_ptr<CShape> &cShape             = entity->cShape;
@@ -70,8 +68,7 @@ namespace CollisionHelpers {
                               const Vec2                    &window_size) {
 
     if (hasNullComponentPointers(entity)) {
-      throw std::runtime_error("Entity " + entity->tag() + ", with ID " +
-                               std::to_string(entity->id()) +
+      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
                                " lacks a transform or collision component.");
     }
     if (entity->tag() == EntityTags::Player) {
@@ -103,14 +100,12 @@ namespace CollisionHelpers {
                         const std::shared_ptr<Entity> &entityB) {
 
     if (hasNullComponentPointers(entityA)) {
-      throw std::runtime_error("Entity " + entityA->tag() + ", with ID " +
-                               std::to_string(entityA->id()) +
+      throw std::runtime_error("Entity with ID " + std::to_string(entityA->id()) +
                                " lacks a transform or collision component.");
     }
 
     if (hasNullComponentPointers(entityB)) {
-      throw std::runtime_error("Entity " + entityB->tag() + ", with ID " +
-                               std::to_string(entityB->id()) +
+      throw std::runtime_error("Entity with ID " + std::to_string(entityB->id()) +
                                " lacks a transform or collision component.");
     }
     const Vec2 &playerPos     = entityA->cTransform->topLeftCornerPos;
@@ -136,13 +131,11 @@ namespace CollisionHelpers {
   bool calculateCollisionBetweenEntities(const std::shared_ptr<Entity> &entityA,
                                          const std::shared_ptr<Entity> &entityB) {
     if (hasNullComponentPointers(entityA)) {
-      throw std::runtime_error("Entity " + entityA->tag() + ", with ID " +
-                               std::to_string(entityA->id()) +
+      throw std::runtime_error("Entity with ID " + std::to_string(entityA->id()) +
                                " lacks a transform or collision component.");
     }
     if (hasNullComponentPointers(entityB)) {
-      throw std::runtime_error("Entity " + entityB->tag() + ", with ID " +
-                               std::to_string(entityB->id()) +
+      throw std::runtime_error("Entity with ID " + std::to_string(entityB->id()) +
                                " lacks a transform or collision component.");
     }
 
@@ -155,14 +148,12 @@ namespace CollisionHelpers {
   std::bitset<4> getPositionRelativeToEntity(const std::shared_ptr<Entity> &entityA,
                                              const std::shared_ptr<Entity> &entityB) {
     if (hasNullComponentPointers(entityA)) {
-      throw std::runtime_error("Entity " + entityA->tag() + ", with ID " +
-                               std::to_string(entityA->id()) +
+      throw std::runtime_error("Entity with ID " + std::to_string(entityA->id()) +
                                " lacks a transform or collision component.");
     }
 
     if (hasNullComponentPointers(entityB)) {
-      throw std::runtime_error("Entity " + entityB->tag() + ", with ID " +
-                               std::to_string(entityB->id()) +
+      throw std::runtime_error("Entity with ID " + std::to_string(entityB->id()) +
                                " lacks a transform or collision component.");
     }
     const Vec2 &entityAPos = entityA->cTransform->topLeftCornerPos;
@@ -186,14 +177,12 @@ namespace CollisionHelpers {
                                 const std::shared_ptr<Entity> &wall) {
 
     if (hasNullComponentPointers(entity)) {
-      throw std::runtime_error("Entity " + entity->tag() + ", with ID " +
-                               std::to_string(entity->id()) +
+      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
                                " lacks a transform or collision component.");
     }
 
     if (hasNullComponentPointers(wall)) {
-      throw std::runtime_error("Entity " + wall->tag() + ", with ID " +
-                               std::to_string(wall->id()) +
+      throw std::runtime_error("Entity with ID " + std::to_string(wall->id()) +
                                " lacks a transform or collision component.");
     }
 
@@ -232,14 +221,12 @@ namespace CollisionHelpers {
   void enforceEntityEntityCollision(const std::shared_ptr<Entity> &entityA,
                                     const std::shared_ptr<Entity> &entityB) {
     if (hasNullComponentPointers(entityA)) {
-      throw std::runtime_error("Entity " + entityA->tag() + ", with ID " +
-                               std::to_string(entityA->id()) +
+      throw std::runtime_error("Entity with ID " + std::to_string(entityA->id()) +
                                " lacks a transform or collision component.");
     }
 
     if (hasNullComponentPointers(entityB)) {
-      throw std::runtime_error("Entity " + entityB->tag() + ", with ID " +
-                               std::to_string(entityB->id()) +
+      throw std::runtime_error("Entity with ID " + std::to_string(entityB->id()) +
                                " lacks a transform or collision component.");
     }
 
@@ -301,5 +288,19 @@ namespace CollisionHelpers {
       entityB->cTransform->topLeftCornerPos.x += overlap.x;
       entityB->cTransform->velocity.x = -entityB->cTransform->velocity.x;
     }
+  }
+
+  void enforceBulletCollision(const std::shared_ptr<Entity> &bullet,
+                              const bool                     bulletCollides) {
+    if (hasNullComponentPointers(bullet)) {
+      throw std::runtime_error("Entity with ID " + std::to_string(bullet->id()) +
+                               " lacks a transform or collision component.");
+    }
+
+    if (!bulletCollides) {
+      return;
+    }
+
+    bullet->destroy();
   }
 }; // namespace CollisionHelpers

@@ -32,4 +32,7 @@ namespace CollisionHelpers {
 
   void enforceEntityEntityCollision(const std::shared_ptr<Entity> &entityA,
                                     const std::shared_ptr<Entity> &entityB);
+
+  void enforceBulletCollision(const std::shared_ptr<Entity> &bullet,
+                              const bool                     bulletCollides);
 } // namespace CollisionHelpers
