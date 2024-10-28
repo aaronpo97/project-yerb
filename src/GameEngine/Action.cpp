@@ -1,7 +1,9 @@
 #include "../../includes/GameEngine/Action.hpp"
 #include "../../includes/Helpers/Vec2.hpp"
 
-Action::Action(const std::string &name, const ActionState &state, const Vec2 &pos) :
+Action::Action(const std::string         &name,
+               const ActionState         &state,
+               const std::optional<Vec2> &pos) :
     m_name(name), m_state(state), m_pos(pos) {}
 
 const std::string &Action::getName() const {
@@ -12,6 +14,6 @@ const ActionState &Action::getState() const {
   return m_state;
 }
 
-const Vec2 &Action::getPos() const {
+const std::optional<Vec2> &Action::getPos() const {
   return m_pos;
 }

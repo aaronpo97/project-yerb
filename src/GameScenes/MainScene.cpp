@@ -94,7 +94,14 @@ void MainScene::sDoAction(Action &action) {
     return;
   }
   if (action.getName() == "SHOOT") {
-    const Vec2 mousePosition = action.getPos();
+    const std::optional<Vec2> position = action.getPos();
+
+    if (!position.has_value()) {
+      throw new std::runtime_error("A mouse event was called without a position.");
+    }
+
+    const Vec2 mousePosition = *position;
+
     SpawnHelpers::spawnBullets(m_gameEngine->getRenderer(), m_gameEngine->getConfigManager(),
                                m_entities, m_player, mousePosition);
   }

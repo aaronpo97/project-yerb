@@ -166,7 +166,7 @@ void GameEngine::sUserInput() {
           event.type == SDL_KEYDOWN ? ActionState::START : ActionState::END;
 
       const std::string &actionName = activeScene->getActionMap().at(event.key.keysym.sym);
-      Action             action(actionName, actionState);
+      Action             action(actionName, actionState, std::nullopt);
       activeScene->sDoAction(action);
     }
 
