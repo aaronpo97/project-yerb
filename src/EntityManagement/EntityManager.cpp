@@ -7,9 +7,9 @@
 EntityManager::EntityManager() = default;
 
 std::shared_ptr<Entity> EntityManager::addEntity(const EntityTags tag) {
-  auto e = std::shared_ptr<Entity>(new Entity(m_totalEntities++, tag));
-  m_toAdd.push_back(e);
-  return e;
+  auto entityToAdd = std::shared_ptr<Entity>(new Entity(m_totalEntities++, tag));
+  m_toAdd.push_back(entityToAdd);
+  return entityToAdd;
 }
 
 EntityVector &EntityManager::getEntities() {
@@ -27,9 +27,9 @@ void EntityManager::update() {
   };
 
   // add all entities in the `m_toAdd` vector to the main entity vector
-  for (const std::shared_ptr<Entity> &e : m_toAdd) {
-    m_entities.push_back(e);
-    m_entityMap[e->tag()].push_back(e);
+  for (const std::shared_ptr<Entity> &entity : m_toAdd) {
+    m_entities.push_back(entity);
+    m_entityMap[entity->tag()].push_back(entity);
   }
 
   // Remove dead entities from the vector of all entities

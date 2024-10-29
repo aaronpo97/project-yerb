@@ -31,11 +31,18 @@ GameEngine::GameEngine() {
 
   const std::string &fontPath = m_configManager.getGameConfig().fontPath;
 
-  m_font_sm = TTF_OpenFont(fontPath.c_str(), 14);
-  m_font_md = TTF_OpenFont(fontPath.c_str(), 28);
-  m_font_lg = TTF_OpenFont(fontPath.c_str(), 48);
+  const int smallFontPointSize  = 14;
+  const int mediumFontPointSize = 28;
+  const int largeFontPointSize  = 48;
 
-  if (!m_font_md || !m_font_sm) {
+  m_font_sm = TTF_OpenFont(fontPath.c_str(), smallFontPointSize);
+  m_font_md = TTF_OpenFont(fontPath.c_str(), mediumFontPointSize);
+  m_font_lg = TTF_OpenFont(fontPath.c_str(), largeFontPointSize);
+
+  const bool fontsLoaded =
+      (m_font_lg != nullptr && m_font_md != nullptr && m_font_sm != nullptr);
+
+  if (!fontsLoaded) {
     std::cerr << "Failed to load fonts: " << TTF_GetError() << std::endl;
     return;
   }
@@ -62,8 +69,9 @@ GameEngine::GameEngine() {
     return;
   }
   std::cout << "Renderer created successfully!" << std::endl;
-
-  SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
+  const SDL_Color backgroundColor = {.r = 0, .g = 0, .b = 0, .a = 255};
+  SDL_SetRenderDrawColor(m_renderer, backgroundColor.r, backgroundColor.g, backgroundColor.b,
+                         backgroundColor.a);
   SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
   SDL_RenderClear(m_renderer);
   SDL_RenderPresent(m_renderer);
@@ -115,7 +123,7 @@ SDL_Window *GameEngine::getWindow() {
   return m_window;
 }
 
-bool GameEngine::isRunning() {
+bool GameEngine::isRunning() const {
   return m_isRunning;
 }
 
@@ -133,7 +141,7 @@ void GameEngine::quit() {
   m_isRunning = false;
 }
 
-void GameEngine::loadScene(const std::string &sceneName, std::shared_ptr<Scene> scene) {
+void GameEngine::loadScene(const std::string &sceneName, const std::shared_ptr<Scene> &scene) {
   m_scenes[sceneName] = scene;
 
   scene->setStartTime(SDL_GetTicks64());
@@ -149,7 +157,7 @@ void GameEngine::sUserInput() {
 
   const std::shared_ptr<Scene> activeScene = m_scenes[m_currentSceneName];
 
-  while (SDL_PollEvent(&event)) {
+  while (!!SDL_PollEvent(&event)) {
     if (event.type == SDL_QUIT) {
       quit();
       return;

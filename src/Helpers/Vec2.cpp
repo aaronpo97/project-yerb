@@ -50,7 +50,7 @@ void Vec2::operator/=(const float val) {
 }
 
 float Vec2::length() const {
-  return std::sqrt(x * x + y * y);
+  return std::sqrt((x * x) + (y * y));
 }
 
 // the normalize function will make the vector a unit vector (length of 1) pointing in the

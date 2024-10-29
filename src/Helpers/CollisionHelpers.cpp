@@ -5,8 +5,8 @@
 #include <bitset>
 #include <iostream>
 
-enum Boundaries { TOP, BOTTOM, LEFT, RIGHT };
-enum RelativePosition { ABOVE, BELOW, LEFT_OF, RIGHT_OF };
+enum Boundaries : Uint8 { TOP, BOTTOM, LEFT, RIGHT };
+enum RelativePosition : Uint8 { ABOVE, BELOW, LEFT_OF, RIGHT_OF };
 
 bool hasNullComponentPointers(const std::shared_ptr<Entity> &entity) {
   const bool cTransformIsNullPtr = !entity->cTransform;

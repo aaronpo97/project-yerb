@@ -77,13 +77,13 @@ namespace SpawnHelpers {
       }
     }
 
-    bool isValidVelocity = !(xVel == 0 && yVel == 0);
+    bool isValidVelocity = xVel != 0 || yVel == 0;
     while (!isValidVelocity) {
       const int newXVel = randomXVel(randomGenerator);
       const int newYVel = randomYVel(randomGenerator);
 
       enemy->cTransform->velocity = Vec2(newXVel, newYVel);
-      isValidVelocity             = !(newXVel == 0 && newYVel == 0);
+      isValidVelocity             = newXVel != 0 || newYVel != 0;
     }
 
     bool      isValidSpawn       = !touchesBoundary && !touchesOtherEntities;
@@ -156,14 +156,14 @@ namespace SpawnHelpers {
       }
     }
 
-    bool isValidVelocity = !(xVel == 0 && yVel == 0);
+    bool isValidVelocity = xVel != 0 || yVel != 0;
 
     while (!isValidVelocity) {
       const int newXVel = randomXVel(randomGenerator);
       const int newYVel = randomYVel(randomGenerator);
 
       speedBoost->cTransform->velocity = Vec2(newXVel, newYVel);
-      isValidVelocity                  = !(newXVel == 0 && newYVel == 0);
+      isValidVelocity                  = newXVel != 0 || newYVel != 0;
     }
 
     bool      isValidSpawn       = !touchesBoundary && !touchesOtherEntities;
@@ -237,7 +237,7 @@ namespace SpawnHelpers {
     }
 
     bool      isValidSpawn       = !touchesBoundary && !touchesOtherEntities;
-    bool      isValidVelocity    = !(xVel == 0 && yVel == 0);
+    bool      isValidVelocity    = xVel != 0 || yVel != 0;
     const int MAX_SPAWN_ATTEMPTS = 10;
     int       spawnAttempt       = 1;
 
@@ -246,7 +246,7 @@ namespace SpawnHelpers {
       const int newYVel = randomYVel(randomGenerator);
 
       slownessEntity->cTransform->velocity = Vec2(newXVel, newYVel);
-      isValidVelocity                      = !(newXVel == 0 && newYVel == 0);
+      isValidVelocity                      = newXVel != 0 || newYVel != 0;
     }
 
     while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
@@ -343,10 +343,10 @@ namespace SpawnHelpers {
     // Set bullet position slightly offset from player center in the direction of travel
 
     const auto  playerHalfWidth = player->cShape->rect.w / 2;
-    const float spawnOffset     = playerHalfWidth + bullet->cShape->rect.w / 2 + 5;
+    const float spawnOffset     = (bullet->cShape->rect.w / 2) + (playerHalfWidth + 5);
     Vec2        bulletPos;
-    bulletPos.x = playerCenter.x + direction.x * spawnOffset - bullet->cShape->rect.w / 2;
-    bulletPos.y = playerCenter.y + direction.y * spawnOffset - bullet->cShape->rect.h / 2;
+    bulletPos.x = playerCenter.x + (direction.x * spawnOffset) - bullet->cShape->rect.w / 2;
+    bulletPos.y = playerCenter.y + (direction.y * spawnOffset) - bullet->cShape->rect.h / 2;
 
     // Set transform with position, velocity and rotation
     bullet->cTransform = std::make_shared<CTransform>(bulletPos, bulletVelocity, angle);

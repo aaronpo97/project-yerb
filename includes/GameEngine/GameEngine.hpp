@@ -27,14 +27,14 @@ public:
 
   SDL_Renderer *getRenderer();
   SDL_Window   *getWindow();
-  bool          isRunning();
+  bool          isRunning() const;
 
   ConfigManager &getConfigManager();
 
   void run();
   void quit();
 
-  void loadScene(const std::string &name, std::shared_ptr<Scene> scene);
+  void loadScene(const std::string &name, const std::shared_ptr<Scene> &scene);
 
   TTF_Font *getFontLg() {
     return m_font_lg;

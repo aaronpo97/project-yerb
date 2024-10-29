@@ -30,10 +30,11 @@ void HowToPlayScene::renderText() {
   SDL_Renderer   *renderer  = m_gameEngine->getRenderer();
   TTF_Font       *fontMd    = m_gameEngine->getFontMd();
   TTF_Font       *fontLg    = m_gameEngine->getFontLg();
-  TTF_Font       *fontSm    = m_gameEngine->getFontSm();
   const SDL_Color textColor = {255, 255, 255, 255};
 
-  if (fontMd == nullptr) {
+  const bool fontsLoaded = fontMd != nullptr && fontLg != nullptr;
+
+  if (!fontsLoaded) {
     std::cerr << "Failed to load font" << std::endl;
     return;
   }

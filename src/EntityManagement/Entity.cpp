@@ -5,7 +5,7 @@ bool Entity::isActive() const {
   return m_active;
 }
 
-const EntityTags Entity::tag() const {
+EntityTags Entity::tag() const {
   return m_tag;
 }
 

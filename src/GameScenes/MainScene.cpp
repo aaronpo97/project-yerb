@@ -179,8 +179,16 @@ void MainScene::sRender() {
 void MainScene::sCollision() {
   const ConfigManager &m_configManager = m_gameEngine->getConfigManager();
   const Vec2          &windowSize      = m_configManager.getGameConfig().windowSize;
-  std::uniform_int_distribution<Uint64> randomSlownessDuration(5000, 10000);
-  std::uniform_int_distribution<Uint64> randomSpeedBoostDuration(9000, 15000);
+
+  const Uint64 minSlownessDuration   = 5000;
+  const Uint64 maxSlownessDuration   = 10000;
+  const Uint64 minSpeedBoostDuration = 9000;
+  const Uint64 maxSpeedBoostDuration = 15000;
+
+  std::uniform_int_distribution<Uint64> randomSlownessDuration(minSlownessDuration,
+                                                               maxSlownessDuration);
+  std::uniform_int_distribution<Uint64> randomSpeedBoostDuration(minSpeedBoostDuration,
+                                                                 maxSpeedBoostDuration);
 
   for (auto &entity : m_entities.getEntities()) {
     const auto tag = entity->tag();
@@ -210,6 +218,7 @@ void MainScene::sCollision() {
       std::bitset<4> bulletCollides = CollisionHelpers::detectOutOfBounds(entity, windowSize);
       CollisionHelpers::enforceBulletCollision(entity, bulletCollides.any());
     }
+
     for (auto &otherEntity : m_entities.getEntities()) {
       if (entity == otherEntity) {
         continue;
@@ -280,11 +289,11 @@ void MainScene::sCollision() {
             m_entities.getEntities(EntityTags::SlownessDebuff);
         const EntityVector &speedBoosts = m_entities.getEntities(EntityTags::SpeedBoost);
 
-        for (auto &slownessDebuff : slownessDebuffs) {
+        for (const auto &slownessDebuff : slownessDebuffs) {
           slownessDebuff->destroy();
         }
 
-        for (auto &speedBoost : speedBoosts) {
+        for (const auto &speedBoost : speedBoosts) {
           speedBoost->destroy();
         }
       }
@@ -355,7 +364,7 @@ void MainScene::sEffects() {
   }
 
   const Uint64 currentTime = SDL_GetTicks64();
-  for (auto &effect : effects) {
+  for (const Effect &effect : effects) {
     const bool effectExpired = currentTime - effect.startTime > effect.duration;
     if (!effectExpired) {
       return;
