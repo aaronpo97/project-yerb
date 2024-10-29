@@ -20,12 +20,14 @@ public:
   Vec2        windowSize;
   std::string windowTitle;
   std::string fontPath;
+  Uint64      spawnInterval;
 
   // Constructor
-  GameConfig(Vec2        size  = Vec2(800, 600),
-             std::string title = "Game",
-             std::string font  = "font.ttf") :
-      windowSize(size), windowTitle(title), fontPath(font) {}
+  GameConfig(Vec2        size     = Vec2(800, 600),
+             std::string title    = "Game",
+             std::string font     = "font.ttf",
+             Uint64      interval = 1000) :
+      windowSize(size), windowTitle(title), fontPath(font), spawnInterval(interval) {}
 };
 
 class PlayerConfig {

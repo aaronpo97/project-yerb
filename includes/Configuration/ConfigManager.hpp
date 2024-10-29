@@ -16,10 +16,11 @@ private:
   std::string            m_configPath;
 
   void parseGameConfig() {
-    m_gameConfig.windowSize  = Vec2(m_json["gameConfig"]["windowSize"]["width"],
-                                    m_json["gameConfig"]["windowSize"]["height"]);
-    m_gameConfig.windowTitle = m_json["gameConfig"]["windowTitle"];
-    m_gameConfig.fontPath    = m_json["gameConfig"]["fontPath"];
+    m_gameConfig.windowSize    = Vec2(m_json["gameConfig"]["windowSize"]["width"],
+                                      m_json["gameConfig"]["windowSize"]["height"]);
+    m_gameConfig.windowTitle   = m_json["gameConfig"]["windowTitle"];
+    m_gameConfig.fontPath      = m_json["gameConfig"]["fontPath"];
+    m_gameConfig.spawnInterval = m_json["gameConfig"]["spawnInterval"];
   }
 
   void parsePlayerConfig() {

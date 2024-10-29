@@ -316,7 +316,9 @@ void MainScene::sSpawner() {
   SDL_Renderer *renderer        = m_gameEngine->getRenderer();
   const Uint64  ticks           = SDL_GetTicks64();
 
-  if (ticks - m_lastEnemySpawnTime < 2500) {
+  const Uint64 SPAWN_INTERVAL = m_configManager.getGameConfig().spawnInterval;
+
+  if (ticks - m_lastEnemySpawnTime < SPAWN_INTERVAL) {
     return;
   }
   m_lastEnemySpawnTime = ticks;

@@ -5,7 +5,8 @@
       "width": 1600
     },
     "windowTitle": "Yerb's Game",
-    "fontPath": "./assets/fonts/Sixtyfour/static/Sixtyfour-Regular.ttf"
+    "fontPath": "./assets/fonts/Sixtyfour/static/Sixtyfour-Regular.ttf",
+    "spawnInterval": 800
   },
   "playerConfig": {
     "baseSpeed": 9.0,
