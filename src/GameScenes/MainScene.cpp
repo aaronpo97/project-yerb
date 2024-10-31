@@ -177,126 +177,141 @@ void MainScene::sRender() {
 }
 
 void MainScene::sCollision() {
-  const ConfigManager &m_configManager = m_gameEngine->getConfigManager();
-  const Vec2          &windowSize      = m_configManager.getGameConfig().windowSize;
+  const ConfigManager &configManager = m_gameEngine->getConfigManager();
+  const Vec2          &windowSize    = configManager.getGameConfig().windowSize;
 
-  const Uint64 minSlownessDuration   = 5000;
-  const Uint64 maxSlownessDuration   = 10000;
-  const Uint64 minSpeedBoostDuration = 9000;
-  const Uint64 maxSpeedBoostDuration = 15000;
-
-  std::uniform_int_distribution<Uint64> randomSlownessDuration(minSlownessDuration,
-                                                               maxSlownessDuration);
-  std::uniform_int_distribution<Uint64> randomSpeedBoostDuration(minSpeedBoostDuration,
-                                                                 maxSpeedBoostDuration);
-
-  for (auto &entity : m_entities.getEntities()) {
+  auto handleEntityBounds = [](const std::shared_ptr<Entity> &entity, const Vec2 &windowSize) {
     const auto tag = entity->tag();
     if (tag == EntityTags::SpeedBoost) {
       std::bitset<4> speedBoostCollides =
           CollisionHelpers::detectOutOfBounds(entity, windowSize);
-      CollisionHelpers::enforceNonPlayerBounds(entity, speedBoostCollides, windowSize);
+      CollisionHelpers::MainScene::enforceNonPlayerBounds(entity, speedBoostCollides,
+                                                          windowSize);
     }
 
     if (tag == EntityTags::Player) {
       std::bitset<4> playerCollides = CollisionHelpers::detectOutOfBounds(entity, windowSize);
-      CollisionHelpers::enforcePlayerBounds(entity, playerCollides, windowSize);
+      CollisionHelpers::MainScene::enforcePlayerBounds(entity, playerCollides, windowSize);
     }
 
     if (tag == EntityTags::Enemy) {
       std::bitset<4> enemyCollides = CollisionHelpers::detectOutOfBounds(entity, windowSize);
-      CollisionHelpers::enforceNonPlayerBounds(entity, enemyCollides, windowSize);
+      CollisionHelpers::MainScene::enforceNonPlayerBounds(entity, enemyCollides, windowSize);
     }
 
     if (tag == EntityTags::SlownessDebuff) {
       std::bitset<4> slownessCollides =
           CollisionHelpers::detectOutOfBounds(entity, windowSize);
-      CollisionHelpers::enforceNonPlayerBounds(entity, slownessCollides, windowSize);
+      CollisionHelpers::MainScene::enforceNonPlayerBounds(entity, slownessCollides,
+                                                          windowSize);
     }
 
     if (tag == EntityTags::Bullet) {
       std::bitset<4> bulletCollides = CollisionHelpers::detectOutOfBounds(entity, windowSize);
-      CollisionHelpers::enforceBulletCollision(entity, bulletCollides.any());
+      CollisionHelpers::MainScene::enforceBulletCollision(entity, bulletCollides.any());
+    }
+  };
+
+  auto handleEntityEntityCollision = [](const std::shared_ptr<Entity> &entity,
+                                        const std::shared_ptr<Entity> &otherEntity,
+                                        MainScene                     *scene) {
+    const auto tag      = entity->tag();
+    const auto otherTag = otherEntity->tag();
+
+    const Uint64 minSlownessDuration   = 5000;
+    const Uint64 maxSlownessDuration   = 10000;
+    const Uint64 minSpeedBoostDuration = 9000;
+    const Uint64 maxSpeedBoostDuration = 15000;
+
+    std::uniform_int_distribution<Uint64> randomSlownessDuration(minSlownessDuration,
+                                                                 maxSlownessDuration);
+    std::uniform_int_distribution<Uint64> randomSpeedBoostDuration(minSpeedBoostDuration,
+                                                                   maxSpeedBoostDuration);
+
+    const auto &setScore          = [scene](const int score) { scene->setScore(score); };
+    auto       &m_randomGenerator = scene->m_randomGenerator;
+    auto       &m_entities        = scene->m_entities;
+    auto       &m_score           = scene->m_score;
+
+    if (entity == otherEntity) {
+      return;
     }
 
+    const bool entitiesCollided =
+        CollisionHelpers::calculateCollisionBetweenEntities(entity, otherEntity);
+
+    if (!entitiesCollided) {
+      return;
+    }
+
+    if (otherTag == EntityTags::Wall) {
+      CollisionHelpers::MainScene::enforceCollisionWithWall(entity, otherEntity);
+    }
+
+    if (tag == EntityTags::Enemy && otherTag == EntityTags::Enemy) {
+      CollisionHelpers::MainScene::enforceEntityEntityCollision(entity, otherEntity);
+    }
+
+    if (tag == EntityTags::Enemy && otherTag == EntityTags::SpeedBoost) {
+      CollisionHelpers::MainScene::enforceEntityEntityCollision(entity, otherEntity);
+    }
+
+    if (tag == EntityTags::Enemy && otherTag == EntityTags::SlownessDebuff) {
+      CollisionHelpers::MainScene::enforceEntityEntityCollision(entity, otherEntity);
+    }
+
+    if (tag == EntityTags::Bullet && otherTag == EntityTags::Enemy) {
+      setScore(m_score + 5);
+      otherEntity->destroy();
+      entity->destroy();
+    }
+
+    if (tag == EntityTags::Player && otherTag == EntityTags::Enemy) {
+      setScore(m_score - 3);
+      otherEntity->destroy();
+    }
+
+    if (tag == EntityTags::Player && otherTag == EntityTags::SlownessDebuff) {
+      const Uint64 startTime = SDL_GetTicks64();
+      const Uint64 duration  = randomSlownessDuration(m_randomGenerator);
+      entity->cEffects->addEffect(
+          {.startTime = startTime, .duration = duration, .type = EffectTypes::Slowness});
+
+      const EntityVector &slownessDebuffs = m_entities.getEntities(EntityTags::SlownessDebuff);
+      const EntityVector &speedBoosts     = m_entities.getEntities(EntityTags::SpeedBoost);
+
+      for (auto &slownessDebuff : slownessDebuffs) {
+        slownessDebuff->destroy();
+      }
+
+      for (auto &speedBoost : speedBoosts) {
+        speedBoost->destroy();
+      }
+    }
+
+    if (tag == EntityTags::Player && otherTag == EntityTags::SpeedBoost) {
+      const Uint64 startTime = SDL_GetTicks64();
+      const Uint64 duration  = randomSpeedBoostDuration(m_randomGenerator);
+      entity->cEffects->addEffect(
+          {.startTime = startTime, .duration = duration, .type = EffectTypes::Speed});
+
+      const EntityVector &slownessDebuffs = m_entities.getEntities(EntityTags::SlownessDebuff);
+      const EntityVector &speedBoosts     = m_entities.getEntities(EntityTags::SpeedBoost);
+
+      for (const auto &slownessDebuff : slownessDebuffs) {
+        slownessDebuff->destroy();
+      }
+
+      for (const auto &speedBoost : speedBoosts) {
+        speedBoost->destroy();
+      }
+    }
+  };
+
+  for (auto &entity : m_entities.getEntities()) {
+    handleEntityBounds(entity, windowSize);
     for (auto &otherEntity : m_entities.getEntities()) {
-      if (entity == otherEntity) {
-        continue;
-      }
-
-      const bool entitiesCollided =
-          CollisionHelpers::calculateCollisionBetweenEntities(entity, otherEntity);
-
-      if (!entitiesCollided) {
-        continue;
-      }
-
-      const auto otherTag = otherEntity->tag();
-
-      if (otherTag == EntityTags::Wall) {
-        CollisionHelpers::enforceCollisionWithWall(entity, otherEntity);
-      }
-
-      if (tag == EntityTags::Enemy && otherTag == EntityTags::Enemy) {
-        CollisionHelpers::enforceEntityEntityCollision(entity, otherEntity);
-      }
-
-      if (tag == EntityTags::Enemy && otherTag == EntityTags::SpeedBoost) {
-        CollisionHelpers::enforceEntityEntityCollision(entity, otherEntity);
-      }
-
-      if (tag == EntityTags::Enemy && otherTag == EntityTags::SlownessDebuff) {
-        CollisionHelpers::enforceEntityEntityCollision(entity, otherEntity);
-      }
-
-      if (tag == EntityTags::Bullet && otherTag == EntityTags::Enemy) {
-        setScore(m_score + 5);
-        otherEntity->destroy();
-        entity->destroy();
-      }
-
-      if (tag == EntityTags::Player && otherTag == EntityTags::Enemy) {
-        setScore(m_score - 3);
-        otherEntity->destroy();
-      }
-
-      if (tag == EntityTags::Player && otherTag == EntityTags::SlownessDebuff) {
-        const Uint64 startTime = SDL_GetTicks64();
-        const Uint64 duration  = randomSlownessDuration(m_randomGenerator);
-        entity->cEffects->addEffect(
-            {.startTime = startTime, .duration = duration, .type = EffectTypes::Slowness});
-
-        const EntityVector &slownessDebuffs =
-            m_entities.getEntities(EntityTags::SlownessDebuff);
-        const EntityVector &speedBoosts = m_entities.getEntities(EntityTags::SpeedBoost);
-
-        for (auto &slownessDebuff : slownessDebuffs) {
-          slownessDebuff->destroy();
-        }
-
-        for (auto &speedBoost : speedBoosts) {
-          speedBoost->destroy();
-        }
-      }
-
-      if (tag == EntityTags::Player && otherTag == EntityTags::SpeedBoost) {
-        const Uint64 startTime = SDL_GetTicks64();
-        const Uint64 duration  = randomSpeedBoostDuration(m_randomGenerator);
-        entity->cEffects->addEffect(
-            {.startTime = startTime, .duration = duration, .type = EffectTypes::Speed});
-
-        const EntityVector &slownessDebuffs =
-            m_entities.getEntities(EntityTags::SlownessDebuff);
-        const EntityVector &speedBoosts = m_entities.getEntities(EntityTags::SpeedBoost);
-
-        for (const auto &slownessDebuff : slownessDebuffs) {
-          slownessDebuff->destroy();
-        }
-
-        for (const auto &speedBoost : speedBoosts) {
-          speedBoost->destroy();
-        }
-      }
+      handleEntityEntityCollision(entity, otherEntity, this);
     }
   }
 
@@ -304,12 +319,12 @@ void MainScene::sCollision() {
 }
 
 void MainScene::sMovement() {
-  const ConfigManager        &m_configManager      = m_gameEngine->getConfigManager();
-  const PlayerConfig         &playerConfig         = m_configManager.getPlayerConfig();
-  const EnemyConfig          &enemyConfig          = m_configManager.getEnemyConfig();
-  const SlownessEffectConfig &slownessEffectConfig = m_configManager.getSlownessEffectConfig();
+  const ConfigManager          &configManager        = m_gameEngine->getConfigManager();
+  const PlayerConfig           &playerConfig         = configManager.getPlayerConfig();
+  const EnemyConfig            &enemyConfig          = configManager.getEnemyConfig();
+  const SlownessEffectConfig   &slownessEffectConfig = configManager.getSlownessEffectConfig();
   const SpeedBoostEffectConfig &speedBoostEffectConfig =
-      m_configManager.getSpeedBoostEffectConfig();
+      configManager.getSpeedBoostEffectConfig();
 
   for (std::shared_ptr<Entity> entity : m_entities.getEntities()) {
     MovementHelpers::moveSpeedBoosts(entity, speedBoostEffectConfig, m_deltaTime);
@@ -321,17 +336,17 @@ void MainScene::sMovement() {
 }
 
 void MainScene::sSpawner() {
-  ConfigManager m_configManager = m_gameEngine->getConfigManager();
-  SDL_Renderer *renderer        = m_gameEngine->getRenderer();
-  const Uint64  ticks           = SDL_GetTicks64();
+  ConfigManager configManager = m_gameEngine->getConfigManager();
+  SDL_Renderer *renderer      = m_gameEngine->getRenderer();
+  const Uint64  ticks         = SDL_GetTicks64();
 
-  const Uint64 SPAWN_INTERVAL = m_configManager.getGameConfig().spawnInterval;
+  const Uint64 SPAWN_INTERVAL = configManager.getGameConfig().spawnInterval;
 
   if (ticks - m_lastEnemySpawnTime < SPAWN_INTERVAL) {
     return;
   }
   m_lastEnemySpawnTime = ticks;
-  SpawnHelpers::spawnEnemy(renderer, m_configManager, m_randomGenerator, m_entities);
+  SpawnHelpers::spawnEnemy(renderer, configManager, m_randomGenerator, m_entities);
 
   const bool hasSpeedBoost = m_player->cEffects->hasEffect(EffectTypes::Speed);
   const bool hasSlowness   = m_player->cEffects->hasEffect(EffectTypes::Slowness);
@@ -344,7 +359,7 @@ void MainScene::sSpawner() {
       randomChance(m_randomGenerator) < 15 && !hasSpeedBoost && !hasSlowness;
 
   if (willSpawnSpeedBoost) {
-    SpawnHelpers::spawnSpeedBoostEntity(renderer, m_configManager, m_randomGenerator,
+    SpawnHelpers::spawnSpeedBoostEntity(renderer, configManager, m_randomGenerator,
                                         m_entities);
   }
   // Spawns a slowness debuff with a 30% chance and while slowness debuff and speed boost are
@@ -352,8 +367,7 @@ void MainScene::sSpawner() {
   const bool willSpawnSlownessDebuff =
       randomChance(m_randomGenerator) < 30 && !hasSlowness && !hasSpeedBoost;
   if (willSpawnSlownessDebuff) {
-    SpawnHelpers::spawnSlownessEntity(renderer, m_configManager, m_randomGenerator,
-                                      m_entities);
+    SpawnHelpers::spawnSlownessEntity(renderer, configManager, m_randomGenerator, m_entities);
   }
 }
 

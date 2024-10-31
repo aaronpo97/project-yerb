@@ -1,6 +1,7 @@
 
 #include "../../includes/Helpers/CollisionHelpers.hpp"
 #include "../../includes/EntityManagement/Entity.hpp"
+#include "../../includes/GameScenes/MainScene.hpp"
 
 #include <bitset>
 #include <iostream>
@@ -38,63 +39,6 @@ namespace CollisionHelpers {
 
     return collidesWithBoundary;
   }
-
-  void enforcePlayerBounds(const std::shared_ptr<Entity> &entity,
-                           const std::bitset<4>          &collides,
-                           const Vec2                    &window_size) {
-    if (hasNullComponentPointers(entity)) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
-                               " lacks a transform or collision component.");
-    }
-    const std::shared_ptr<CShape> &cShape             = entity->cShape;
-    Vec2                          &leftCornerPosition = entity->cTransform->topLeftCornerPos;
-
-    if (collides[TOP]) {
-      leftCornerPosition.y = 0;
-    }
-    if (collides[BOTTOM]) {
-      leftCornerPosition.y = window_size.y - cShape->rect.h;
-    }
-    if (collides[LEFT]) {
-      leftCornerPosition.x = 0;
-    }
-    if (collides[RIGHT]) {
-      leftCornerPosition.x = window_size.x - cShape->rect.w;
-    }
-  }
-
-  void enforceNonPlayerBounds(const std::shared_ptr<Entity> &entity,
-                              const std::bitset<4>          &collides,
-                              const Vec2                    &window_size) {
-
-    if (hasNullComponentPointers(entity)) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
-                               " lacks a transform or collision component.");
-    }
-    if (entity->tag() == EntityTags::Player) {
-      return;
-    }
-    const std::shared_ptr<CShape> &cShape             = entity->cShape;
-    Vec2                          &leftCornerPosition = entity->cTransform->topLeftCornerPos;
-    Vec2                          &velocity           = entity->cTransform->velocity;
-    // Bounce the entity off the boundaries
-    if (collides[TOP]) {
-      leftCornerPosition.y = 0;
-      velocity.y           = -velocity.y;
-    }
-    if (collides[BOTTOM]) {
-      leftCornerPosition.y = window_size.y - cShape->rect.h;
-      velocity.y           = -velocity.y;
-    }
-    if (collides[LEFT]) {
-      leftCornerPosition.x = 0;
-      velocity.x           = -velocity.x;
-    }
-    if (collides[RIGHT]) {
-      leftCornerPosition.x = window_size.x - cShape->rect.w;
-      velocity.x           = -velocity.x;
-    }
-  };
 
   Vec2 calculateOverlap(const std::shared_ptr<Entity> &entityA,
                         const std::shared_ptr<Entity> &entityB) {
@@ -172,6 +116,67 @@ namespace CollisionHelpers {
 
     return relativePosition;
   }
+
+}; // namespace CollisionHelpers
+
+namespace CollisionHelpers::MainScene {
+
+  void enforcePlayerBounds(const std::shared_ptr<Entity> &entity,
+                           const std::bitset<4>          &collides,
+                           const Vec2                    &window_size) {
+    if (hasNullComponentPointers(entity)) {
+      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
+                               " lacks a transform or collision component.");
+    }
+    const std::shared_ptr<CShape> &cShape             = entity->cShape;
+    Vec2                          &leftCornerPosition = entity->cTransform->topLeftCornerPos;
+
+    if (collides[TOP]) {
+      leftCornerPosition.y = 0;
+    }
+    if (collides[BOTTOM]) {
+      leftCornerPosition.y = window_size.y - cShape->rect.h;
+    }
+    if (collides[LEFT]) {
+      leftCornerPosition.x = 0;
+    }
+    if (collides[RIGHT]) {
+      leftCornerPosition.x = window_size.x - cShape->rect.w;
+    }
+  }
+
+  void enforceNonPlayerBounds(const std::shared_ptr<Entity> &entity,
+                              const std::bitset<4>          &collides,
+                              const Vec2                    &window_size) {
+
+    if (hasNullComponentPointers(entity)) {
+      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
+                               " lacks a transform or collision component.");
+    }
+    if (entity->tag() == EntityTags::Player) {
+      return;
+    }
+    const std::shared_ptr<CShape> &cShape             = entity->cShape;
+    Vec2                          &leftCornerPosition = entity->cTransform->topLeftCornerPos;
+    Vec2                          &velocity           = entity->cTransform->velocity;
+    // Bounce the entity off the boundaries
+    if (collides[TOP]) {
+      leftCornerPosition.y = 0;
+      velocity.y           = -velocity.y;
+    }
+    if (collides[BOTTOM]) {
+      leftCornerPosition.y = window_size.y - cShape->rect.h;
+      velocity.y           = -velocity.y;
+    }
+    if (collides[LEFT]) {
+      leftCornerPosition.x = 0;
+      velocity.x           = -velocity.x;
+    }
+    if (collides[RIGHT]) {
+      leftCornerPosition.x = window_size.x - cShape->rect.w;
+      velocity.x           = -velocity.x;
+    }
+  };
 
   void enforceCollisionWithWall(const std::shared_ptr<Entity> &entity,
                                 const std::shared_ptr<Entity> &wall) {
@@ -303,4 +308,36 @@ namespace CollisionHelpers {
 
     bullet->destroy();
   }
-}; // namespace CollisionHelpers
+
+  auto handleEntityBounds = [](const std::shared_ptr<Entity> &entity, const Vec2 &windowSize) {
+    const auto tag = entity->tag();
+    if (tag == EntityTags::SpeedBoost) {
+      std::bitset<4> speedBoostCollides =
+          CollisionHelpers::detectOutOfBounds(entity, windowSize);
+      CollisionHelpers::MainScene::enforceNonPlayerBounds(entity, speedBoostCollides,
+                                                          windowSize);
+    }
+
+    if (tag == EntityTags::Player) {
+      std::bitset<4> playerCollides = CollisionHelpers::detectOutOfBounds(entity, windowSize);
+      CollisionHelpers::MainScene::enforcePlayerBounds(entity, playerCollides, windowSize);
+    }
+
+    if (tag == EntityTags::Enemy) {
+      std::bitset<4> enemyCollides = CollisionHelpers::detectOutOfBounds(entity, windowSize);
+      CollisionHelpers::MainScene::enforceNonPlayerBounds(entity, enemyCollides, windowSize);
+    }
+
+    if (tag == EntityTags::SlownessDebuff) {
+      std::bitset<4> slownessCollides =
+          CollisionHelpers::detectOutOfBounds(entity, windowSize);
+      CollisionHelpers::MainScene::enforceNonPlayerBounds(entity, slownessCollides,
+                                                          windowSize);
+    }
+
+    if (tag == EntityTags::Bullet) {
+      std::bitset<4> bulletCollides = CollisionHelpers::detectOutOfBounds(entity, windowSize);
+      CollisionHelpers::MainScene::enforceBulletCollision(entity, bulletCollides.any());
+    }
+  };
+} // namespace CollisionHelpers::MainScene
