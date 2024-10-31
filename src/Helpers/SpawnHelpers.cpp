@@ -77,7 +77,7 @@ namespace SpawnHelpers {
       }
     }
 
-    bool isValidVelocity = xVel != 0 || yVel == 0;
+    bool isValidVelocity = xVel != 0 || yVel != 0;
     while (!isValidVelocity) {
       const int newXVel = randomXVel(randomGenerator);
       const int newYVel = randomYVel(randomGenerator);
