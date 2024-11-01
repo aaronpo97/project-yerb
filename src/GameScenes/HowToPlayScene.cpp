@@ -35,7 +35,7 @@ void HowToPlayScene::renderText() {
   const bool fontsLoaded = fontMd != nullptr && fontLg != nullptr;
 
   if (!fontsLoaded) {
-    std::cerr << "Failed to load font" << std::endl;
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to load fonts as they are null.");
     return;
   }
 

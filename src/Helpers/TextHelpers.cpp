@@ -10,14 +10,17 @@ namespace TextHelpers {
     // Render the text to a surface
     SDL_Surface *surface = TTF_RenderText_Solid(font, text.c_str(), color);
     if (!surface) {
-      std::cerr << "Failed to create surface: " << TTF_GetError() << std::endl;
+      SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to create surface for text rendering: %s",
+                   TTF_GetError());
       return; // Exit if the surface creation fails
     }
 
     // Create a texture from the surface
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
     if (!texture) {
-      std::cerr << "Failed to create texture: " << SDL_GetError() << std::endl;
+      SDL_LogError(SDL_LOG_CATEGORY_ERROR,
+                   "Failed to create texture from surface for text rendering: %s",
+                   SDL_GetError());
       SDL_FreeSurface(surface); // Free the surface if texture creation fails
       return;                   // Exit if the texture creation fails
     }
@@ -32,8 +35,13 @@ namespace TextHelpers {
     // Copy the texture to the renderer
     SDL_RenderCopy(renderer, texture, nullptr, &textRect);
 
-    // Clean up
-    SDL_DestroyTexture(texture);
-    SDL_FreeSurface(surface);
+    if (texture) {
+      SDL_DestroyTexture(texture);
+      texture = nullptr;
+    }
+    if (surface) {
+      SDL_FreeSurface(surface);
+      surface = nullptr;
+    }
   }
 } // namespace TextHelpers

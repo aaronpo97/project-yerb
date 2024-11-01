@@ -12,7 +12,7 @@
 
 GameEngine::GameEngine() {
   if (!std::filesystem::exists("./assets")) {
-    std::cerr << "Assets folder not found." << std::endl;
+    SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Assets folder not found!");
     return;
   }
 
@@ -27,29 +27,31 @@ GameEngine::GameEngine() {
   m_fontManager = std::make_unique<FontManager>(FONT_PATH);
 
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-    std::cerr << "SDL video system is not ready to go: " << SDL_GetError() << std::endl;
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "SDL video system is not ready to go: %s",
+                 SDL_GetError());
     return;
   }
-  std::cout << "SDL video system is ready to go" << std::endl;
+  SDL_LogInfo(SDL_LOG_CATEGORY_VIDEO, "SDL video system initialized successfully!");
 
   m_window =
       SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                        WINDOW_SIZE.x, WINDOW_SIZE.y, SDL_WINDOW_SHOWN);
   if (m_window == nullptr) {
-    std::cerr << "Window could not be created: " << SDL_GetError() << std::endl;
+
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "Window could not be created: %s", SDL_GetError());
     SDL_Quit();
     return;
   }
-  std::cout << "Window created successfully!" << std::endl;
+  SDL_LogInfo(SDL_LOG_CATEGORY_VIDEO, "Window created successfully!");
 
   m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
   if (m_renderer == nullptr) {
-    std::cerr << "Renderer could not be created: " << SDL_GetError() << std::endl;
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "Renderer could not be created: %s", SDL_GetError());
     SDL_DestroyWindow(m_window);
     SDL_Quit();
     return;
   }
-  std::cout << "Renderer created successfully!" << std::endl;
+  SDL_LogInfo(SDL_LOG_CATEGORY_VIDEO, "Renderer created successfully!");
   const SDL_Color backgroundColor = {.r = 0, .g = 0, .b = 0, .a = 255};
   SDL_SetRenderDrawColor(m_renderer, backgroundColor.r, backgroundColor.g, backgroundColor.b,
                          backgroundColor.a);
@@ -59,15 +61,25 @@ GameEngine::GameEngine() {
 
   m_isRunning = true; // Set isRunning to true after successful initialization
 
-  std::cout << "Game initialized successfully!" << std::endl;
-
+  SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "Game engine initialized successfully!");
   std::shared_ptr<Scene> menuScene = std::make_shared<MenuScene>(this);
   loadScene("Menu", menuScene);
 }
 
 GameEngine::~GameEngine() {
+  if (m_renderer != nullptr) {
+    SDL_DestroyRenderer(m_renderer);
+    m_renderer = nullptr;
+    SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "Renderer cleaned up successfully!");
+  }
+  if (m_window != nullptr) {
+    SDL_DestroyWindow(m_window);
+    m_window = nullptr;
+    SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "Window cleaned up successfully!");
+  }
+
   SDL_Quit();
-  std::cout << "Cleanup completed, SDL exited." << std::endl;
+  SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "Game engine cleaned up successfully!");
 }
 
 void GameEngine::update() {

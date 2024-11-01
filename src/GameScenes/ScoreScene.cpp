@@ -44,7 +44,7 @@ void ScoreScene::renderText() {
 
   const bool fontsLoaded = fontLg != nullptr && fontMd != nullptr;
   if (!fontsLoaded) {
-    std::cerr << "Failed to load font" << std::endl;
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to load fonts as they are null.");
     return;
   }
 

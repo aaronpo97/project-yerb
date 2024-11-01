@@ -81,7 +81,7 @@ private:
   }
 
   void loadConfig() {
-    std::ifstream configFile("./assets/config.json");
+    std::ifstream configFile(m_configPath);
     if (!configFile.is_open()) {
       throw std::runtime_error("Could not open config file");
     }
@@ -93,6 +93,8 @@ private:
 public:
   ConfigManager(std::string configPath = "./assets/config.json") :
       m_configPath(configPath) {
+    SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "ConfigManager created with path: %s",
+                configPath.c_str());
     loadConfig();
   }
 

@@ -61,12 +61,12 @@ void MainScene::sDoAction(Action &action) {
   const ActionState &actionState = action.getState();
 
   if (m_player == nullptr) {
-    std::cerr << "Player entity is null." << std::endl;
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Player entity is null, cannot process action.");
     return;
   }
 
   if (m_player->cInput == nullptr) {
-    std::cerr << "Player entity lacks an input component." << std::endl;
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Player entity lacks an input component.");
     return;
   }
 
@@ -415,8 +415,9 @@ void MainScene::sLifespan() {
       continue;
     }
     if (entity->cLifespan == nullptr) {
-      std::cerr << "Entity with ID " << entity->id() << " lacks a lifespan component"
-                << std::endl;
+      SDL_LogError(SDL_LOG_CATEGORY_ERROR,
+                   "Entity with ID %zu and tag %d lacks a lifespan component.", entity->id(),
+                   tag);
       continue;
     }
 

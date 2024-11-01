@@ -11,15 +11,17 @@ private:
   TTF_Font   *m_font_sm = nullptr;
 
 public:
-  explicit FontManager(const std::string &fontPath) :
+  FontManager(const std::string &fontPath) :
       m_fontPath(fontPath) {
     if (TTF_Init() != 0) {
-      std::cerr << "Failed to initialize SDL_ttf: " << TTF_GetError() << std::endl;
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Failed to initialize SDL_ttf: %s",
+                   TTF_GetError());
       return;
     }
 
+    SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "SDL_ttf initialized successfully.");
     loadFonts(fontPath);
-  }
+    }
 
   void loadFonts(const std::string &fontPath) {
     const int SMALL_FONT_POINT_SIZE  = 14;
@@ -34,11 +36,11 @@ public:
         (m_font_lg != nullptr && m_font_md != nullptr && m_font_sm != nullptr);
 
     if (!fontsLoaded) {
-      std::cerr << "Failed to load fonts: " << TTF_GetError() << std::endl;
+      SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to load fonts: %s", TTF_GetError());
       return;
     }
 
-    std::cout << "Fonts loaded successfully!" << std::endl;
+    SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "Fonts loaded successfully!");
   }
 
   TTF_Font *getFontLg() {
@@ -55,7 +57,7 @@ public:
 
   ~FontManager() {
 
-    std::cout << "Cleaning up fonts..." << std::endl;
+    SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "Cleaning up fonts...");
 
     if (m_font_md != nullptr) {
       TTF_CloseFont(m_font_md);
@@ -74,6 +76,6 @@ public:
 
     TTF_Quit();
 
-    std::cout << "Fonts cleaned up!" << std::endl;
+    SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "Fonts cleaned up successfully!");
   }
 };

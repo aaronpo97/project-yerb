@@ -45,7 +45,7 @@ void MenuScene::renderText() {
   SDL_Color     selectedColor = {0, 255, 0, 255};
 
   if (fontLg == nullptr || fontMd == nullptr) {
-    std::cerr << "Failed to load font" << std::endl;
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to load fonts as they are null.");
     return;
   }
 
