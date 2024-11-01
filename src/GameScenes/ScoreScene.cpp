@@ -35,8 +35,8 @@ void ScoreScene::sRender() {
 
 void ScoreScene::renderText() {
   SDL_Renderer *renderer = m_gameEngine->getRenderer();
-  TTF_Font     *fontLg   = m_gameEngine->getFontLg();
-  TTF_Font     *fontMd   = m_gameEngine->getFontMd();
+  TTF_Font     *fontLg   = m_gameEngine->getFontManager().getFontLg();
+  TTF_Font     *fontMd   = m_gameEngine->getFontManager().getFontMd();
 
   const SDL_Color gameOverColor = {255, 0, 0, 255};
   const SDL_Color textColor     = {255, 255, 255, 255};

@@ -16,40 +16,21 @@ GameEngine::GameEngine() {
     return;
   }
 
-  m_configManager = ConfigManager();
+  m_configManager = std::make_unique<ConfigManager>("./assets/config.json");
+
+  const auto &gameConfig = m_configManager->getGameConfig();
+
+  const std::string &FONT_PATH    = gameConfig.fontPath;
+  const std::string &WINDOW_TITLE = gameConfig.windowTitle;
+  const Vec2        &WINDOW_SIZE  = gameConfig.windowSize;
+
+  m_fontManager = std::make_unique<FontManager>(FONT_PATH);
 
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     std::cerr << "SDL video system is not ready to go: " << SDL_GetError() << std::endl;
     return;
   }
   std::cout << "SDL video system is ready to go" << std::endl;
-
-  if (TTF_Init() != 0) {
-    std::cerr << "TTF_Init: " << TTF_GetError() << std::endl;
-    return;
-  }
-
-  const std::string &fontPath = m_configManager.getGameConfig().fontPath;
-
-  const int smallFontPointSize  = 14;
-  const int mediumFontPointSize = 28;
-  const int largeFontPointSize  = 48;
-
-  m_font_sm = TTF_OpenFont(fontPath.c_str(), smallFontPointSize);
-  m_font_md = TTF_OpenFont(fontPath.c_str(), mediumFontPointSize);
-  m_font_lg = TTF_OpenFont(fontPath.c_str(), largeFontPointSize);
-
-  const bool fontsLoaded =
-      (m_font_lg != nullptr && m_font_md != nullptr && m_font_sm != nullptr);
-
-  if (!fontsLoaded) {
-    std::cerr << "Failed to load fonts: " << TTF_GetError() << std::endl;
-    return;
-  }
-  std::cout << "Fonts loaded successfully!" << std::endl;
-
-  const std::string &WINDOW_TITLE = m_configManager.getGameConfig().windowTitle;
-  const Vec2        &WINDOW_SIZE  = m_configManager.getGameConfig().windowSize;
 
   m_window =
       SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -85,25 +66,6 @@ GameEngine::GameEngine() {
 }
 
 GameEngine::~GameEngine() {
-  if (m_renderer != nullptr) {
-    SDL_DestroyRenderer(m_renderer);
-    m_renderer = nullptr;
-  }
-  if (m_window != nullptr) {
-    SDL_DestroyWindow(m_window);
-    m_window = nullptr;
-  }
-
-  if (m_font_md != nullptr) {
-    TTF_CloseFont(m_font_md);
-    m_font_md = nullptr;
-  }
-
-  if (m_font_sm != nullptr) {
-    TTF_CloseFont(m_font_sm);
-    m_font_sm = nullptr;
-  }
-  TTF_Quit();
   SDL_Quit();
   std::cout << "Cleanup completed, SDL exited." << std::endl;
 }
@@ -149,9 +111,18 @@ void GameEngine::loadScene(const std::string &sceneName, const std::shared_ptr<S
 }
 
 ConfigManager &GameEngine::getConfigManager() {
-  return m_configManager;
+  if (!m_configManager) {
+    throw std::runtime_error("ConfigManager not initialized");
+  }
+  return *m_configManager;
 }
 
+FontManager &GameEngine::getFontManager() {
+  if (!m_fontManager) {
+    throw std::runtime_error("FontManager not initialized");
+  }
+  return *m_fontManager;
+}
 void GameEngine::sUserInput() {
   SDL_Event event;
 

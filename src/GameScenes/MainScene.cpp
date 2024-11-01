@@ -117,8 +117,8 @@ void MainScene::sDoAction(Action &action) {
 
 void MainScene::renderText() {
   SDL_Renderer *renderer = m_gameEngine->getRenderer();
-  TTF_Font     *fontMd   = m_gameEngine->getFontMd();
-  TTF_Font     *fontSm   = m_gameEngine->getFontSm();
+  TTF_Font     *fontSm   = m_gameEngine->getFontManager().getFontSm();
+  TTF_Font     *fontMd   = m_gameEngine->getFontManager().getFontMd();
 
   const SDL_Color   scoreColor = {255, 255, 255, 255};
   const std::string scoreText  = "Score: " + std::to_string(m_score);
