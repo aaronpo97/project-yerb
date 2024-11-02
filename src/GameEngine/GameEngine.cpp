@@ -124,14 +124,15 @@ void GameEngine::loadScene(const std::string &sceneName, const std::shared_ptr<S
 
 ConfigManager &GameEngine::getConfigManager() {
   if (!m_configManager) {
-    throw std::runtime_error("ConfigManager not initialized");
+    SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "ConfigManager not initialized");
   }
+
   return *m_configManager;
 }
 
 FontManager &GameEngine::getFontManager() {
   if (!m_fontManager) {
-    throw std::runtime_error("FontManager not initialized");
+    SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "FontManager not initialized");
   }
   return *m_fontManager;
 }

@@ -12,7 +12,8 @@ namespace MovementHelpers {
     std::uniform_int_distribution<int> randomVelocityX(-1, 1);
 
     if (entity == nullptr) {
-      throw std::runtime_error("Entity is null");
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Entity is null");
+      return;
     }
 
     const EntityTags entityTag = entity->tag();
@@ -22,8 +23,9 @@ namespace MovementHelpers {
 
     const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
     if (entityCTransform == nullptr) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
-                               " lacks a transform component.");
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                   "Entity with ID %d lacks a transform component.", entity->id());
+      return;
     }
 
     Vec2 &position = entityCTransform->topLeftCornerPos;
@@ -35,7 +37,8 @@ namespace MovementHelpers {
                        const SpeedBoostEffectConfig &speedBoostEffectConfig,
                        const float                  &deltaTime) {
     if (entity == nullptr) {
-      throw std::runtime_error("Entity is null");
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Entity is null");
+      return;
     }
 
     const EntityTags entityTag = entity->tag();
@@ -45,8 +48,9 @@ namespace MovementHelpers {
 
     const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
     if (entityCTransform == nullptr) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
-                               " lacks a transform component.");
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                   "Entity with ID %d lacks a transform component.", entity->id());
+      return;
     }
 
     Vec2 &position = entityCTransform->topLeftCornerPos;
@@ -59,7 +63,8 @@ namespace MovementHelpers {
                   const PlayerConfig      &playerConfig,
                   const float             &deltaTime) {
     if (entity == nullptr) {
-      throw std::runtime_error("Entity is null");
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Entity is null");
+      return;
     }
 
     const EntityTags entityTag = entity->tag();
@@ -69,13 +74,16 @@ namespace MovementHelpers {
 
     const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
     if (entityCTransform == nullptr) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
-                               " lacks a transform component.");
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                   "Entity with ID %d lacks a transform component.", entity->id());
+      return;
     }
 
     const std::shared_ptr<CInput> &entityCInput = entity->cInput;
     if (entityCInput == nullptr) {
-      throw std::runtime_error("Player entity lacks an input component.");
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Entity with ID %d lacks an input component.",
+                   entity->id());
+      return;
     }
 
     Vec2 &position = entityCTransform->topLeftCornerPos;
@@ -115,7 +123,8 @@ namespace MovementHelpers {
                            const float                &deltaTime) {
 
     if (entity == nullptr) {
-      throw std::runtime_error("Entity is null");
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Entity is null");
+      return;
     }
 
     const EntityTags entityTag = entity->tag();
@@ -127,13 +136,17 @@ namespace MovementHelpers {
     const std::shared_ptr<CShape>     &entityCShape     = entity->cShape;
 
     if (entityCTransform == nullptr) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
-                               " lacks a transform component.");
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                   "Entity with ID %d lacks a transform component.", entity->id());
+
+      return;
     }
 
     if (entityCShape == nullptr) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
-                               " lacks a shape component.");
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Entity with ID %d lacks a shape component.",
+                   entity->id());
+
+      return;
     }
 
     Vec2 &position = entityCTransform->topLeftCornerPos;
@@ -145,7 +158,8 @@ namespace MovementHelpers {
   void moveBullets(std::shared_ptr<Entity> &entity, const float &deltaTime) {
 
     if (entity == nullptr) {
-      throw std::runtime_error("Entity is null");
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Entity is null");
+      return;
     }
 
     const EntityTags entityTag = entity->tag();
@@ -155,8 +169,9 @@ namespace MovementHelpers {
 
     const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
     if (entityCTransform == nullptr) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
-                               " lacks a transform component.");
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                   "Entity with ID %d lacks a transform component.", entity->id());
+      return;
     }
 
     Vec2 &position = entityCTransform->topLeftCornerPos;

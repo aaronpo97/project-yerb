@@ -83,7 +83,9 @@ private:
   void loadConfig() {
     std::ifstream configFile(m_configPath);
     if (!configFile.is_open()) {
-      throw std::runtime_error("Could not open config file");
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Could not open config file");
+
+      return;
     }
     configFile >> m_json;
     parseConfig();

@@ -97,7 +97,8 @@ void MainScene::sDoAction(Action &action) {
     const std::optional<Vec2> position = action.getPos();
 
     if (!position.has_value()) {
-      throw new std::runtime_error("A mouse event was called without a position.");
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "A mouse event was called without a position.");
+      return;
     }
 
     const Vec2 mousePosition = *position;

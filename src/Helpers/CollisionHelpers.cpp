@@ -18,8 +18,10 @@ namespace CollisionHelpers {
   std::bitset<4> detectOutOfBounds(const std::shared_ptr<Entity> &entity,
                                    const Vec2                    &window_size) {
     if (hasNullComponentPointers(entity)) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
-                               " lacks a transform or collision component.");
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
+                   entity->id(), entity->tag());
+      return std::bitset<4>({});
     }
 
     const std::shared_ptr<CShape> &entityCShape = entity->cShape;
@@ -44,13 +46,17 @@ namespace CollisionHelpers {
                         const std::shared_ptr<Entity> &entityB) {
 
     if (hasNullComponentPointers(entityA)) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entityA->id()) +
-                               " lacks a transform or collision component.");
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
+                   entityA->id(), entityA->tag());
+      return {0, 0};
     }
 
     if (hasNullComponentPointers(entityB)) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entityB->id()) +
-                               " lacks a transform or collision component.");
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
+                   entityB->id(), entityB->tag());
+      return {0, 0};
     }
     const Vec2 &playerPos     = entityA->cTransform->topLeftCornerPos;
     const Vec2 &wallPos       = entityB->cTransform->topLeftCornerPos;
@@ -75,12 +81,17 @@ namespace CollisionHelpers {
   bool calculateCollisionBetweenEntities(const std::shared_ptr<Entity> &entityA,
                                          const std::shared_ptr<Entity> &entityB) {
     if (hasNullComponentPointers(entityA)) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entityA->id()) +
-                               " lacks a transform or collision component.");
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
+                   entityA->id(), entityA->tag());
+      return false;
     }
+
     if (hasNullComponentPointers(entityB)) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entityB->id()) +
-                               " lacks a transform or collision component.");
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
+                   entityB->id(), entityB->tag());
+      return false;
     }
 
     const Vec2 overlap = calculateOverlap(entityA, entityB);
@@ -92,13 +103,17 @@ namespace CollisionHelpers {
   std::bitset<4> getPositionRelativeToEntity(const std::shared_ptr<Entity> &entityA,
                                              const std::shared_ptr<Entity> &entityB) {
     if (hasNullComponentPointers(entityA)) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entityA->id()) +
-                               " lacks a transform or collision component.");
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
+                   entityA->id(), entityA->tag());
+      return std::bitset<4>({});
     }
 
     if (hasNullComponentPointers(entityB)) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entityB->id()) +
-                               " lacks a transform or collision component.");
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
+                   entityB->id(), entityB->tag());
+      return std::bitset<4>({});
     }
     const Vec2 &entityAPos = entityA->cTransform->topLeftCornerPos;
     const Vec2 &entityBPos = entityB->cTransform->topLeftCornerPos;
@@ -125,8 +140,10 @@ namespace CollisionHelpers::MainScene {
                            const std::bitset<4>          &collides,
                            const Vec2                    &window_size) {
     if (hasNullComponentPointers(entity)) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
-                               " lacks a transform or collision component.");
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
+                   entity->id(), entity->tag());
+      return;
     }
     const std::shared_ptr<CShape> &cShape             = entity->cShape;
     Vec2                          &leftCornerPosition = entity->cTransform->topLeftCornerPos;
@@ -150,8 +167,9 @@ namespace CollisionHelpers::MainScene {
                               const Vec2                    &window_size) {
 
     if (hasNullComponentPointers(entity)) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
-                               " lacks a transform or collision component.");
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
+                   entity->id(), entity->tag());
     }
     if (entity->tag() == EntityTags::Player) {
       return;
@@ -182,13 +200,17 @@ namespace CollisionHelpers::MainScene {
                                 const std::shared_ptr<Entity> &wall) {
 
     if (hasNullComponentPointers(entity)) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entity->id()) +
-                               " lacks a transform or collision component.");
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
+                   entity->id(), entity->tag());
+      return;
     }
 
     if (hasNullComponentPointers(wall)) {
-      throw std::runtime_error("Entity with ID " + std::to_string(wall->id()) +
-                               " lacks a transform or collision component.");
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
+                   wall->id(), wall->tag());
+      return;
     }
 
     const Vec2 &overlap = calculateOverlap(entity, wall);
@@ -226,13 +248,19 @@ namespace CollisionHelpers::MainScene {
   void enforceEntityEntityCollision(const std::shared_ptr<Entity> &entityA,
                                     const std::shared_ptr<Entity> &entityB) {
     if (hasNullComponentPointers(entityA)) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entityA->id()) +
-                               " lacks a transform or collision component.");
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
+                   entityA->id(), entityA->tag());
+
+      return;
     }
 
     if (hasNullComponentPointers(entityB)) {
-      throw std::runtime_error("Entity with ID " + std::to_string(entityB->id()) +
-                               " lacks a transform or collision component.");
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
+                   entityB->id(), entityB->tag());
+
+      return;
     }
 
     const Vec2 &overlap = calculateOverlap(entityA, entityB);
@@ -298,8 +326,10 @@ namespace CollisionHelpers::MainScene {
   void enforceBulletCollision(const std::shared_ptr<Entity> &bullet,
                               const bool                     bulletCollides) {
     if (hasNullComponentPointers(bullet)) {
-      throw std::runtime_error("Entity with ID " + std::to_string(bullet->id()) +
-                               " lacks a transform or collision component.");
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
+                   bullet->id(), bullet->tag());
+      return;
     }
 
     if (!bulletCollides) {
