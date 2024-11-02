@@ -39,13 +39,13 @@ void MenuScene::sRender() {
 
 void MenuScene::renderText() {
   SDL_Renderer *renderer      = m_gameEngine->getRenderer();
-  TTF_Font     *fontLg        = m_gameEngine->getFontLg();
-  TTF_Font     *fontMd        = m_gameEngine->getFontMd();
+  TTF_Font     *fontLg        = m_gameEngine->getFontManager().getFontLg();
+  TTF_Font     *fontMd        = m_gameEngine->getFontManager().getFontMd();
   SDL_Color     textColor     = {255, 255, 255, 255};
   SDL_Color     selectedColor = {0, 255, 0, 255};
 
   if (fontLg == nullptr || fontMd == nullptr) {
-    std::cerr << "Failed to load font" << std::endl;
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to load fonts as they are null.");
     return;
   }
 

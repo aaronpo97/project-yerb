@@ -31,7 +31,8 @@ public:
       renderer(renderer) {
 
     if (renderer == nullptr) {
-      throw std::runtime_error("CShape entity initialization failed: Renderer is null.");
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                   "CShape entity initialization failed: Renderer is null.");
     }
 
     rect.h = config.height;

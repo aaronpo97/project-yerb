@@ -12,7 +12,7 @@ namespace MathHelpers {
   }
 
   float pythagoras(const float a, const float b) {
-    const float c = sqrt(a * a + b * b);
+    const float c = sqrt((a * a) + (b * b));
     return c;
   }
 }; // namespace MathHelpers

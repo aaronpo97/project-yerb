@@ -36,7 +36,7 @@ To build for MacOS, run the following commands.
 mkdir dist-macos
 cd dist-macos
 cmake ..
-make VERBOSE=1 2>&1 | tee build.log
+make 2>&1 | tee build.log
 ```
 
 ## Usage

@@ -29,4 +29,15 @@ namespace SpawnHelpers {
                            const ConfigManager &configManager,
                            std::mt19937        &randomGenerator,
                            EntityManager       &entityManager);
+
+  void spawnWalls(SDL_Renderer        *renderer,
+                  const ConfigManager &configManager,
+                  std::mt19937        &randomGenerator,
+                  EntityManager       &entityManager);
+
+  void spawnBullets(SDL_Renderer                  *renderer,
+                    ConfigManager                 &configManager,
+                    EntityManager                 &entityManager,
+                    const std::shared_ptr<Entity> &player,
+                    const Vec2                    &mousePosition);
 } // namespace SpawnHelpers

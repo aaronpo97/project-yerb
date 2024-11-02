@@ -34,16 +34,17 @@ void ScoreScene::sRender() {
 }
 
 void ScoreScene::renderText() {
-  SDL_Renderer   *renderer      = m_gameEngine->getRenderer();
-  TTF_Font       *fontLg        = m_gameEngine->getFontLg();
-  TTF_Font       *fontMd        = m_gameEngine->getFontMd();
-  TTF_Font       *fontSm        = m_gameEngine->getFontSm();
+  SDL_Renderer *renderer = m_gameEngine->getRenderer();
+  TTF_Font     *fontLg   = m_gameEngine->getFontManager().getFontLg();
+  TTF_Font     *fontMd   = m_gameEngine->getFontManager().getFontMd();
+
   const SDL_Color gameOverColor = {255, 0, 0, 255};
   const SDL_Color textColor     = {255, 255, 255, 255};
   const SDL_Color selectedColor = {0, 255, 0, 255};
 
-  if (fontMd == nullptr) {
-    std::cerr << "Failed to load font" << std::endl;
+  const bool fontsLoaded = fontLg != nullptr && fontMd != nullptr;
+  if (!fontsLoaded) {
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to load fonts as they are null.");
     return;
   }
 

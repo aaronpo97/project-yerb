@@ -16,10 +16,11 @@ private:
   std::string            m_configPath;
 
   void parseGameConfig() {
-    m_gameConfig.windowSize  = Vec2(m_json["gameConfig"]["windowSize"]["width"],
-                                    m_json["gameConfig"]["windowSize"]["height"]);
-    m_gameConfig.windowTitle = m_json["gameConfig"]["windowTitle"];
-    m_gameConfig.fontPath    = m_json["gameConfig"]["fontPath"];
+    m_gameConfig.windowSize    = Vec2(m_json["gameConfig"]["windowSize"]["width"],
+                                      m_json["gameConfig"]["windowSize"]["height"]);
+    m_gameConfig.windowTitle   = m_json["gameConfig"]["windowTitle"];
+    m_gameConfig.fontPath      = m_json["gameConfig"]["fontPath"];
+    m_gameConfig.spawnInterval = m_json["gameConfig"]["spawnInterval"];
   }
 
   void parsePlayerConfig() {
@@ -80,9 +81,11 @@ private:
   }
 
   void loadConfig() {
-    std::ifstream configFile("./assets/config.json");
+    std::ifstream configFile(m_configPath);
     if (!configFile.is_open()) {
-      throw std::runtime_error("Could not open config file");
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Could not open config file");
+
+      return;
     }
     configFile >> m_json;
     parseConfig();
@@ -92,6 +95,8 @@ private:
 public:
   ConfigManager(std::string configPath = "./assets/config.json") :
       m_configPath(configPath) {
+    SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "ConfigManager created with path: %s",
+                configPath.c_str());
     loadConfig();
   }
 
