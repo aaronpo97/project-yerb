@@ -4,7 +4,6 @@
 const float BASE_MOVEMENT_MULTIPLIER = 50.0f;
 
 namespace MovementHelpers {
-
   void moveEnemies(std::shared_ptr<Entity> &entity,
                    const EnemyConfig       &enemyConfig,
                    const float             &deltaTime) {
@@ -24,7 +23,7 @@ namespace MovementHelpers {
     const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
     if (entityCTransform == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                   "Entity with ID %d lacks a transform component.", entity->id());
+                   "Entity with ID %zu lacks a transform component.", entity->id());
       return;
     }
 
@@ -49,7 +48,7 @@ namespace MovementHelpers {
     const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
     if (entityCTransform == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                   "Entity with ID %d lacks a transform component.", entity->id());
+                   "Entity with ID %zu lacks a transform component.", entity->id());
       return;
     }
 
@@ -75,14 +74,14 @@ namespace MovementHelpers {
     const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
     if (entityCTransform == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                   "Entity with ID %d lacks a transform component.", entity->id());
+                   "Entity with ID %zu lacks a transform component.", entity->id());
       return;
     }
 
     const std::shared_ptr<CInput> &entityCInput = entity->cInput;
     if (entityCInput == nullptr) {
-      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Entity with ID %d lacks an input component.",
-                   entity->id());
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                   "Entity with ID %zu lacks an input component.", entity->id());
       return;
     }
 
@@ -137,13 +136,13 @@ namespace MovementHelpers {
 
     if (entityCTransform == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                   "Entity with ID %d lacks a transform component.", entity->id());
+                   "Entity with ID %zu lacks a transform component.", entity->id());
 
       return;
     }
 
     if (entityCShape == nullptr) {
-      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Entity with ID %d lacks a shape component.",
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Entity with ID %zu lacks a shape component.",
                    entity->id());
 
       return;
@@ -156,7 +155,6 @@ namespace MovementHelpers {
   };
 
   void moveBullets(std::shared_ptr<Entity> &entity, const float &deltaTime) {
-
     if (entity == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Entity is null");
       return;
@@ -170,7 +168,7 @@ namespace MovementHelpers {
     const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
     if (entityCTransform == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                   "Entity with ID %d lacks a transform component.", entity->id());
+                   "Entity with ID %zu lacks a transform component.", entity->id());
       return;
     }
 

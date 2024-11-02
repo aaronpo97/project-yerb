@@ -38,6 +38,8 @@ public:
   void sEffects();
   void sTimer();
 
+  int  getScore() const;
   void setScore(const int score);
+
   void setGameOver();
 };

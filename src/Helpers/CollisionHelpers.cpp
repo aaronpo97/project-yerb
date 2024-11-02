@@ -9,7 +9,7 @@
 enum Boundaries : Uint8 { TOP, BOTTOM, LEFT, RIGHT };
 enum RelativePosition : Uint8 { ABOVE, BELOW, LEFT_OF, RIGHT_OF };
 
-bool hasNullComponentPointers(const std::shared_ptr<Entity> &entity) {
+inline bool hasNullComponentPointers(const std::shared_ptr<Entity> &entity) {
   const bool cTransformIsNullPtr = !entity->cTransform;
   return cTransformIsNullPtr;
 }
@@ -134,8 +134,7 @@ namespace CollisionHelpers {
 
 }; // namespace CollisionHelpers
 
-namespace CollisionHelpers::MainScene {
-
+namespace CollisionHelpers::MainScene::Enforce {
   void enforcePlayerBounds(const std::shared_ptr<Entity> &entity,
                            const std::bitset<4>          &collides,
                            const Vec2                    &window_size) {
@@ -339,35 +338,132 @@ namespace CollisionHelpers::MainScene {
     bullet->destroy();
   }
 
-  auto handleEntityBounds = [](const std::shared_ptr<Entity> &entity, const Vec2 &windowSize) {
+}; // namespace CollisionHelpers::MainScene::Enforce
+
+namespace CollisionHelpers::MainScene {
+  void handleEntityBounds(const std::shared_ptr<Entity> &entity, const Vec2 &windowSize) {
     const auto tag = entity->tag();
     if (tag == EntityTags::SpeedBoost) {
-      std::bitset<4> speedBoostCollides =
-          CollisionHelpers::detectOutOfBounds(entity, windowSize);
-      CollisionHelpers::MainScene::enforceNonPlayerBounds(entity, speedBoostCollides,
-                                                          windowSize);
+      std::bitset<4> speedBoostCollides = detectOutOfBounds(entity, windowSize);
+      Enforce::enforceNonPlayerBounds(entity, speedBoostCollides, windowSize);
     }
 
     if (tag == EntityTags::Player) {
-      std::bitset<4> playerCollides = CollisionHelpers::detectOutOfBounds(entity, windowSize);
-      CollisionHelpers::MainScene::enforcePlayerBounds(entity, playerCollides, windowSize);
+      std::bitset<4> playerCollides = detectOutOfBounds(entity, windowSize);
+      Enforce::enforcePlayerBounds(entity, playerCollides, windowSize);
     }
 
     if (tag == EntityTags::Enemy) {
-      std::bitset<4> enemyCollides = CollisionHelpers::detectOutOfBounds(entity, windowSize);
-      CollisionHelpers::MainScene::enforceNonPlayerBounds(entity, enemyCollides, windowSize);
+      std::bitset<4> enemyCollides = detectOutOfBounds(entity, windowSize);
+      Enforce::enforceNonPlayerBounds(entity, enemyCollides, windowSize);
     }
 
     if (tag == EntityTags::SlownessDebuff) {
-      std::bitset<4> slownessCollides =
-          CollisionHelpers::detectOutOfBounds(entity, windowSize);
-      CollisionHelpers::MainScene::enforceNonPlayerBounds(entity, slownessCollides,
-                                                          windowSize);
+      std::bitset<4> slownessCollides = detectOutOfBounds(entity, windowSize);
+      Enforce::enforceNonPlayerBounds(entity, slownessCollides, windowSize);
     }
 
     if (tag == EntityTags::Bullet) {
-      std::bitset<4> bulletCollides = CollisionHelpers::detectOutOfBounds(entity, windowSize);
-      CollisionHelpers::MainScene::enforceBulletCollision(entity, bulletCollides.any());
+      std::bitset<4> bulletCollides = detectOutOfBounds(entity, windowSize);
+      Enforce::enforceBulletCollision(entity, bulletCollides.any());
     }
   };
+
+  void handleEntityEntityCollision(const CollisionPair &collisionPair, const GameState &args) {
+    const std::shared_ptr<Entity> &entity      = collisionPair.entityA;
+    const std::shared_ptr<Entity> &otherEntity = collisionPair.entityB;
+
+    const EntityTags tag      = entity->tag();
+    const EntityTags otherTag = otherEntity->tag();
+
+    const Uint64 minSlownessDuration   = 5000;
+    const Uint64 maxSlownessDuration   = 10000;
+    const Uint64 minSpeedBoostDuration = 9000;
+    const Uint64 maxSpeedBoostDuration = 15000;
+
+    std::uniform_int_distribution<Uint64> randomSlownessDuration(minSlownessDuration,
+                                                                 maxSlownessDuration);
+    std::uniform_int_distribution<Uint64> randomSpeedBoostDuration(minSpeedBoostDuration,
+                                                                   maxSpeedBoostDuration);
+
+    const int  m_score           = args.score;
+    const auto setScore          = args.setScore;
+    auto      &m_entities        = args.entityManager;
+    auto      &m_randomGenerator = args.randomGenerator;
+
+    if (entity == otherEntity) {
+      return;
+    }
+
+    const bool entitiesCollided =
+        CollisionHelpers::calculateCollisionBetweenEntities(entity, otherEntity);
+
+    if (!entitiesCollided) {
+      return;
+    }
+
+    if (otherTag == EntityTags::Wall) {
+      Enforce::enforceCollisionWithWall(entity, otherEntity);
+    }
+
+    if (tag == EntityTags::Enemy && otherTag == EntityTags::Enemy) {
+      Enforce::enforceEntityEntityCollision(entity, otherEntity);
+    }
+
+    if (tag == EntityTags::Enemy && otherTag == EntityTags::SpeedBoost) {
+      Enforce::enforceEntityEntityCollision(entity, otherEntity);
+    }
+
+    if (tag == EntityTags::Enemy && otherTag == EntityTags::SlownessDebuff) {
+      Enforce::enforceEntityEntityCollision(entity, otherEntity);
+    }
+
+    if (tag == EntityTags::Bullet && otherTag == EntityTags::Enemy) {
+      setScore(m_score + 5);
+      otherEntity->destroy();
+      entity->destroy();
+    }
+
+    if (tag == EntityTags::Player && otherTag == EntityTags::Enemy) {
+      setScore(m_score - 3);
+      otherEntity->destroy();
+    }
+
+    if (tag == EntityTags::Player && otherTag == EntityTags::SlownessDebuff) {
+      const Uint64 startTime = SDL_GetTicks64();
+      const Uint64 duration  = randomSlownessDuration(m_randomGenerator);
+      entity->cEffects->addEffect(
+          {.startTime = startTime, .duration = duration, .type = EffectTypes::Slowness});
+
+      const EntityVector &slownessDebuffs = m_entities.getEntities(EntityTags::SlownessDebuff);
+      const EntityVector &speedBoosts     = m_entities.getEntities(EntityTags::SpeedBoost);
+
+      for (auto &slownessDebuff : slownessDebuffs) {
+        slownessDebuff->destroy();
+      }
+
+      for (auto &speedBoost : speedBoosts) {
+        speedBoost->destroy();
+      }
+    }
+
+    if (tag == EntityTags::Player && otherTag == EntityTags::SpeedBoost) {
+      const Uint64 startTime = SDL_GetTicks64();
+      const Uint64 duration  = randomSpeedBoostDuration(m_randomGenerator);
+      entity->cEffects->addEffect(
+          {.startTime = startTime, .duration = duration, .type = EffectTypes::Speed});
+
+      const EntityVector &slownessDebuffs = m_entities.getEntities(EntityTags::SlownessDebuff);
+      const EntityVector &speedBoosts     = m_entities.getEntities(EntityTags::SpeedBoost);
+
+      for (const auto &slownessDebuff : slownessDebuffs) {
+        slownessDebuff->destroy();
+      }
+
+      for (const auto &speedBoost : speedBoosts) {
+        speedBoost->destroy();
+      }
+    }
+  };
+
 } // namespace CollisionHelpers::MainScene
