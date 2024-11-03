@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 
-enum EntityTags { Player, Wall, SpeedBoost, SlownessDebuff, Enemy, Default, Bullet };
+enum EntityTags { Player, Wall, SpeedBoost, SlownessDebuff, Enemy, Default, Bullet, Item };
 
 class Entity {
 private:

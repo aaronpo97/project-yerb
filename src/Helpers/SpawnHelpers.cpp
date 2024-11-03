@@ -1,4 +1,5 @@
 #include "../../includes/Helpers/SpawnHelpers.hpp"
+#include "../../includes/EntityManagement/Entity.hpp"
 #include "../../includes/Helpers/CollisionHelpers.hpp"
 #include "../../includes/Helpers/MathHelpers.hpp"
 
@@ -309,49 +310,107 @@ namespace SpawnHelpers {
     const GameConfig &gameConfig = configManager.getGameConfig();
     const Vec2       &windowSize = gameConfig.windowSize;
 
-    // Get player's center position
     Vec2 playerCenter = player->cTransform->topLeftCornerPos;
     playerCenter.x += player->cShape->rect.w / 2;
     playerCenter.y += player->cShape->rect.h / 2;
 
-    // Calculate direction vector from player to mouse
     Vec2 direction;
     direction.x = mousePosition.x - playerCenter.x;
     direction.y = mousePosition.y - playerCenter.y;
 
-    // Normalize the direction vector
     float length = MathHelpers::pythagoras(direction.x, direction.y);
     if (length > 0) {
       direction.x /= length;
       direction.y /= length;
     }
 
-    // Set bullet speed (adjust this value as needed)
     const float bulletSpeed    = 10.0f;
     Vec2        bulletVelocity = direction * bulletSpeed;
 
-    // Calculate bullet rotation angle in degrees
     float angle = MathHelpers::radiansToDegrees(atan2(direction.y, direction.x));
 
-    // Create the bullet
     std::shared_ptr<Entity> bullet = entityManager.addEntity(EntityTags::Bullet);
 
-    // Set bullet shape
     bullet->cShape =
         std::make_shared<CShape>(renderer, ShapeConfig(20, 20, SDL_Color{255, 255, 255, 255}));
-
-    // Set bullet position slightly offset from player center in the direction of travel
 
     const auto  playerHalfWidth = player->cShape->rect.w / 2;
     const float spawnOffset     = (bullet->cShape->rect.w / 2) + (playerHalfWidth + 5);
     Vec2        bulletPos;
+    // Set bullet position slightly offset from player center in the direction of travel
     bulletPos.x = playerCenter.x + (direction.x * spawnOffset) - bullet->cShape->rect.w / 2;
     bulletPos.y = playerCenter.y + (direction.y * spawnOffset) - bullet->cShape->rect.h / 2;
 
-    // Set transform with position, velocity and rotation
     bullet->cTransform = std::make_shared<CTransform>(bulletPos, bulletVelocity, angle);
+    bullet->cLifespan  = std::make_shared<CLifespan>(2000);
+  }
 
-    // Set lifespan
-    bullet->cLifespan = std::make_shared<CLifespan>(2000);
+  void spawnItem(SDL_Renderer        *renderer,
+                 const ConfigManager &configManager,
+                 std::mt19937        &randomGenerator,
+                 EntityManager       &entityManager) {
+    const GameConfig &gameConfig = configManager.getGameConfig();
+    const Vec2       &windowSize = gameConfig.windowSize;
+
+    std::uniform_int_distribution<int> randomXPos(0, windowSize.x);
+    std::uniform_int_distribution<int> randomYPos(0, windowSize.y);
+
+    const int xPos = randomXPos(randomGenerator);
+    const int yPos = randomYPos(randomGenerator);
+
+    std::shared_ptr<Entity>      item             = entityManager.addEntity(EntityTags::Item);
+    std::shared_ptr<CTransform> &entityCTransform = item->cTransform;
+    std::shared_ptr<CShape>     &entityCShape     = item->cShape;
+    std::shared_ptr<CLifespan>  &entityLifespan   = item->cLifespan;
+
+    const int       ITEM_SIZE  = 15;
+    const SDL_Color ITEM_COLOR = {.r = 255, .g = 255, .b = 0, .a = 255}; // Gold color
+
+    entityCTransform = std::make_shared<CTransform>(Vec2(xPos, yPos), Vec2(0, 0), 0);
+
+    const int ITEM_LIFESPAN = 15000;
+    entityLifespan          = std::make_shared<CLifespan>(ITEM_LIFESPAN);
+
+    entityCShape =
+        std::make_shared<CShape>(renderer, ShapeConfig(ITEM_SIZE, ITEM_SIZE, ITEM_COLOR));
+
+    bool touchesBoundary      = CollisionHelpers::detectOutOfBounds(item, windowSize).any();
+    bool touchesOtherEntities = false;
+
+    for (auto &entity : entityManager.getEntities()) {
+      if (CollisionHelpers::calculateCollisionBetweenEntities(entity, item)) {
+        touchesOtherEntities = true;
+        break;
+      }
+    }
+
+    bool      isValidSpawn       = !touchesBoundary && !touchesOtherEntities;
+    const int MAX_SPAWN_ATTEMPTS = 10;
+    int       spawnAttempt       = 1;
+
+    while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
+      const int newXPos = randomXPos(randomGenerator);
+      const int newYPos = randomYPos(randomGenerator);
+
+      item->cTransform->topLeftCornerPos = Vec2(newXPos, newYPos);
+      touchesBoundary      = CollisionHelpers::detectOutOfBounds(item, windowSize).any();
+      touchesOtherEntities = false;
+
+      for (auto &entity : entityManager.getEntities()) {
+        if (CollisionHelpers::calculateCollisionBetweenEntities(entity, item)) {
+          touchesOtherEntities = true;
+          break;
+        }
+      }
+
+      spawnAttempt += 1;
+      isValidSpawn = !touchesBoundary && !touchesOtherEntities;
+    }
+
+    if (!isValidSpawn) {
+      item->destroy();
+    }
+
+    entityManager.update();
   }
 } // namespace SpawnHelpers

@@ -250,6 +250,12 @@ void MainScene::sSpawner() {
   if (willSpawnSlownessDebuff) {
     SpawnHelpers::spawnSlownessEntity(renderer, configManager, m_randomGenerator, m_entities);
   }
+
+  // Spawns an item with an 8% chance
+  const bool willSpawnItem = randomChance(m_randomGenerator) < 8;
+  if (willSpawnItem) {
+    SpawnHelpers::spawnItem(renderer, configManager, m_randomGenerator, m_entities);
+  }
 }
 
 void MainScene::sEffects() {
