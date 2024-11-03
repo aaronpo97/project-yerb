@@ -30,6 +30,13 @@ public:
       windowSize(size), windowTitle(title), fontPath(font), spawnInterval(interval) {}
 };
 
+class ItemConfig {
+public:
+  Uint64      lifespan;
+  float       speed;
+  ShapeConfig shape;
+};
+
 class PlayerConfig {
 public:
   float       baseSpeed;

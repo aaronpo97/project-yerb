@@ -269,7 +269,6 @@ namespace SpawnHelpers {
       isValidSpawn = !touchesBoundary && !touchesOtherEntities;
     }
     if (!isValidSpawn) {
-
       slownessEntity->destroy();
     }
 
@@ -318,7 +317,7 @@ namespace SpawnHelpers {
     direction.x = mousePosition.x - playerCenter.x;
     direction.y = mousePosition.y - playerCenter.y;
 
-    float length = MathHelpers::pythagoras(direction.x, direction.y);
+    const float length = MathHelpers::pythagoras(direction.x, direction.y);
     if (length > 0) {
       direction.x /= length;
       direction.y /= length;
@@ -350,6 +349,7 @@ namespace SpawnHelpers {
                  std::mt19937        &randomGenerator,
                  EntityManager       &entityManager) {
     const GameConfig &gameConfig = configManager.getGameConfig();
+    const ItemConfig &itemConfig = configManager.getItemConfig();
     const Vec2       &windowSize = gameConfig.windowSize;
 
     std::uniform_int_distribution<int> randomXPos(0, windowSize.x);
@@ -363,16 +363,9 @@ namespace SpawnHelpers {
     std::shared_ptr<CShape>     &entityCShape     = item->cShape;
     std::shared_ptr<CLifespan>  &entityLifespan   = item->cLifespan;
 
-    const int       ITEM_SIZE  = 15;
-    const SDL_Color ITEM_COLOR = {.r = 255, .g = 255, .b = 0, .a = 255}; // Gold color
-
     entityCTransform = std::make_shared<CTransform>(Vec2(xPos, yPos), Vec2(0, 0), 0);
-
-    const int ITEM_LIFESPAN = 15000;
-    entityLifespan          = std::make_shared<CLifespan>(ITEM_LIFESPAN);
-
-    entityCShape =
-        std::make_shared<CShape>(renderer, ShapeConfig(ITEM_SIZE, ITEM_SIZE, ITEM_COLOR));
+    entityLifespan   = std::make_shared<CLifespan>(itemConfig.lifespan);
+    entityCShape     = std::make_shared<CShape>(renderer, itemConfig.shape);
 
     bool touchesBoundary      = CollisionHelpers::detectOutOfBounds(item, windowSize).any();
     bool touchesOtherEntities = false;

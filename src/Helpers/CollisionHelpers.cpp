@@ -367,6 +367,10 @@ namespace CollisionHelpers::MainScene {
       std::bitset<4> bulletCollides = detectOutOfBounds(entity, windowSize);
       Enforce::enforceBulletCollision(entity, bulletCollides.any());
     }
+    if (tag == EntityTags::Item) {
+      std::bitset<4> itemCollides = detectOutOfBounds(entity, windowSize);
+      Enforce::enforceNonPlayerBounds(entity, itemCollides, windowSize);
+    }
   };
 
   void handleEntityEntityCollision(const CollisionPair &collisionPair, const GameState &args) {
@@ -390,6 +394,7 @@ namespace CollisionHelpers::MainScene {
     const auto setScore          = args.setScore;
     auto      &m_entities        = args.entityManager;
     auto      &m_randomGenerator = args.randomGenerator;
+    auto      &decrementLives    = args.decrementLives;
 
     if (entity == otherEntity) {
       return;
@@ -425,8 +430,11 @@ namespace CollisionHelpers::MainScene {
     }
 
     if (tag == EntityTags::Player && otherTag == EntityTags::Enemy) {
-      setScore(m_score - 3);
+      setScore(m_score > 10 ? m_score - 10 : 0);
+
       otherEntity->destroy();
+
+      decrementLives();
     }
 
     if (tag == EntityTags::Player && otherTag == EntityTags::SlownessDebuff) {
@@ -463,6 +471,23 @@ namespace CollisionHelpers::MainScene {
       for (const auto &speedBoost : speedBoosts) {
         speedBoost->destroy();
       }
+    }
+
+    if (tag == EntityTags::Player && otherTag == EntityTags::Item) {
+      setScore(m_score + 60);
+      otherEntity->destroy();
+    }
+
+    if (tag == EntityTags::Item && otherTag == EntityTags::Enemy) {
+      Enforce::enforceEntityEntityCollision(entity, otherEntity);
+    }
+
+    if (tag == EntityTags::Item && otherTag == EntityTags::SpeedBoost) {
+      Enforce::enforceEntityEntityCollision(entity, otherEntity);
+    }
+
+    if (tag == EntityTags::Item && otherTag == EntityTags::SlownessDebuff) {
+      Enforce::enforceEntityEntityCollision(entity, otherEntity);
     }
   };
 

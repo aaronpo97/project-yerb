@@ -178,4 +178,45 @@ namespace MovementHelpers {
     const float BULLET_MOVEMENT_MULTIPLIER = 3.0f;
     position += velocity * (deltaTime * BULLET_MOVEMENT_MULTIPLIER * BASE_MOVEMENT_MULTIPLIER);
   }
+  void moveItems(std::shared_ptr<Entity> &entity, const float &deltaTime) {
+    if (entity == nullptr) {
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Entity is null");
+      return;
+    }
+
+    const EntityTags entityTag = entity->tag();
+
+    if (entityTag != EntityTags::Item) {
+      return;
+    }
+
+    const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
+
+    if (entityCTransform == nullptr) {
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                   "Entity with ID %zu lacks a transform component.", entity->id());
+      return;
+    }
+
+    Vec2 &position = entityCTransform->topLeftCornerPos;
+
+    // Use deltaTime to maintain consistent movement speed
+    const float ITEM_MOVEMENT_MULTIPLIER = .9f;
+    const float time                     = static_cast<float>(SDL_GetTicks64()) / 1000.0f;
+
+    const bool ENTITY_ID_ODD = entity->id() & 1;
+
+    if (ENTITY_ID_ODD) {
+      position.x +=
+          std::cos(time) * (ITEM_MOVEMENT_MULTIPLIER * deltaTime * BASE_MOVEMENT_MULTIPLIER);
+      position.y +=
+          std::sin(time) * (ITEM_MOVEMENT_MULTIPLIER * deltaTime * BASE_MOVEMENT_MULTIPLIER);
+
+    } else {
+      position.x +=
+          std::sin(time) * (ITEM_MOVEMENT_MULTIPLIER * deltaTime * BASE_MOVEMENT_MULTIPLIER);
+      position.y +=
+          std::cos(time) * (ITEM_MOVEMENT_MULTIPLIER * deltaTime * BASE_MOVEMENT_MULTIPLIER);
+    }
+  }
 } // namespace MovementHelpers

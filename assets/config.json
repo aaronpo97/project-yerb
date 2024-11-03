@@ -13,12 +13,26 @@
     "speedBoostMultiplier": 2.0,
     "slownessMultiplier": 0.5,
     "shape": {
-      "height": 80,
-      "width": 80,
+      "height": 45,
+      "width": 45,
       "color": {
-        "r": 129,
-        "g": 216,
-        "b": 208,
+        "r": 65,
+        "g": 105,
+        "b": 225,
+        "a": 255
+      }
+    }
+  },
+  "itemConfig": {
+    "lifespan": 10000,
+    "speed": 2.0,
+    "shape": {
+      "height": 25,
+      "width": 25,
+      "color": {
+        "r": 218,
+        "g": 165,
+        "b": 32,
         "a": 255
       }
     }
@@ -27,12 +41,12 @@
     "lifespan": 30000,
     "speed": 2.0,
     "shape": {
-      "height": 40,
-      "width": 40,
+      "height": 38,
+      "width": 38,
       "color": {
-        "r": 255,
-        "g": 0,
-        "b": 0,
+        "r": 220,
+        "g": 20,
+        "b": 60,
         "a": 255
       }
     }
@@ -44,9 +58,9 @@
       "height": 25,
       "width": 25,
       "color": {
-        "r": 0,
-        "g": 255,
-        "b": 0,
+        "r": 50,
+        "g": 205,
+        "b": 50,
         "a": 255
       }
     }
@@ -58,9 +72,9 @@
       "height": 25,
       "width": 25,
       "color": {
-        "r": 255,
-        "g": 20,
-        "b": 255,
+        "r": 147,
+        "g": 112,
+        "b": 219,
         "a": 255
       }
     }
