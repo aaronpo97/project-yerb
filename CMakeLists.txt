@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 FetchContent_MakeAvailable(json)
 
+
 if(NOT EMSCRIPTEN)
   FetchContent_Declare(
     SDL2
@@ -29,6 +30,26 @@ if(NOT EMSCRIPTEN)
   set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=google-*,modernize-*")
 
 endif()
+
+if(APPLE)
+  target_compile_options(SDL2 PRIVATE
+    "-Wno-deprecated-declarations"
+    "-Wno-deprecated"
+  )
+
+  target_compile_options(SDL2-static PRIVATE
+    "-Wno-deprecated-declarations"
+    "-Wno-deprecated"
+  )
+
+  set_target_properties(SDL2 PROPERTIES
+    COMPILE_FLAGS "-Wno-deprecated-declarations -Wno-deprecated"
+  )
+  set_target_properties(SDL2-static PROPERTIES
+    COMPILE_FLAGS "-Wno-deprecated-declarations -Wno-deprecated"
+  )
+endif()
+
 
 set(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
 set(OBJ_DIR "${CMAKE_BINARY_DIR}/objects")
@@ -64,6 +85,12 @@ if(EMSCRIPTEN)
   )
 else()
   target_link_libraries(${PROJECT_NAME} PRIVATE SDL2 SDL2_ttf)
+  add_custom_target(copy_assets ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_SOURCE_DIR}/assets"
+    "${CMAKE_BINARY_DIR}/build/assets"
+    COMMENT "Copying assets directory to build directory"
+  )
 endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
