@@ -13,10 +13,13 @@
 GameEngine::GameEngine() {
   if (!std::filesystem::exists("./assets")) {
     SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Assets folder not found!");
-    return;
+    cleanup();
+    throw std::runtime_error("Assets folder not found!");
   }
 
-  m_configManager = std::make_unique<ConfigManager>("./assets/config.json");
+  const std::string CONFIG_PATH = "./assets/config.json";
+
+  m_configManager = std::make_unique<ConfigManager>(CONFIG_PATH);
 
   const auto &gameConfig = m_configManager->getGameConfig();
 
@@ -26,32 +29,36 @@ GameEngine::GameEngine() {
 
   m_fontManager = std::make_unique<FontManager>(FONT_PATH);
 
+  // Create Video System
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "SDL video system is not ready to go: %s",
                  SDL_GetError());
-    return;
+    cleanup();
+    throw std::runtime_error("SDL video system is not ready to go");
   }
   SDL_LogInfo(SDL_LOG_CATEGORY_VIDEO, "SDL video system initialized successfully!");
 
+  // Create Window
   m_window =
       SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                        WINDOW_SIZE.x, WINDOW_SIZE.y, SDL_WINDOW_SHOWN);
   if (m_window == nullptr) {
-
     SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "Window could not be created: %s", SDL_GetError());
-    SDL_Quit();
-    return;
+    cleanup();
+    throw std::runtime_error("Window could not be created.");
   }
   SDL_LogInfo(SDL_LOG_CATEGORY_VIDEO, "Window created successfully!");
 
+  // Create Renderer
   m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
   if (m_renderer == nullptr) {
     SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "Renderer could not be created: %s", SDL_GetError());
-    SDL_DestroyWindow(m_window);
-    SDL_Quit();
-    return;
+    cleanup();
+    throw std::runtime_error("Renderer could not be created");
   }
   SDL_LogInfo(SDL_LOG_CATEGORY_VIDEO, "Renderer created successfully!");
+
+  // Setup Renderer
   const SDL_Color backgroundColor = {.r = 0, .g = 0, .b = 0, .a = 255};
   SDL_SetRenderDrawColor(m_renderer, backgroundColor.r, backgroundColor.g, backgroundColor.b,
                          backgroundColor.a);
@@ -59,14 +66,15 @@ GameEngine::GameEngine() {
   SDL_RenderClear(m_renderer);
   SDL_RenderPresent(m_renderer);
 
-  m_isRunning = true; // Set isRunning to true after successful initialization
+  // Initialization successful, set running flag to true and load the first scene
+  m_isRunning = true;
 
   SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "Game engine initialized successfully!");
   std::shared_ptr<Scene> menuScene = std::make_shared<MenuScene>(this);
   loadScene("Menu", menuScene);
 }
 
-GameEngine::~GameEngine() {
+void GameEngine::cleanup() {
   if (m_renderer != nullptr) {
     SDL_DestroyRenderer(m_renderer);
     m_renderer = nullptr;
@@ -82,11 +90,17 @@ GameEngine::~GameEngine() {
   SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "Game engine cleaned up successfully!");
 }
 
+GameEngine::~GameEngine() {
+  cleanup();
+}
+
 void GameEngine::update() {
   const std::shared_ptr<Scene> activeScene = m_scenes[m_currentSceneName];
-  if (activeScene != nullptr) {
-    m_scenes[m_currentSceneName]->update();
+  if (activeScene == nullptr) {
+    return;
   }
+
+  m_scenes[m_currentSceneName]->update();
 }
 
 SDL_Renderer *GameEngine::getRenderer() {
@@ -125,6 +139,7 @@ void GameEngine::loadScene(const std::string &sceneName, const std::shared_ptr<S
 ConfigManager &GameEngine::getConfigManager() {
   if (!m_configManager) {
     SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "ConfigManager not initialized");
+    throw std::runtime_error("ConfigManager not initialized");
   }
 
   return *m_configManager;
@@ -133,6 +148,7 @@ ConfigManager &GameEngine::getConfigManager() {
 FontManager &GameEngine::getFontManager() {
   if (!m_fontManager) {
     SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "FontManager not initialized");
+    throw std::runtime_error("FontManager not initialized");
   }
   return *m_fontManager;
 }
