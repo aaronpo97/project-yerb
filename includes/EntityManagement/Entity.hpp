@@ -29,4 +29,5 @@ public:
   EntityTags tag() const;
   size_t     id() const;
   void       destroy();
+  Vec2       getCenterPos() const;
 };

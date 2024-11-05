@@ -17,25 +17,22 @@ protected:
   std::unique_ptr<ConfigManager>                m_configManager;
   std::unique_ptr<FontManager>                  m_fontManager;
 
-  void update();
+  void        update();
+  void        quit();
+  static void mainLoop(void *arg);
+  void        cleanup();
+  void        sUserInput();
 
 public:
   GameEngine();
   ~GameEngine();
 
-  SDL_Renderer *getRenderer();
-  SDL_Window   *getWindow();
-  bool          isRunning() const;
-
+  SDL_Renderer  *getRenderer();
+  SDL_Window    *getWindow();
+  bool           isRunning() const;
+  void           loadScene(const std::string &name, const std::shared_ptr<Scene> &scene);
   ConfigManager &getConfigManager();
   FontManager   &getFontManager();
 
   void run();
-  void quit();
-
-  void loadScene(const std::string &name, const std::shared_ptr<Scene> &scene);
-
-  static void mainLoop(void *arg);
-
-  void sUserInput();
 };

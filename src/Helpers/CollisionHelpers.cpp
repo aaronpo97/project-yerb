@@ -2,6 +2,7 @@
 #include "../../includes/Helpers/CollisionHelpers.hpp"
 #include "../../includes/EntityManagement/Entity.hpp"
 #include "../../includes/GameScenes/MainScene.hpp"
+#include "../../includes/Helpers/EntityHelpers.hpp"
 
 #include <bitset>
 #include <iostream>
@@ -443,15 +444,20 @@ namespace CollisionHelpers::MainScene {
       entity->cEffects->addEffect(
           {.startTime = startTime, .duration = duration, .type = EffectTypes::Slowness});
 
+      EntityVector        effectsToCheck;
       const EntityVector &slownessDebuffs = m_entities.getEntities(EntityTags::SlownessDebuff);
       const EntityVector &speedBoosts     = m_entities.getEntities(EntityTags::SpeedBoost);
 
-      for (auto &slownessDebuff : slownessDebuffs) {
-        slownessDebuff->destroy();
-      }
+      effectsToCheck.insert(effectsToCheck.end(), slownessDebuffs.begin(),
+                            slownessDebuffs.end());
+      effectsToCheck.insert(effectsToCheck.end(), speedBoosts.begin(), speedBoosts.end());
 
-      for (auto &speedBoost : speedBoosts) {
-        speedBoost->destroy();
+      const float        REMOVAL_RADIUS = 150.0f;
+      const EntityVector entitiesToRemove =
+          EntityHelpers::getEntitiesInRadius(entity, effectsToCheck, REMOVAL_RADIUS);
+
+      for (const auto &entityToRemove : entitiesToRemove) {
+        entityToRemove->destroy();
       }
     }
 
@@ -464,12 +470,16 @@ namespace CollisionHelpers::MainScene {
       const EntityVector &slownessDebuffs = m_entities.getEntities(EntityTags::SlownessDebuff);
       const EntityVector &speedBoosts     = m_entities.getEntities(EntityTags::SpeedBoost);
 
-      for (const auto &slownessDebuff : slownessDebuffs) {
-        slownessDebuff->destroy();
+      const float        REMOVAL_RADIUS = 150.0f;
+      const EntityVector entitiesToRemove =
+          EntityHelpers::getEntitiesInRadius(entity, speedBoosts, REMOVAL_RADIUS);
+
+      for (const auto &entityToRemove : entitiesToRemove) {
+        entityToRemove->destroy();
       }
 
-      for (const auto &speedBoost : speedBoosts) {
-        speedBoost->destroy();
+      for (const auto &slowDebuff : slownessDebuffs) {
+        slowDebuff->destroy();
       }
     }
 

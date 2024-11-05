@@ -235,14 +235,14 @@ void MainScene::sSpawner() {
   m_lastEnemySpawnTime = ticks;
 
   struct SpawnConfig {
-    const int ENEMY_CHANCE       = 85;
-    const int SPEED_BOOST_CHANCE = 15;
-    const int SLOWNESS_CHANCE    = 30;
-    const int ITEM_CHANCE        = 20;
+    const int ENEMY_CHANCE_PERCENTAGE       = 85;
+    const int SPEED_BOOST_CHANCE_PERCENTAGE = 15;
+    const int SLOWNESS_CHANCE_PERCENTAGE    = 30;
+    const int ITEM_CHANCE_PERCENTAGE        = 20;
   } spawnConfig;
 
-  const bool hasEffects = m_player->cEffects->hasEffect(EffectTypes::Speed) ||
-                          m_player->cEffects->hasEffect(EffectTypes::Slowness);
+  const bool hasSpeedBasedEffect = m_player->cEffects->hasEffect(EffectTypes::Speed) ||
+                                   m_player->cEffects->hasEffect(EffectTypes::Slowness);
 
   auto shouldSpawn = [this](int chance) -> bool {
     std::uniform_int_distribution<int> distribution(0, 100);
@@ -254,10 +254,12 @@ void MainScene::sSpawner() {
     bool speedBoost;
     bool slowness;
     bool item;
-  } decisions = {.enemy      = shouldSpawn(spawnConfig.ENEMY_CHANCE),
-                 .speedBoost = !hasEffects && shouldSpawn(spawnConfig.SPEED_BOOST_CHANCE),
-                 .slowness   = !hasEffects && shouldSpawn(spawnConfig.SLOWNESS_CHANCE),
-                 .item       = shouldSpawn(spawnConfig.ITEM_CHANCE)};
+  } decisions = {.enemy      = shouldSpawn(spawnConfig.ENEMY_CHANCE_PERCENTAGE),
+                 .speedBoost = !hasSpeedBasedEffect &&
+                               shouldSpawn(spawnConfig.SPEED_BOOST_CHANCE_PERCENTAGE),
+                 .slowness = !hasSpeedBasedEffect &&
+                             shouldSpawn(spawnConfig.SLOWNESS_CHANCE_PERCENTAGE),
+                 .item = shouldSpawn(spawnConfig.ITEM_CHANCE_PERCENTAGE)};
 
   if (decisions.enemy) {
     SpawnHelpers::spawnEnemy(renderer, configManager, m_randomGenerator, m_entities);
