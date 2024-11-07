@@ -247,8 +247,8 @@ void MainScene::sSpawner() {
 
   std::uniform_int_distribution<unsigned int> distribution(0, 100);
 
-  auto &randomGenerator      = m_randomGenerator;
-  auto  meetsSpawnPercentage = [&randomGenerator, &distribution](unsigned int chance) -> bool {
+  std::mt19937 &randomGenerator = m_randomGenerator;
+  auto meetsSpawnPercentage = [&randomGenerator, &distribution](unsigned int chance) -> bool {
     return distribution(randomGenerator) < chance;
   };
 
@@ -315,6 +315,7 @@ void MainScene::sTimer() {
 
   m_timeRemaining -= elapsedTime;
 }
+
 void MainScene::sLifespan() {
   for (auto &entity : m_entities.getEntities()) {
     const auto tag = entity->tag();
