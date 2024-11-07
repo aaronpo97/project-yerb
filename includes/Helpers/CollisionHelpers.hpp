@@ -38,6 +38,7 @@ namespace CollisionHelpers::MainScene {
     const int                       score;
     const std::function<void(int)> &setScore;
     const std::function<void()>     decrementLives;
+    const Vec2                      windowSize;
   };
 
   void handleEntityBounds(const std::shared_ptr<Entity> &entity, const Vec2 &windowSize);

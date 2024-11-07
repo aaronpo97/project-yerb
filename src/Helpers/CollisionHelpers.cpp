@@ -391,11 +391,12 @@ namespace CollisionHelpers::MainScene {
     std::uniform_int_distribution<Uint64> randomSpeedBoostDuration(minSpeedBoostDuration,
                                                                    maxSpeedBoostDuration);
 
-    const int  m_score           = args.score;
-    const auto setScore          = args.setScore;
-    auto      &m_entities        = args.entityManager;
-    auto      &m_randomGenerator = args.randomGenerator;
-    auto      &decrementLives    = args.decrementLives;
+    const int                m_score           = args.score;
+    std::function<void(int)> setScore          = args.setScore;
+    EntityManager           &m_entities        = args.entityManager;
+    std::mt19937            &m_randomGenerator = args.randomGenerator;
+    std::function<void()>    decrementLives    = args.decrementLives;
+    const Vec2              &windowSize        = args.windowSize;
 
     if (entity == otherEntity) {
       return;
@@ -432,10 +433,19 @@ namespace CollisionHelpers::MainScene {
 
     if (tag == EntityTags::Player && otherTag == EntityTags::Enemy) {
       setScore(m_score > 10 ? m_score - 10 : 0);
-
       otherEntity->destroy();
-
       decrementLives();
+
+      const std::shared_ptr<CTransform> &cTransform = entity->cTransform;
+      cTransform->topLeftCornerPos                  = {windowSize.x / 2, windowSize.y / 2};
+
+      const float        REMOVAL_RADIUS   = 150.0f;
+      const EntityVector entitiesToRemove = EntityHelpers::getEntitiesInRadius(
+          entity, m_entities.getEntities(EntityTags::Enemy), REMOVAL_RADIUS);
+
+      for (const std::shared_ptr<Entity> &entityToRemove : entitiesToRemove) {
+        entityToRemove->destroy();
+      }
     }
 
     if (tag == EntityTags::Player && otherTag == EntityTags::SlownessDebuff) {
@@ -478,6 +488,11 @@ namespace CollisionHelpers::MainScene {
         entityToRemove->destroy();
       }
 
+      // set the lifespan of the speed boost to 10% of previous value
+      const float MULTIPLIER = 0.1f;
+      for (const auto &speedBoost : speedBoosts) {
+        speedBoost->cLifespan->lifespan *= MULTIPLIER;
+      }
       for (const auto &slowDebuff : slownessDebuffs) {
         slowDebuff->destroy();
       }

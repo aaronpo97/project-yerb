@@ -32,9 +32,10 @@ public:
 
 class ItemConfig {
 public:
-  Uint64      lifespan;
-  float       speed;
-  ShapeConfig shape;
+  unsigned int spawnPercentage;
+  Uint64       lifespan;
+  float        speed;
+  ShapeConfig  shape;
 };
 
 class PlayerConfig {
@@ -51,9 +52,10 @@ public:
 
 class EnemyConfig {
 public:
-  Uint64      lifespan;
-  float       speed;
-  ShapeConfig shape;
+  unsigned int spawnPercentage;
+  Uint64       lifespan;
+  float        speed;
+  ShapeConfig  shape;
 
   // Constructor
   EnemyConfig(float s = 3.0f, ShapeConfig sh = ShapeConfig()) :
@@ -62,14 +64,16 @@ public:
 
 class SpeedBoostEffectConfig {
 public:
-  Uint64      lifespan;
-  float       speed;
-  ShapeConfig shape;
+  unsigned int spawnPercentage;
+  Uint64       lifespan;
+  float        speed;
+  ShapeConfig  shape;
 };
 
 class SlownessEffectConfig {
 public:
-  Uint64      lifespan;
-  float       speed;
-  ShapeConfig shape;
+  unsigned int spawnPercentage;
+  Uint64       lifespan;
+  float        speed;
+  ShapeConfig  shape;
 };

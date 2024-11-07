@@ -189,15 +189,17 @@ void MainScene::sCollision() {
   const ConfigManager &configManager = m_gameEngine->getConfigManager();
   const Vec2          &windowSize    = configManager.getGameConfig().windowSize;
 
+  const GameState gameState = {.entityManager   = m_entities,
+                               .randomGenerator = m_randomGenerator,
+                               .score           = m_score,
+                               .setScore        = [this](int score) { setScore(score); },
+                               .decrementLives  = [this]() { decrementLives(); },
+                               .windowSize      = windowSize};
+
   for (auto &entity : m_entities.getEntities()) {
     handleEntityBounds(entity, windowSize);
     for (auto &otherEntity : m_entities.getEntities()) {
       const CollisionPair collisionPair = {.entityA = entity, .entityB = otherEntity};
-      const GameState     gameState     = {.entityManager   = m_entities,
-                                           .randomGenerator = m_randomGenerator,
-                                           .score           = m_score,
-                                           .setScore = [this](int score) { setScore(score); },
-                                           .decrementLives = [this]() { decrementLives(); }};
       handleEntityEntityCollision(collisionPair, gameState);
     };
   }
@@ -224,29 +226,30 @@ void MainScene::sMovement() {
 }
 
 void MainScene::sSpawner() {
-  ConfigManager configManager  = m_gameEngine->getConfigManager();
-  SDL_Renderer *renderer       = m_gameEngine->getRenderer();
-  const Uint64  ticks          = SDL_GetTicks64();
-  const Uint64  SPAWN_INTERVAL = configManager.getGameConfig().spawnInterval;
+  ConfigManager &configManager  = m_gameEngine->getConfigManager();
+  SDL_Renderer  *renderer       = m_gameEngine->getRenderer();
+  const Uint64   ticks          = SDL_GetTicks64();
+  const Uint64   SPAWN_INTERVAL = configManager.getGameConfig().spawnInterval;
 
   if (ticks - m_lastEnemySpawnTime < SPAWN_INTERVAL) {
     return;
   }
   m_lastEnemySpawnTime = ticks;
 
-  struct SpawnConfig {
-    const int ENEMY_CHANCE_PERCENTAGE       = 85;
-    const int SPEED_BOOST_CHANCE_PERCENTAGE = 15;
-    const int SLOWNESS_CHANCE_PERCENTAGE    = 30;
-    const int ITEM_CHANCE_PERCENTAGE        = 20;
-  } spawnConfig;
+  const EnemyConfig            &enemyConfig = configManager.getEnemyConfig();
+  const SpeedBoostEffectConfig &speedBoostEffectConfig =
+      configManager.getSpeedBoostEffectConfig();
+  const SlownessEffectConfig &slownessEffectConfig = configManager.getSlownessEffectConfig();
+  const ItemConfig           &itemConfig           = configManager.getItemConfig();
 
   const bool hasSpeedBasedEffect = m_player->cEffects->hasEffect(EffectTypes::Speed) ||
                                    m_player->cEffects->hasEffect(EffectTypes::Slowness);
 
-  auto shouldSpawn = [this](int chance) -> bool {
-    std::uniform_int_distribution<int> distribution(0, 100);
-    return distribution(m_randomGenerator) < chance;
+  std::uniform_int_distribution<unsigned int> distribution(0, 100);
+
+  auto &randomGenerator      = m_randomGenerator;
+  auto  meetsSpawnPercentage = [&randomGenerator, &distribution](unsigned int chance) -> bool {
+    return distribution(randomGenerator) < chance;
   };
 
   struct SpawnDecisions {
@@ -254,12 +257,12 @@ void MainScene::sSpawner() {
     bool speedBoost;
     bool slowness;
     bool item;
-  } decisions = {.enemy      = shouldSpawn(spawnConfig.ENEMY_CHANCE_PERCENTAGE),
+  } decisions = {.enemy      = meetsSpawnPercentage(enemyConfig.spawnPercentage),
                  .speedBoost = !hasSpeedBasedEffect &&
-                               shouldSpawn(spawnConfig.SPEED_BOOST_CHANCE_PERCENTAGE),
+                               meetsSpawnPercentage(speedBoostEffectConfig.spawnPercentage),
                  .slowness = !hasSpeedBasedEffect &&
-                             shouldSpawn(spawnConfig.SLOWNESS_CHANCE_PERCENTAGE),
-                 .item = shouldSpawn(spawnConfig.ITEM_CHANCE_PERCENTAGE)};
+                             meetsSpawnPercentage(slownessEffectConfig.spawnPercentage),
+                 .item = meetsSpawnPercentage(itemConfig.spawnPercentage)};
 
   if (decisions.enemy) {
     SpawnHelpers::spawnEnemy(renderer, configManager, m_randomGenerator, m_entities);
