@@ -1,9 +1,19 @@
 #pragma once
 
 #include "./Config.hpp"
+#include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>
-using json = nlohmann::json;
+#include <stdexcept>
+
+using json   = nlohmann::json;
+namespace fs = std::filesystem;
+
+class ConfigurationError : public std::runtime_error {
+public:
+  explicit ConfigurationError(const std::string &message) :
+      std::runtime_error(message) {}
+};
 
 class ConfigManager {
 private:
@@ -16,111 +26,172 @@ private:
   json                   m_json;
   std::string            m_configPath;
 
+  template <typename T>
+  T getJsonValue(const json &j, const std::string &key, const std::string &context) const {
+    try {
+      return j.at(key).get<T>();
+    } catch (const json::exception &e) {
+      throw ConfigurationError("Error parsing " + context + ": " + key + " - " + e.what());
+    }
+  }
+
+  SDL_Color parseColor(const json &colorJson, const std::string &context) {
+    return SDL_Color{static_cast<Uint8>(getJsonValue<int>(colorJson, "r", context)),
+                     static_cast<Uint8>(getJsonValue<int>(colorJson, "g", context)),
+                     static_cast<Uint8>(getJsonValue<int>(colorJson, "b", context)),
+                     static_cast<Uint8>(getJsonValue<int>(colorJson, "a", context))};
+  }
+
+  ShapeConfig parseShapeConfig(const json &shapeJson, const std::string &context) {
+    return ShapeConfig{getJsonValue<float>(shapeJson, "height", context),
+                       getJsonValue<float>(shapeJson, "width", context),
+                       parseColor(shapeJson["color"], context + ".color")};
+  }
+
   void parseGameConfig() {
-    m_gameConfig.windowSize    = Vec2(m_json["gameConfig"]["windowSize"]["width"],
-                                      m_json["gameConfig"]["windowSize"]["height"]);
-    m_gameConfig.windowTitle   = m_json["gameConfig"]["windowTitle"];
-    m_gameConfig.fontPath      = m_json["gameConfig"]["fontPath"];
-    m_gameConfig.spawnInterval = m_json["gameConfig"]["spawnInterval"];
+    const auto &config   = m_json["gameConfig"];
+    const auto &sizeJson = config["windowSize"];
+
+    m_gameConfig.windowSize =
+        Vec2(getJsonValue<float>(sizeJson, "width", "gameConfig.windowSize"),
+             getJsonValue<float>(sizeJson, "height", "gameConfig.windowSize"));
+
+    m_gameConfig.windowTitle = getJsonValue<std::string>(config, "windowTitle", "gameConfig");
+    m_gameConfig.fontPath    = getJsonValue<std::string>(config, "fontPath", "gameConfig");
+    m_gameConfig.spawnInterval = getJsonValue<Uint64>(config, "spawnInterval", "gameConfig");
+
+    if (!fs::exists(m_gameConfig.fontPath)) {
+      throw ConfigurationError("Font file not found: " + m_gameConfig.fontPath);
+    }
   }
 
   void parseItemConfig() {
-    m_itemConfig.lifespan     = m_json["itemConfig"]["lifespan"];
-    m_itemConfig.speed        = m_json["itemConfig"]["speed"];
-    const SDL_Color itemColor = SDL_Color{m_json["itemConfig"]["shape"]["color"]["r"],
-                                          m_json["itemConfig"]["shape"]["color"]["g"],
-                                          m_json["itemConfig"]["shape"]["color"]["b"],
-                                          m_json["itemConfig"]["shape"]["color"]["a"]};
-    m_itemConfig.shape        = ShapeConfig{m_json["itemConfig"]["shape"]["height"],
-                                     m_json["itemConfig"]["shape"]["width"], itemColor};
-  };
+    const auto &config = m_json["itemConfig"];
+
+    m_itemConfig.lifespan = getJsonValue<Uint64>(config, "lifespan", "itemConfig");
+    m_itemConfig.speed    = getJsonValue<float>(config, "speed", "itemConfig");
+    m_itemConfig.spawnPercentage =
+        getJsonValue<unsigned int>(config, "spawnPercentage", "itemConfig");
+    m_itemConfig.shape = parseShapeConfig(config["shape"], "itemConfig.shape");
+
+    if (m_itemConfig.spawnPercentage > 100) {
+      throw ConfigurationError("Item spawn percentage must be between 0 and 100");
+    }
+  }
 
   void parsePlayerConfig() {
-    m_playerConfig.baseSpeed            = m_json["playerConfig"]["baseSpeed"];
-    m_playerConfig.speedBoostMultiplier = m_json["playerConfig"]["speedBoostMultiplier"];
-    m_playerConfig.slownessMultiplier   = m_json["playerConfig"]["slownessMultiplier"];
-    const SDL_Color playerColor = SDL_Color{m_json["playerConfig"]["shape"]["color"]["r"],
-                                            m_json["playerConfig"]["shape"]["color"]["g"],
-                                            m_json["playerConfig"]["shape"]["color"]["b"],
-                                            m_json["playerConfig"]["shape"]["color"]["a"]};
-    m_playerConfig.shape        = ShapeConfig{m_json["playerConfig"]["shape"]["height"],
-                                       m_json["playerConfig"]["shape"]["width"], playerColor};
+    const auto &config = m_json["playerConfig"];
+
+    m_playerConfig.baseSpeed = getJsonValue<float>(config, "baseSpeed", "playerConfig");
+    m_playerConfig.speedBoostMultiplier =
+        getJsonValue<float>(config, "speedBoostMultiplier", "playerConfig");
+    m_playerConfig.slownessMultiplier =
+        getJsonValue<float>(config, "slownessMultiplier", "playerConfig");
+    m_playerConfig.shape = parseShapeConfig(config["shape"], "playerConfig.shape");
+
+    if (m_playerConfig.speedBoostMultiplier <= 0 || m_playerConfig.slownessMultiplier <= 0) {
+      throw ConfigurationError("Player speed multipliers must be positive");
+    }
   }
 
   void parseEnemyConfig() {
-    m_enemyConfig.speed           = m_json["enemyConfig"]["speed"];
-    m_enemyConfig.lifespan        = m_json["enemyConfig"]["lifespan"];
-    const SDL_Color enemyColor    = SDL_Color{m_json["enemyConfig"]["shape"]["color"]["r"],
-                                           m_json["enemyConfig"]["shape"]["color"]["g"],
-                                           m_json["enemyConfig"]["shape"]["color"]["b"],
-                                           m_json["enemyConfig"]["shape"]["color"]["a"]};
-    m_enemyConfig.shape           = ShapeConfig{m_json["enemyConfig"]["shape"]["height"],
-                                      m_json["enemyConfig"]["shape"]["width"], enemyColor};
-    m_enemyConfig.spawnPercentage = m_json["enemyConfig"]["spawnPercentage"];
+    const auto &config = m_json["enemyConfig"];
+
+    m_enemyConfig.speed    = getJsonValue<float>(config, "speed", "enemyConfig");
+    m_enemyConfig.lifespan = getJsonValue<Uint64>(config, "lifespan", "enemyConfig");
+    m_enemyConfig.spawnPercentage =
+        getJsonValue<unsigned int>(config, "spawnPercentage", "enemyConfig");
+    m_enemyConfig.shape = parseShapeConfig(config["shape"], "enemyConfig.shape");
+
+    if (m_enemyConfig.spawnPercentage > 100) {
+      throw ConfigurationError("Enemy spawn percentage must be between 0 and 100");
+    }
   }
 
   void parseSpeedBoostEffectConfig() {
-    m_speedBoostEffectConfig.speed    = m_json["speedBoostEffectConfig"]["speed"];
-    m_speedBoostEffectConfig.lifespan = m_json["speedBoostEffectConfig"]["lifespan"];
-    const SDL_Color speedBoostColor =
-        SDL_Color{m_json["speedBoostEffectConfig"]["shape"]["color"]["r"],
-                  m_json["speedBoostEffectConfig"]["shape"]["color"]["g"],
-                  m_json["speedBoostEffectConfig"]["shape"]["color"]["b"],
-                  m_json["speedBoostEffectConfig"]["shape"]["color"]["a"]};
-    m_speedBoostEffectConfig.shape =
-        ShapeConfig{m_json["speedBoostEffectConfig"]["shape"]["height"],
-                    m_json["speedBoostEffectConfig"]["shape"]["width"], speedBoostColor};
+    const auto &config = m_json["speedBoostEffectConfig"];
+
+    m_speedBoostEffectConfig.speed =
+        getJsonValue<float>(config, "speed", "speedBoostEffectConfig");
+    m_speedBoostEffectConfig.lifespan =
+        getJsonValue<Uint64>(config, "lifespan", "speedBoostEffectConfig");
     m_speedBoostEffectConfig.spawnPercentage =
-        m_json["speedBoostEffectConfig"]["spawnPercentage"];
+        getJsonValue<unsigned int>(config, "spawnPercentage", "speedBoostEffectConfig");
+    m_speedBoostEffectConfig.shape =
+        parseShapeConfig(config["shape"], "speedBoostEffectConfig.shape");
+
+    if (m_speedBoostEffectConfig.spawnPercentage > 100) {
+      throw ConfigurationError("SpeedBoost spawn percentage must be between 0 and 100");
+    }
   }
 
   void parseSlownessEffectConfig() {
-    m_slownessEffectConfig.speed    = m_json["slownessEffectConfig"]["speed"];
-    m_slownessEffectConfig.lifespan = m_json["slownessEffectConfig"]["lifespan"];
-    const SDL_Color slownessColor =
-        SDL_Color{m_json["slownessEffectConfig"]["shape"]["color"]["r"],
-                  m_json["slownessEffectConfig"]["shape"]["color"]["g"],
-                  m_json["slownessEffectConfig"]["shape"]["color"]["b"],
-                  m_json["slownessEffectConfig"]["shape"]["color"]["a"]};
+    const auto &config = m_json["slownessEffectConfig"];
+
+    m_slownessEffectConfig.speed =
+        getJsonValue<float>(config, "speed", "slownessEffectConfig");
+    m_slownessEffectConfig.lifespan =
+        getJsonValue<Uint64>(config, "lifespan", "slownessEffectConfig");
+    m_slownessEffectConfig.spawnPercentage =
+        getJsonValue<unsigned int>(config, "spawnPercentage", "slownessEffectConfig");
     m_slownessEffectConfig.shape =
-        ShapeConfig{m_json["slownessEffectConfig"]["shape"]["height"],
-                    m_json["slownessEffectConfig"]["shape"]["width"], slownessColor};
-    m_slownessEffectConfig.spawnPercentage = m_json["slownessEffectConfig"]["spawnPercentage"];
+        parseShapeConfig(config["shape"], "slownessEffectConfig.shape");
+
+    if (m_slownessEffectConfig.spawnPercentage > 100) {
+      throw ConfigurationError("Slowness spawn percentage must be between 0 and 100");
+    }
   }
 
   void parseConfig() {
-    parseGameConfig();
-    parsePlayerConfig();
-    parseEnemyConfig();
-    parseItemConfig();
-    parseSpeedBoostEffectConfig();
-    parseSlownessEffectConfig();
+    try {
+      parseGameConfig();
+      parsePlayerConfig();
+      parseEnemyConfig();
+      parseItemConfig();
+      parseSpeedBoostEffectConfig();
+      parseSlownessEffectConfig();
+    } catch (const json::exception &e) {
+      throw ConfigurationError("JSON parsing error: " + std::string(e.what()));
+    }
   }
 
   void loadConfig() {
+    if (!fs::exists(m_configPath)) {
+      throw ConfigurationError("Config file not found: " + m_configPath);
+    }
+
     std::ifstream configFile(m_configPath);
     if (!configFile.is_open()) {
-      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Could not open config file");
-
-      return;
+      throw ConfigurationError("Failed to open config file: " + m_configPath);
     }
-    configFile >> m_json;
+
+    try {
+      configFile >> m_json;
+    } catch (const json::parse_error &e) {
+      throw ConfigurationError("JSON parse error: " + std::string(e.what()));
+    }
+
     parseConfig();
     configFile.close();
   }
 
 public:
-  ConfigManager(std::string configPath = "./assets/config.json") :
-      m_configPath(configPath) {
-    SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "ConfigManager created with path: %s",
-                configPath.c_str());
-    loadConfig();
+  explicit ConfigManager(std::string configPath = "./assets/config.json") :
+      m_configPath(std::move(configPath)) {
+    try {
+      loadConfig();
+      SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "ConfigManager successfully loaded: %s",
+                  m_configPath.c_str());
+    } catch (const ConfigurationError &e) {
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Configuration error: %s", e.what());
+      std::cerr << e.what() << std::endl;
+      throw e;
+    }
   }
 
   const GameConfig &getGameConfig() const {
     return m_gameConfig;
   }
-
   const ItemConfig &getItemConfig() const {
     return m_itemConfig;
   }
@@ -136,28 +207,54 @@ public:
   const SlownessEffectConfig &getSlownessEffectConfig() const {
     return m_slownessEffectConfig;
   }
+
   void updatePlayerShape(const ShapeConfig &shape) {
     m_playerConfig.shape = shape;
   }
+
   void updatePlayerSpeed(const float speed) {
+    if (speed <= 0) {
+      throw ConfigurationError("Player speed must be positive");
+    }
     m_playerConfig.baseSpeed = speed;
   }
+
   void updateEnemyShape(const ShapeConfig &shape) {
     m_enemyConfig.shape = shape;
   }
+
   void updateEnemySpeed(const float speed) {
+    if (speed <= 0) {
+      throw ConfigurationError("Enemy speed must be positive");
+    }
     m_enemyConfig.speed = speed;
   }
+
   void updateGameWindowSize(const Vec2 &size) {
+    if (size.x <= 0 || size.y <= 0) {
+      throw ConfigurationError("Window dimensions must be positive");
+    }
     m_gameConfig.windowSize = size;
   }
+
   void updateGameWindowTitle(const std::string &title) {
+    if (title.empty()) {
+      throw ConfigurationError("Window title cannot be empty");
+    }
     m_gameConfig.windowTitle = title;
   }
+
   void updateSpeedBoostEffectSpeed(const float speed) {
+    if (speed <= 0) {
+      throw ConfigurationError("Speed boost effect speed must be positive");
+    }
     m_speedBoostEffectConfig.speed = speed;
   }
+
   void updateSlownessEffectSpeed(const float speed) {
+    if (speed <= 0) {
+      throw ConfigurationError("Slowness effect speed must be positive");
+    }
     m_slownessEffectConfig.speed = speed;
   }
 };
