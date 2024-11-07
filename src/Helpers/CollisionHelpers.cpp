@@ -431,6 +431,13 @@ namespace CollisionHelpers::MainScene {
       entity->destroy();
     }
 
+    if (tag == EntityTags::Bullet &&
+        (otherTag == EntityTags::SlownessDebuff || otherTag == EntityTags::SpeedBoost ||
+         otherTag == EntityTags::Item)) {
+      otherEntity->destroy();
+      entity->destroy();
+    }
+
     if (tag == EntityTags::Player && otherTag == EntityTags::Enemy) {
       setScore(m_score > 10 ? m_score - 10 : 0);
       otherEntity->destroy();
