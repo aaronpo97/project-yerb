@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 
-enum EntityTags { Player, Wall, SpeedBoost, SlownessDebuff, Enemy, Default, Bullet };
+enum EntityTags { Player, Wall, SpeedBoost, SlownessDebuff, Enemy, Default, Bullet, Item };
 
 class Entity {
 private:
@@ -29,4 +29,5 @@ public:
   EntityTags tag() const;
   size_t     id() const;
   void       destroy();
+  Vec2       getCenterPos() const;
 };

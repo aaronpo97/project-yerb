@@ -19,20 +19,19 @@ public:
 
 class CShape {
 private:
-  // Renderer is only used to draw the shape and should not be directly modified
   SDL_Renderer *renderer;
 
 public:
   SDL_Rect  rect;
   SDL_Color color;
 
-  // Inject the renderer dependency
   CShape(SDL_Renderer *renderer, ShapeConfig config) :
       renderer(renderer) {
 
     if (renderer == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
                    "CShape entity initialization failed: Renderer is null.");
+      throw std::runtime_error("CShape entity initialization failed: Renderer is null.");
     }
 
     rect.h = config.height;
@@ -61,12 +60,13 @@ public:
   Uint64 lifespan;
 
   CLifespan() :
-      birthTime(SDL_GetTicks()), lifespan(0) {}
+      birthTime(SDL_GetTicks64()), lifespan(0) {}
   CLifespan(Uint64 lifespan) :
-      birthTime(SDL_GetTicks()), lifespan(lifespan) {}
+      birthTime(SDL_GetTicks64()), lifespan(lifespan) {}
 };
 
 enum EffectTypes { Speed, Slowness };
+
 struct Effect {
   Uint64      startTime;
   Uint64      duration;
@@ -79,31 +79,10 @@ class CEffects {
 public:
   CEffects() {}
   void addEffect(const Effect &effect) {
-
     // do not add the effect if it already exists
     for (const auto &existingEffect : effects) {
       if (existingEffect.type == effect.type) {
         return;
-      }
-    }
-
-    std::string effectType;
-    std::string effectEmoji;
-    switch (effect.type) {
-      case EffectTypes::Speed: {
-        effectType  = "Speed";
-        effectEmoji = "🚀";
-        break;
-      }
-      case EffectTypes::Slowness: {
-        effectType  = "Slowness";
-        effectEmoji = "🐢";
-        break;
-      }
-      default: {
-        effectType  = "Unknown";
-        effectEmoji = "❓";
-        break;
       }
     }
 

@@ -16,8 +16,9 @@ private:
   float                   m_deltaTime = 0;
   bool                    m_paused    = false;
   int                     m_score     = 0;
+  int                     m_lives     = 5;
   std::shared_ptr<Entity> m_player;
-  Uint64                  m_timeRemaining = 60 * 1000; // 60 seconds
+  Uint64                  m_timeRemaining = 2.5 * 60 * 1000;
   bool                    m_gameOver      = false;
   std::random_device      m_rd;
   std::mt19937            m_randomGenerator = std::mt19937(m_rd());
@@ -40,6 +41,7 @@ public:
 
   int  getScore() const;
   void setScore(const int score);
+  void decrementLives();
 
   void setGameOver();
 };

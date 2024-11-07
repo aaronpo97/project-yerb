@@ -126,19 +126,25 @@ void MainScene::renderText() {
   const Vec2        scorePos   = {10, 10};
   TextHelpers::renderLineOfText(renderer, fontMd, scoreText, scoreColor, scorePos);
 
+  const SDL_Color   livesColor = {255, 255, 255, 255};
+  const std::string livesText  = "Lives: " + std::to_string(m_lives);
+  const Vec2        livesPos   = {10, 40};
+  TextHelpers::renderLineOfText(renderer, fontMd, livesText, livesColor, livesPos);
+
   const Uint64      timeRemaining = m_timeRemaining;
   const Uint64      minutes       = timeRemaining / 60000;
   const Uint64      seconds       = (timeRemaining % 60000) / 1000;
   const SDL_Color   timeColor     = {255, 255, 255, 255};
   const std::string timeText      = "Time: " + std::to_string(minutes) + ":" +
                                (seconds < 10 ? "0" : "") + std::to_string(seconds);
-  const Vec2 timePos = {10, 40};
+  const Vec2 timePos = {10, 70};
+
   TextHelpers::renderLineOfText(renderer, fontMd, timeText, timeColor, timePos);
 
   if (m_player->cEffects->hasEffect(EffectTypes::Speed)) {
     const SDL_Color   speedBoostColor = {0, 255, 0, 255};
     const std::string speedBoostText  = "Speed Boost Active!";
-    const Vec2        speedBoostPos   = {10, 90};
+    const Vec2        speedBoostPos   = {10, 100};
     TextHelpers::renderLineOfText(renderer, fontSm, speedBoostText, speedBoostColor,
                                   speedBoostPos);
   };
@@ -146,7 +152,7 @@ void MainScene::renderText() {
   if (m_player->cEffects->hasEffect(EffectTypes::Slowness)) {
     const SDL_Color   slownessColor = {255, 0, 0, 255};
     const std::string slownessText  = "Slowness Active!";
-    const Vec2        slownessPos   = {10, 90};
+    const Vec2        slownessPos   = {10, 100};
     TextHelpers::renderLineOfText(renderer, fontSm, slownessText, slownessColor, slownessPos);
   };
 }
@@ -183,15 +189,17 @@ void MainScene::sCollision() {
   const ConfigManager &configManager = m_gameEngine->getConfigManager();
   const Vec2          &windowSize    = configManager.getGameConfig().windowSize;
 
+  const GameState gameState = {.entityManager   = m_entities,
+                               .randomGenerator = m_randomGenerator,
+                               .score           = m_score,
+                               .setScore        = [this](int score) { setScore(score); },
+                               .decrementLives  = [this]() { decrementLives(); },
+                               .windowSize      = windowSize};
+
   for (auto &entity : m_entities.getEntities()) {
     handleEntityBounds(entity, windowSize);
     for (auto &otherEntity : m_entities.getEntities()) {
       const CollisionPair collisionPair = {.entityA = entity, .entityB = otherEntity};
-      const GameState     gameState     = {.entityManager   = m_entities,
-                                           .randomGenerator = m_randomGenerator,
-                                           .score           = m_score,
-                                           .setScore = [this](int score) { setScore(score); }};
-
       handleEntityEntityCollision(collisionPair, gameState);
     };
   }
@@ -213,42 +221,64 @@ void MainScene::sMovement() {
     MovementHelpers::movePlayer(entity, playerConfig, m_deltaTime);
     MovementHelpers::moveSlownessDebuffs(entity, slownessEffectConfig, m_deltaTime);
     MovementHelpers::moveBullets(entity, m_deltaTime);
+    MovementHelpers::moveItems(entity, m_deltaTime);
   }
 }
 
 void MainScene::sSpawner() {
-  ConfigManager configManager = m_gameEngine->getConfigManager();
-  SDL_Renderer *renderer      = m_gameEngine->getRenderer();
-  const Uint64  ticks         = SDL_GetTicks64();
-
-  const Uint64 SPAWN_INTERVAL = configManager.getGameConfig().spawnInterval;
+  ConfigManager &configManager  = m_gameEngine->getConfigManager();
+  SDL_Renderer  *renderer       = m_gameEngine->getRenderer();
+  const Uint64   ticks          = SDL_GetTicks64();
+  const Uint64   SPAWN_INTERVAL = configManager.getGameConfig().spawnInterval;
 
   if (ticks - m_lastEnemySpawnTime < SPAWN_INTERVAL) {
     return;
   }
   m_lastEnemySpawnTime = ticks;
-  SpawnHelpers::spawnEnemy(renderer, configManager, m_randomGenerator, m_entities);
 
-  const bool hasSpeedBoost = m_player->cEffects->hasEffect(EffectTypes::Speed);
-  const bool hasSlowness   = m_player->cEffects->hasEffect(EffectTypes::Slowness);
+  const EnemyConfig            &enemyConfig = configManager.getEnemyConfig();
+  const SpeedBoostEffectConfig &speedBoostEffectConfig =
+      configManager.getSpeedBoostEffectConfig();
+  const SlownessEffectConfig &slownessEffectConfig = configManager.getSlownessEffectConfig();
+  const ItemConfig           &itemConfig           = configManager.getItemConfig();
 
-  // Spawns a speed boost with a 15% chance and while speed boost and slowness debuff are not
-  // active
+  const bool hasSpeedBasedEffect = m_player->cEffects->hasEffect(EffectTypes::Speed) ||
+                                   m_player->cEffects->hasEffect(EffectTypes::Slowness);
 
-  std::uniform_int_distribution<int> randomChance(0, 100);
-  const bool                         willSpawnSpeedBoost =
-      randomChance(m_randomGenerator) < 15 && !hasSpeedBoost && !hasSlowness;
+  std::uniform_int_distribution<unsigned int> distribution(0, 100);
 
-  if (willSpawnSpeedBoost) {
+  std::mt19937 &randomGenerator = m_randomGenerator;
+  auto meetsSpawnPercentage = [&randomGenerator, &distribution](unsigned int chance) -> bool {
+    return distribution(randomGenerator) < chance;
+  };
+
+  struct SpawnDecisions {
+    bool enemy;
+    bool speedBoost;
+    bool slowness;
+    bool item;
+  } decisions = {.enemy      = meetsSpawnPercentage(enemyConfig.spawnPercentage),
+                 .speedBoost = !hasSpeedBasedEffect &&
+                               meetsSpawnPercentage(speedBoostEffectConfig.spawnPercentage),
+                 .slowness = !hasSpeedBasedEffect &&
+                             meetsSpawnPercentage(slownessEffectConfig.spawnPercentage),
+                 .item = meetsSpawnPercentage(itemConfig.spawnPercentage)};
+
+  if (decisions.enemy) {
+    SpawnHelpers::spawnEnemy(renderer, configManager, m_randomGenerator, m_entities);
+  }
+
+  if (decisions.speedBoost) {
     SpawnHelpers::spawnSpeedBoostEntity(renderer, configManager, m_randomGenerator,
                                         m_entities);
   }
-  // Spawns a slowness debuff with a 30% chance and while slowness debuff and speed boost are
-  // not active
-  const bool willSpawnSlownessDebuff =
-      randomChance(m_randomGenerator) < 30 && !hasSlowness && !hasSpeedBoost;
-  if (willSpawnSlownessDebuff) {
+
+  if (decisions.slowness) {
     SpawnHelpers::spawnSlownessEntity(renderer, configManager, m_randomGenerator, m_entities);
+  }
+
+  if (decisions.item) {
+    SpawnHelpers::spawnItem(renderer, configManager, m_randomGenerator, m_entities);
   }
 }
 
@@ -285,9 +315,9 @@ void MainScene::sTimer() {
 
   m_timeRemaining -= elapsedTime;
 }
+
 void MainScene::sLifespan() {
   for (auto &entity : m_entities.getEntities()) {
-
     const auto tag = entity->tag();
     if (tag == EntityTags::Player) {
       continue;
@@ -347,6 +377,14 @@ void MainScene::setScore(const int score) {
 
 int MainScene::getScore() const {
   return m_score;
+}
+
+void MainScene::decrementLives() {
+  if (m_lives > 0) {
+    m_lives--;
+    return;
+  }
+  setGameOver();
 }
 
 void MainScene::onEnd() {

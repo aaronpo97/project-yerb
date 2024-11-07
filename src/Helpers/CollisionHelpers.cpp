@@ -2,6 +2,7 @@
 #include "../../includes/Helpers/CollisionHelpers.hpp"
 #include "../../includes/EntityManagement/Entity.hpp"
 #include "../../includes/GameScenes/MainScene.hpp"
+#include "../../includes/Helpers/EntityHelpers.hpp"
 
 #include <bitset>
 #include <iostream>
@@ -367,6 +368,10 @@ namespace CollisionHelpers::MainScene {
       std::bitset<4> bulletCollides = detectOutOfBounds(entity, windowSize);
       Enforce::enforceBulletCollision(entity, bulletCollides.any());
     }
+    if (tag == EntityTags::Item) {
+      std::bitset<4> itemCollides = detectOutOfBounds(entity, windowSize);
+      Enforce::enforceNonPlayerBounds(entity, itemCollides, windowSize);
+    }
   };
 
   void handleEntityEntityCollision(const CollisionPair &collisionPair, const GameState &args) {
@@ -386,10 +391,12 @@ namespace CollisionHelpers::MainScene {
     std::uniform_int_distribution<Uint64> randomSpeedBoostDuration(minSpeedBoostDuration,
                                                                    maxSpeedBoostDuration);
 
-    const int  m_score           = args.score;
-    const auto setScore          = args.setScore;
-    auto      &m_entities        = args.entityManager;
-    auto      &m_randomGenerator = args.randomGenerator;
+    const int                m_score           = args.score;
+    std::function<void(int)> setScore          = args.setScore;
+    EntityManager           &m_entities        = args.entityManager;
+    std::mt19937            &m_randomGenerator = args.randomGenerator;
+    std::function<void()>    decrementLives    = args.decrementLives;
+    const Vec2              &windowSize        = args.windowSize;
 
     if (entity == otherEntity) {
       return;
@@ -425,8 +432,20 @@ namespace CollisionHelpers::MainScene {
     }
 
     if (tag == EntityTags::Player && otherTag == EntityTags::Enemy) {
-      setScore(m_score - 3);
+      setScore(m_score > 10 ? m_score - 10 : 0);
       otherEntity->destroy();
+      decrementLives();
+
+      const std::shared_ptr<CTransform> &cTransform = entity->cTransform;
+      cTransform->topLeftCornerPos                  = {windowSize.x / 2, windowSize.y / 2};
+
+      const float        REMOVAL_RADIUS   = 150.0f;
+      const EntityVector entitiesToRemove = EntityHelpers::getEntitiesInRadius(
+          entity, m_entities.getEntities(EntityTags::Enemy), REMOVAL_RADIUS);
+
+      for (const std::shared_ptr<Entity> &entityToRemove : entitiesToRemove) {
+        entityToRemove->destroy();
+      }
     }
 
     if (tag == EntityTags::Player && otherTag == EntityTags::SlownessDebuff) {
@@ -435,15 +454,20 @@ namespace CollisionHelpers::MainScene {
       entity->cEffects->addEffect(
           {.startTime = startTime, .duration = duration, .type = EffectTypes::Slowness});
 
+      EntityVector        effectsToCheck;
       const EntityVector &slownessDebuffs = m_entities.getEntities(EntityTags::SlownessDebuff);
       const EntityVector &speedBoosts     = m_entities.getEntities(EntityTags::SpeedBoost);
 
-      for (auto &slownessDebuff : slownessDebuffs) {
-        slownessDebuff->destroy();
-      }
+      effectsToCheck.insert(effectsToCheck.end(), slownessDebuffs.begin(),
+                            slownessDebuffs.end());
+      effectsToCheck.insert(effectsToCheck.end(), speedBoosts.begin(), speedBoosts.end());
 
-      for (auto &speedBoost : speedBoosts) {
-        speedBoost->destroy();
+      const float        REMOVAL_RADIUS = 150.0f;
+      const EntityVector entitiesToRemove =
+          EntityHelpers::getEntitiesInRadius(entity, effectsToCheck, REMOVAL_RADIUS);
+
+      for (const auto &entityToRemove : entitiesToRemove) {
+        entityToRemove->destroy();
       }
     }
 
@@ -456,13 +480,39 @@ namespace CollisionHelpers::MainScene {
       const EntityVector &slownessDebuffs = m_entities.getEntities(EntityTags::SlownessDebuff);
       const EntityVector &speedBoosts     = m_entities.getEntities(EntityTags::SpeedBoost);
 
-      for (const auto &slownessDebuff : slownessDebuffs) {
-        slownessDebuff->destroy();
+      const float        REMOVAL_RADIUS = 150.0f;
+      const EntityVector entitiesToRemove =
+          EntityHelpers::getEntitiesInRadius(entity, speedBoosts, REMOVAL_RADIUS);
+
+      for (const auto &entityToRemove : entitiesToRemove) {
+        entityToRemove->destroy();
       }
 
+      // set the lifespan of the speed boost to 10% of previous value
+      const float MULTIPLIER = 0.1f;
       for (const auto &speedBoost : speedBoosts) {
-        speedBoost->destroy();
+        speedBoost->cLifespan->lifespan *= MULTIPLIER;
       }
+      for (const auto &slowDebuff : slownessDebuffs) {
+        slowDebuff->destroy();
+      }
+    }
+
+    if (tag == EntityTags::Player && otherTag == EntityTags::Item) {
+      setScore(m_score + 60);
+      otherEntity->destroy();
+    }
+
+    if (tag == EntityTags::Item && otherTag == EntityTags::Enemy) {
+      Enforce::enforceEntityEntityCollision(entity, otherEntity);
+    }
+
+    if (tag == EntityTags::Item && otherTag == EntityTags::SpeedBoost) {
+      Enforce::enforceEntityEntityCollision(entity, otherEntity);
+    }
+
+    if (tag == EntityTags::Item && otherTag == EntityTags::SlownessDebuff) {
+      Enforce::enforceEntityEntityCollision(entity, otherEntity);
     }
   };
 

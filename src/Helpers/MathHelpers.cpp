@@ -11,8 +11,18 @@ namespace MathHelpers {
     return degrees;
   }
 
+  /**
+   * @brief Pythagorean theorem, returns actual distance
+   */
   float pythagoras(const float a, const float b) {
     const float c = sqrt((a * a) + (b * b));
     return c;
   }
-}; // namespace MathHelpers
+  /**
+   * @brief Version of the Pythagorean theorem that doesn't calculate the square root.
+   */
+  float pythagorasSquared(const float a, const float b) {
+    const float c = (a * a) + (b * b);
+    return c;
+  }
+} // namespace MathHelpers

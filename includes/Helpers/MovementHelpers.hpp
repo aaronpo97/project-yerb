@@ -23,4 +23,6 @@ namespace MovementHelpers {
                            const float                &deltaTime);
 
   void moveBullets(std::shared_ptr<Entity> &entity, const float &deltaTime);
+
+  void moveItems(std::shared_ptr<Entity> &entity, const float &deltaTime);
 } // namespace MovementHelpers

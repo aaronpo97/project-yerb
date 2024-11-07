@@ -41,6 +41,7 @@ void MenuScene::renderText() {
   SDL_Renderer *renderer      = m_gameEngine->getRenderer();
   TTF_Font     *fontLg        = m_gameEngine->getFontManager().getFontLg();
   TTF_Font     *fontMd        = m_gameEngine->getFontManager().getFontMd();
+  TTF_Font     *fontSm        = m_gameEngine->getFontManager().getFontSm();
   SDL_Color     textColor     = {255, 255, 255, 255};
   SDL_Color     selectedColor = {0, 255, 0, 255};
 
@@ -63,6 +64,12 @@ void MenuScene::renderText() {
   const SDL_Color   instructionsColor = m_selectedIndex == 1 ? selectedColor : textColor;
   TextHelpers::renderLineOfText(renderer, fontMd, instructionsText, instructionsColor,
                                 instructionsPos);
+
+  const std::string controlsText = "W/S to move up/down, Enter to select";
+  // bottom right corner
+  const Vec2 controlsPos = {
+      100, m_gameEngine->getConfigManager().getGameConfig().windowSize.y - 50};
+  TextHelpers::renderLineOfText(renderer, fontSm, controlsText, textColor, controlsPos);
 }
 
 void MenuScene::sDoAction(Action &action) {

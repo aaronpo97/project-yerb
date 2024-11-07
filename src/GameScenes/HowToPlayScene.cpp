@@ -68,6 +68,10 @@ void HowToPlayScene::renderText() {
   const std::string backText = "Back: Backspace";
   const Vec2        backPos  = {100, 450};
   TextHelpers::renderLineOfText(renderer, fontMd, backText, textColor, backPos);
+
+  const std::string shootText = "Mouse Click: Shoot";
+  const Vec2        shootPos  = {100, 500};
+  TextHelpers::renderLineOfText(renderer, fontMd, shootText, textColor, shootPos);
 }
 
 void HowToPlayScene::sDoAction(Action &action) {

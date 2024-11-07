@@ -10,6 +10,7 @@ private:
   GameConfig             m_gameConfig;
   PlayerConfig           m_playerConfig;
   EnemyConfig            m_enemyConfig;
+  ItemConfig             m_itemConfig;
   SpeedBoostEffectConfig m_speedBoostEffectConfig;
   SlownessEffectConfig   m_slownessEffectConfig;
   json                   m_json;
@@ -22,6 +23,17 @@ private:
     m_gameConfig.fontPath      = m_json["gameConfig"]["fontPath"];
     m_gameConfig.spawnInterval = m_json["gameConfig"]["spawnInterval"];
   }
+
+  void parseItemConfig() {
+    m_itemConfig.lifespan     = m_json["itemConfig"]["lifespan"];
+    m_itemConfig.speed        = m_json["itemConfig"]["speed"];
+    const SDL_Color itemColor = SDL_Color{m_json["itemConfig"]["shape"]["color"]["r"],
+                                          m_json["itemConfig"]["shape"]["color"]["g"],
+                                          m_json["itemConfig"]["shape"]["color"]["b"],
+                                          m_json["itemConfig"]["shape"]["color"]["a"]};
+    m_itemConfig.shape        = ShapeConfig{m_json["itemConfig"]["shape"]["height"],
+                                     m_json["itemConfig"]["shape"]["width"], itemColor};
+  };
 
   void parsePlayerConfig() {
     m_playerConfig.baseSpeed            = m_json["playerConfig"]["baseSpeed"];
@@ -36,14 +48,15 @@ private:
   }
 
   void parseEnemyConfig() {
-    m_enemyConfig.speed        = m_json["enemyConfig"]["speed"];
-    m_enemyConfig.lifespan     = m_json["enemyConfig"]["lifespan"];
-    const SDL_Color enemyColor = SDL_Color{m_json["enemyConfig"]["shape"]["color"]["r"],
+    m_enemyConfig.speed           = m_json["enemyConfig"]["speed"];
+    m_enemyConfig.lifespan        = m_json["enemyConfig"]["lifespan"];
+    const SDL_Color enemyColor    = SDL_Color{m_json["enemyConfig"]["shape"]["color"]["r"],
                                            m_json["enemyConfig"]["shape"]["color"]["g"],
                                            m_json["enemyConfig"]["shape"]["color"]["b"],
                                            m_json["enemyConfig"]["shape"]["color"]["a"]};
-    m_enemyConfig.shape        = ShapeConfig{m_json["enemyConfig"]["shape"]["height"],
+    m_enemyConfig.shape           = ShapeConfig{m_json["enemyConfig"]["shape"]["height"],
                                       m_json["enemyConfig"]["shape"]["width"], enemyColor};
+    m_enemyConfig.spawnPercentage = m_json["enemyConfig"]["spawnPercentage"];
   }
 
   void parseSpeedBoostEffectConfig() {
@@ -57,6 +70,8 @@ private:
     m_speedBoostEffectConfig.shape =
         ShapeConfig{m_json["speedBoostEffectConfig"]["shape"]["height"],
                     m_json["speedBoostEffectConfig"]["shape"]["width"], speedBoostColor};
+    m_speedBoostEffectConfig.spawnPercentage =
+        m_json["speedBoostEffectConfig"]["spawnPercentage"];
   }
 
   void parseSlownessEffectConfig() {
@@ -70,12 +85,14 @@ private:
     m_slownessEffectConfig.shape =
         ShapeConfig{m_json["slownessEffectConfig"]["shape"]["height"],
                     m_json["slownessEffectConfig"]["shape"]["width"], slownessColor};
+    m_slownessEffectConfig.spawnPercentage = m_json["slownessEffectConfig"]["spawnPercentage"];
   }
 
   void parseConfig() {
     parseGameConfig();
     parsePlayerConfig();
     parseEnemyConfig();
+    parseItemConfig();
     parseSpeedBoostEffectConfig();
     parseSlownessEffectConfig();
   }
@@ -102,6 +119,10 @@ public:
 
   const GameConfig &getGameConfig() const {
     return m_gameConfig;
+  }
+
+  const ItemConfig &getItemConfig() const {
+    return m_itemConfig;
   }
   const PlayerConfig &getPlayerConfig() const {
     return m_playerConfig;

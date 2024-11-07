@@ -40,4 +40,9 @@ namespace SpawnHelpers {
                     EntityManager                 &entityManager,
                     const std::shared_ptr<Entity> &player,
                     const Vec2                    &mousePosition);
+
+  void spawnItem(SDL_Renderer        *renderer,
+                 const ConfigManager &configManager,
+                 std::mt19937        &randomGenerator,
+                 EntityManager       &entityManager);
 } // namespace SpawnHelpers
