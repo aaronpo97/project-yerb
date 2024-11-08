@@ -306,42 +306,59 @@ namespace SpawnHelpers {
                     EntityManager                 &entityManager,
                     const std::shared_ptr<Entity> &player,
                     const Vec2                    &mousePosition) {
-    const GameConfig   &gameConfig   = configManager.getGameConfig();
-    const BulletConfig &bulletConfig = configManager.getBulletConfig();
-    const Vec2         &windowSize   = gameConfig.windowSize;
 
-    const Vec2 &playerCenter = player->getCenterPos();
+    const EntityVector walls                  = entityManager.getEntities(EntityTags::Wall);
+    bool               playerCollidesWithWall = false;
 
-    Vec2 direction;
-    direction.x = mousePosition.x - playerCenter.x;
-    direction.y = mousePosition.y - playerCenter.y;
+    for (const std::shared_ptr<Entity> &wall : walls) {
+      const GameConfig   &gameConfig   = configManager.getGameConfig();
+      const BulletConfig &bulletConfig = configManager.getBulletConfig();
+      const Vec2         &windowSize   = gameConfig.windowSize;
 
-    const float length = MathHelpers::pythagoras(direction.x, direction.y);
-    if (length > 0) {
-      direction.x /= length;
-      direction.y /= length;
+      const Vec2 &playerCenter = player->getCenterPos();
+
+      Vec2 direction;
+      direction.x = mousePosition.x - playerCenter.x;
+      direction.y = mousePosition.y - playerCenter.y;
+
+      const float length = MathHelpers::pythagoras(direction.x, direction.y);
+      if (length > 0) {
+        direction.x /= length;
+        direction.y /= length;
+      }
+
+      const float bulletSpeed    = bulletConfig.speed;
+      Vec2        bulletVelocity = direction * bulletSpeed;
+
+      float angle = MathHelpers::radiansToDegrees(atan2(direction.y, direction.x));
+
+      std::shared_ptr<Entity> bullet = entityManager.addEntity(EntityTags::Bullet);
+
+      bullet->cShape = std::make_shared<CShape>(
+          renderer, ShapeConfig(bulletConfig.shape.height, bulletConfig.shape.width,
+                                bulletConfig.shape.color));
+
+      const auto  playerHalfWidth = player->cShape->rect.w / 2;
+      const float spawnOffset     = (bullet->cShape->rect.w / 2) + (playerHalfWidth);
+      Vec2        bulletPos;
+      // Set bullet position slightly offset from player center in the direction of travel
+      bulletPos.x = playerCenter.x + (direction.x * spawnOffset) - bullet->cShape->rect.w / 2;
+      bulletPos.y = playerCenter.y + (direction.y * spawnOffset) - bullet->cShape->rect.h / 2;
+
+      bullet->cTransform = std::make_shared<CTransform>(bulletPos, bulletVelocity, angle);
+      bullet->cLifespan  = std::make_shared<CLifespan>(bulletConfig.lifespan);
+
+      const EntityVector walls = entityManager.getEntities(EntityTags::Wall);
+
+      for (const std::shared_ptr<Entity> &wall : walls) {
+        if (CollisionHelpers::calculateCollisionBetweenEntities(bullet, wall)) {
+          bullet->destroy();
+          break;
+        }
+      }
     }
 
-    const float bulletSpeed    = bulletConfig.speed;
-    Vec2        bulletVelocity = direction * bulletSpeed;
-
-    float angle = MathHelpers::radiansToDegrees(atan2(direction.y, direction.x));
-
-    std::shared_ptr<Entity> bullet = entityManager.addEntity(EntityTags::Bullet);
-
-    bullet->cShape = std::make_shared<CShape>(renderer, ShapeConfig(bulletConfig.shape.height,
-                                                                    bulletConfig.shape.width,
-                                                                    bulletConfig.shape.color));
-
-    const auto  playerHalfWidth = player->cShape->rect.w / 2;
-    const float spawnOffset     = (bullet->cShape->rect.w / 2) + (playerHalfWidth + 5);
-    Vec2        bulletPos;
-    // Set bullet position slightly offset from player center in the direction of travel
-    bulletPos.x = playerCenter.x + (direction.x * spawnOffset) - bullet->cShape->rect.w / 2;
-    bulletPos.y = playerCenter.y + (direction.y * spawnOffset) - bullet->cShape->rect.h / 2;
-
-    bullet->cTransform = std::make_shared<CTransform>(bulletPos, bulletVelocity, angle);
-    bullet->cLifespan  = std::make_shared<CLifespan>(bulletConfig.lifespan);
+    entityManager.update();
   }
 
   void spawnItem(SDL_Renderer        *renderer,
