@@ -77,3 +77,10 @@ public:
   float        speed;
   ShapeConfig  shape;
 };
+
+class BulletConfig {
+public:
+  Uint64      lifespan;
+  float       speed;
+  ShapeConfig shape;
+};

@@ -20,6 +20,7 @@ private:
   GameConfig             m_gameConfig;
   PlayerConfig           m_playerConfig;
   EnemyConfig            m_enemyConfig;
+  BulletConfig           m_bulletConfig;
   ItemConfig             m_itemConfig;
   SpeedBoostEffectConfig m_speedBoostEffectConfig;
   SlownessEffectConfig   m_slownessEffectConfig;
@@ -142,12 +143,21 @@ private:
     }
   }
 
+  void parseBulletConfig() {
+    const auto &config = m_json["bulletConfig"];
+
+    m_bulletConfig.speed    = getJsonValue<float>(config, "speed", "bulletConfig");
+    m_bulletConfig.lifespan = getJsonValue<Uint64>(config, "lifespan", "bulletConfig");
+    m_bulletConfig.shape    = parseShapeConfig(config["shape"], "bulletConfig.shape");
+  }
+
   void parseConfig() {
     try {
       parseGameConfig();
       parsePlayerConfig();
       parseEnemyConfig();
       parseItemConfig();
+      parseBulletConfig();
       parseSpeedBoostEffectConfig();
       parseSlownessEffectConfig();
     } catch (const json::exception &e) {
@@ -201,6 +211,10 @@ public:
   const EnemyConfig &getEnemyConfig() const {
     return m_enemyConfig;
   }
+  const BulletConfig &getBulletConfig() const {
+    return m_bulletConfig;
+  }
+
   const SpeedBoostEffectConfig &getSpeedBoostEffectConfig() const {
     return m_speedBoostEffectConfig;
   }
@@ -256,5 +270,19 @@ public:
       throw ConfigurationError("Slowness effect speed must be positive");
     }
     m_slownessEffectConfig.speed = speed;
+  }
+
+  void updateBulletSpeed(const float speed) {
+    if (speed <= 0) {
+      throw ConfigurationError("Bullet speed must be positive");
+    }
+    m_bulletConfig.speed = speed;
+  }
+
+  void updateItemSpeed(const float speed) {
+    if (speed <= 0) {
+      throw ConfigurationError("Item speed must be positive");
+    }
+    m_itemConfig.speed = speed;
   }
 };
