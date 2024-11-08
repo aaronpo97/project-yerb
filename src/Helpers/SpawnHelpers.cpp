@@ -306,12 +306,11 @@ namespace SpawnHelpers {
                     EntityManager                 &entityManager,
                     const std::shared_ptr<Entity> &player,
                     const Vec2                    &mousePosition) {
-    const GameConfig &gameConfig = configManager.getGameConfig();
-    const Vec2       &windowSize = gameConfig.windowSize;
+    const GameConfig   &gameConfig   = configManager.getGameConfig();
+    const BulletConfig &bulletConfig = configManager.getBulletConfig();
+    const Vec2         &windowSize   = gameConfig.windowSize;
 
-    Vec2 playerCenter = player->cTransform->topLeftCornerPos;
-    playerCenter.x += player->cShape->rect.w / 2;
-    playerCenter.y += player->cShape->rect.h / 2;
+    const Vec2 &playerCenter = player->getCenterPos();
 
     Vec2 direction;
     direction.x = mousePosition.x - playerCenter.x;
@@ -323,15 +322,16 @@ namespace SpawnHelpers {
       direction.y /= length;
     }
 
-    const float bulletSpeed    = 10.0f;
+    const float bulletSpeed    = bulletConfig.speed;
     Vec2        bulletVelocity = direction * bulletSpeed;
 
     float angle = MathHelpers::radiansToDegrees(atan2(direction.y, direction.x));
 
     std::shared_ptr<Entity> bullet = entityManager.addEntity(EntityTags::Bullet);
 
-    bullet->cShape =
-        std::make_shared<CShape>(renderer, ShapeConfig(20, 20, SDL_Color{255, 255, 255, 255}));
+    bullet->cShape = std::make_shared<CShape>(renderer, ShapeConfig(bulletConfig.shape.height,
+                                                                    bulletConfig.shape.width,
+                                                                    bulletConfig.shape.color));
 
     const auto  playerHalfWidth = player->cShape->rect.w / 2;
     const float spawnOffset     = (bullet->cShape->rect.w / 2) + (playerHalfWidth + 5);
@@ -341,7 +341,7 @@ namespace SpawnHelpers {
     bulletPos.y = playerCenter.y + (direction.y * spawnOffset) - bullet->cShape->rect.h / 2;
 
     bullet->cTransform = std::make_shared<CTransform>(bulletPos, bulletVelocity, angle);
-    bullet->cLifespan  = std::make_shared<CLifespan>(2000);
+    bullet->cLifespan  = std::make_shared<CLifespan>(bulletConfig.lifespan);
   }
 
   void spawnItem(SDL_Renderer        *renderer,
