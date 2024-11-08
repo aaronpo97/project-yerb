@@ -21,10 +21,10 @@ public:
 
     SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "SDL_ttf initialized successfully.");
     loadFonts(fontPath);
-    }
+  }
 
   void loadFonts(const std::string &fontPath) {
-    const int SMALL_FONT_POINT_SIZE  = 14;
+    const int SMALL_FONT_POINT_SIZE  = 18;
     const int MEDIUM_FONT_POINT_SIZE = 28;
     const int LARGE_FONT_POINT_SIZE  = 48;
 

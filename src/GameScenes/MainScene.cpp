@@ -144,7 +144,7 @@ void MainScene::renderText() {
   if (m_player->cEffects->hasEffect(EffectTypes::Speed)) {
     const SDL_Color   speedBoostColor = {0, 255, 0, 255};
     const std::string speedBoostText  = "Speed Boost Active!";
-    const Vec2        speedBoostPos   = {10, 100};
+    const Vec2        speedBoostPos   = {10, 120};
     TextHelpers::renderLineOfText(renderer, fontSm, speedBoostText, speedBoostColor,
                                   speedBoostPos);
   };
@@ -152,7 +152,7 @@ void MainScene::renderText() {
   if (m_player->cEffects->hasEffect(EffectTypes::Slowness)) {
     const SDL_Color   slownessColor = {255, 0, 0, 255};
     const std::string slownessText  = "Slowness Active!";
-    const Vec2        slownessPos   = {10, 100};
+    const Vec2        slownessPos   = {10, 120};
     TextHelpers::renderLineOfText(renderer, fontSm, slownessText, slownessColor, slownessPos);
   };
 }

@@ -285,8 +285,8 @@ namespace SpawnHelpers {
     // 2% of the window width
     const int wallWidth = static_cast<int>(gameConfig.windowSize.x * 0.02);
     // 60% of the window height
-    const int  wallHeight = static_cast<int>(gameConfig.windowSize.y * 0.6);
-    const auto wallColor  = SDL_Color{255, 255, 255, 255};
+    const int       wallHeight = static_cast<int>(gameConfig.windowSize.y * 0.6);
+    const SDL_Color wallColor  = {.r = 176, .g = 196, .b = 222, .a = 255}; // pastel blue-gray
 
     std::shared_ptr<Entity> wallLeft = entityManager.addEntity(EntityTags::Wall);
     wallLeft->cShape =
