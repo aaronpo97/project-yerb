@@ -4,3 +4,5 @@ dist-web
 .DS_Store
 .netlify
 makefile
+.idea
+cmake-build-debug
