@@ -17,7 +17,7 @@ protected:
   ActionMap   m_actionMap;
 
 public:
-  Scene(GameEngine *gameEngine) :
+  explicit Scene(GameEngine *gameEngine) :
       m_gameEngine(gameEngine) {};
 
   virtual ~Scene()                       = default;

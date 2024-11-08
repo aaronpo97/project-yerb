@@ -5,17 +5,17 @@
 #include <map>
 #include <string>
 
-class MenuScene : public Scene {
+class MenuScene final : public Scene {
 private:
-  void         renderText();
+  void         renderText() const;
   bool         m_playButtonClicked         = false;
   bool         m_instructionsButtonClicked = false;
   unsigned int m_selectedIndex             = 0;
 
 public:
-  MenuScene(GameEngine *gameEngine);
-  virtual void update() override;
-  virtual void onEnd() override;
-  virtual void sRender() override;
-  virtual void sDoAction(Action &action) override;
+  explicit MenuScene(GameEngine *gameEngine);
+  void update() override;
+void onEnd() override;
+void sRender() override;
+void sDoAction(Action &action) override;
 };

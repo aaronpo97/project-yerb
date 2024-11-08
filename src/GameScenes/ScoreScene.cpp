@@ -3,9 +3,8 @@
 #include "../../includes/GameScenes/MenuScene.hpp"
 #include "../../includes/Helpers/TextHelpers.hpp"
 #include <SDL2/SDL.h>
-#include <iostream>
 
-ScoreScene::ScoreScene(GameEngine *gameEngine, int score) :
+ScoreScene::ScoreScene(GameEngine *gameEngine, const int score) :
     Scene(gameEngine), m_score(score) {
 
   registerAction(SDLK_RETURN, "SELECT");
@@ -33,14 +32,14 @@ void ScoreScene::sRender() {
   SDL_RenderPresent(renderer);
 }
 
-void ScoreScene::renderText() {
+void ScoreScene::renderText() const {
   SDL_Renderer *renderer = m_gameEngine->getRenderer();
   TTF_Font     *fontLg   = m_gameEngine->getFontManager().getFontLg();
   TTF_Font     *fontMd   = m_gameEngine->getFontManager().getFontMd();
 
-  const SDL_Color gameOverColor = {255, 0, 0, 255};
-  const SDL_Color textColor     = {255, 255, 255, 255};
-  const SDL_Color selectedColor = {0, 255, 0, 255};
+  constexpr SDL_Color gameOverColor = {255, 0, 0, 255};
+  constexpr SDL_Color textColor     = {255, 255, 255, 255};
+  constexpr SDL_Color selectedColor = {0, 255, 0, 255};
 
   const bool fontsLoaded = fontLg != nullptr && fontMd != nullptr;
   if (!fontsLoaded) {
@@ -87,6 +86,5 @@ void ScoreScene::sDoAction(Action &action) {
 
   if (action.getName() == "DOWN") {
     m_selectedIndex < 1 ? m_selectedIndex += 1 : m_selectedIndex = 0;
-    return;
   }
 }
