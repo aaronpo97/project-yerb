@@ -26,11 +26,11 @@ void HowToPlayScene::sRender() {
 }
 
 void HowToPlayScene::renderText() const {
-  SDL_Renderer   *renderer  = m_gameEngine->getRenderer();
-  TTF_Font       *fontSm    = m_gameEngine->getFontManager().getFontSm();
-  TTF_Font       *fontMd    = m_gameEngine->getFontManager().getFontMd();
+  SDL_Renderer       *renderer  = m_gameEngine->getRenderer();
+  TTF_Font           *fontSm    = m_gameEngine->getFontManager().getFontSm();
+  TTF_Font           *fontMd    = m_gameEngine->getFontManager().getFontMd();
   TTF_Font           *fontLg    = m_gameEngine->getFontManager().getFontLg();
-  constexpr SDL_Color textColor = {.r = 255, .g= 255,.b= 255, .a=255};
+  constexpr SDL_Color textColor = {.r = 255, .g = 255, .b = 255, .a = 255};
 
   const bool fontsLoaded = fontSm != nullptr && fontMd != nullptr && fontLg != nullptr;
 

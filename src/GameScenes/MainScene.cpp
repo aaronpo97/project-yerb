@@ -245,8 +245,9 @@ void MainScene::sSpawner() {
 
   std::uniform_int_distribution<unsigned int> distribution(0, 100);
 
-  std::mt19937 &randomGenerator = m_randomGenerator;
-  auto meetsSpawnPercentage = [&randomGenerator, &distribution](const unsigned int chance) -> bool {
+  std::mt19937 &randomGenerator      = m_randomGenerator;
+  auto          meetsSpawnPercentage = [&randomGenerator,
+                               &distribution](const unsigned int chance) -> bool {
     return distribution(randomGenerator) < chance;
   };
 
@@ -334,12 +335,13 @@ void MainScene::sLifespan() {
     const Uint64 elapsedTime = currentTime - entity->cLifespan->birthTime;
     // Calculate the lifespan percentage, ensuring it's clamped between 0 and 1
     const float lifespanPercentage =
-        std::min(1.0f, static_cast<float>(elapsedTime) / static_cast<float>(entity->cLifespan->lifespan));
+        std::min(1.0f, static_cast<float>(elapsedTime) /
+                           static_cast<float>(entity->cLifespan->lifespan));
 
     const bool entityExpired = elapsedTime > entity->cLifespan->lifespan;
     if (!entityExpired) {
       constexpr float MAX_COLOR_VALUE = 255.0f;
-      const Uint8     alpha           =static_cast<Uint8>( std::max(
+      const Uint8     alpha           = static_cast<Uint8>(std::max(
           0.0f, std::min(MAX_COLOR_VALUE, MAX_COLOR_VALUE * (1.0f - lifespanPercentage))));
 
       SDL_Color &color = entity->cShape->color;

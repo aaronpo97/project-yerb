@@ -1,5 +1,6 @@
 #!/bin/bash
-echo "WARNING: This script will format all .cpp, .h, .c, .hpp files in the current directory and its subdirectories."
+echo "WARNING: This script will format all .cpp, .h, .c, .hpp files in the include and src directory."
+echo "This script will overwrite the files with the formatted version."
 
 read -p "Do you want to continue? (y/n) " -n 1 -r
 echo
@@ -18,7 +19,10 @@ if ! command -v clang-format &>/dev/null; then
     exit 1
 fi
 
-find . -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.c" -o -name "*.hpp" \) -print0 | xargs -0 clang-format -i
+echo "Formatting files..."
+
+find includes src -name "*.cpp" -o -name "*.hpp" | xargs clang-format -i
 
 echo "Done."
+
 exit 0

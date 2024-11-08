@@ -15,7 +15,7 @@ private:
 public:
   explicit MenuScene(GameEngine *gameEngine);
   void update() override;
-void onEnd() override;
-void sRender() override;
-void sDoAction(Action &action) override;
+  void onEnd() override;
+  void sRender() override;
+  void sDoAction(Action &action) override;
 };
