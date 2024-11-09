@@ -27,12 +27,13 @@ public:
   GameEngine();
   ~GameEngine();
 
-  SDL_Renderer  *getRenderer();
-  SDL_Window    *getWindow();
-  bool           isRunning() const;
-  void           loadScene(const std::string &name, const std::shared_ptr<Scene> &scene);
-  ConfigManager &getConfigManager();
-  FontManager   &getFontManager();
+  bool isRunning() const;
+  void loadScene(const std::string &sceneName, const std::shared_ptr<Scene> &scene);
+
+  ConfigManager &getConfigManager() const;
+  FontManager   &getFontManager() const;
+  SDL_Renderer  *getRenderer() const;
+  SDL_Window    *getWindow() const;
 
   void run();
 };
