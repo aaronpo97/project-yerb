@@ -26,6 +26,7 @@ Vec2 Entity::getCenterPos() const {
   }
 
   const Vec2 &pos    = cTransform->topLeftCornerPos;
-  const Vec2 &center = pos + Vec2(cShape->rect.w / 2, cShape->rect.h / 2);
+  const Vec2 &center = pos + Vec2(static_cast<float>(cShape->rect.w) / 2.0f,
+                                  static_cast<float>(cShape->rect.h) / 2);
   return center;
 }

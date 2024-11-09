@@ -149,6 +149,7 @@ FontManager &GameEngine::getFontManager() const {
   }
   return *m_fontManager;
 }
+
 void GameEngine::sUserInput() {
   SDL_Event event;
 
