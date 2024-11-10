@@ -1,7 +1,6 @@
 
 #include "../../includes/Helpers/EntityHelpers.hpp"
 #include <algorithm>
-#include <memory>
 #include <vector>
 
 namespace EntityHelpers {
@@ -10,24 +9,21 @@ namespace EntityHelpers {
                                    const size_t                  &limit) {
 
     std::vector<std::pair<std::shared_ptr<Entity>, float>> distances;
-    const Vec2 &pos    = entity->cTransform->topLeftCornerPos;
-    const Vec2 &center = pos + Vec2(entity->cShape->rect.w / 2, entity->cShape->rect.h / 2);
+    const Vec2                                            &center = entity->getCenterPos();
 
     for (const auto &candidate : candidates) {
       if (candidate == entity)
         continue;
 
-      const Vec2 &candidatePos = candidate->cTransform->topLeftCornerPos;
-      const Vec2 &candidateCenter =
-          candidatePos + Vec2(candidate->cShape->rect.w / 2, candidate->cShape->rect.h / 2);
+      const Vec2 &candidateCenter = candidate->getCenterPos();
 
       float distance = MathHelpers::pythagorasSquared(center.x - candidateCenter.x,
                                                       center.y - candidateCenter.y);
-      distances.push_back({candidate, distance});
+      distances.emplace_back(candidate, distance);
     }
 
-    std::sort(distances.begin(), distances.end(),
-              [](const auto &a, const auto &b) { return a.second < b.second; });
+    std::ranges::sort(distances,
+                      [](const auto &a, const auto &b) { return a.second < b.second; });
 
     EntityVector result;
     const size_t numToReturn = std::min(limit, distances.size());
@@ -43,7 +39,6 @@ namespace EntityHelpers {
                                    const float                   &radius) {
 
     EntityVector result;
-    const Vec2  &pos           = entity->cTransform->topLeftCornerPos;
     const Vec2  &center        = entity->getCenterPos();
     const float  radiusSquared = radius * radius;
 
@@ -51,9 +46,7 @@ namespace EntityHelpers {
       if (candidate == entity)
         continue;
 
-      const Vec2 &candidatePos = candidate->cTransform->topLeftCornerPos;
-      const Vec2 &candidateCenter =
-          candidatePos + Vec2(candidate->cShape->rect.w / 2, candidate->cShape->rect.h / 2);
+      const Vec2 &candidateCenter = candidate->getCenterPos();
 
       const float deltaX          = center.x - candidateCenter.x;
       const float deltaY          = center.y - candidateCenter.y;

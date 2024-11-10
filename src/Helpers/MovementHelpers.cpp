@@ -1,14 +1,11 @@
 #include "../../includes/Helpers/MovementHelpers.hpp"
 
-#include <memory>
-const float BASE_MOVEMENT_MULTIPLIER = 50.0f;
+constexpr float BASE_MOVEMENT_MULTIPLIER = 50.0f;
 
 namespace MovementHelpers {
-  void moveEnemies(std::shared_ptr<Entity> &entity,
-                   const EnemyConfig       &enemyConfig,
-                   const float             &deltaTime) {
-
-    std::uniform_int_distribution<int> randomVelocityX(-1, 1);
+  void moveEnemies(const std::shared_ptr<Entity> &entity,
+                   const EnemyConfig             &enemyConfig,
+                   const float                   &deltaTime) {
 
     if (entity == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Entity is null");
@@ -27,14 +24,15 @@ namespace MovementHelpers {
       return;
     }
 
-    Vec2 &position = entityCTransform->topLeftCornerPos;
-    Vec2 &velocity = entityCTransform->velocity;
+    Vec2       &position = entityCTransform->topLeftCornerPos;
+    const Vec2 &velocity = entityCTransform->velocity;
 
-    position += velocity * ((enemyConfig.speed) * (deltaTime * BASE_MOVEMENT_MULTIPLIER));
+    position += velocity * (enemyConfig.speed * (deltaTime * BASE_MOVEMENT_MULTIPLIER));
   }
-  void moveSpeedBoosts(std::shared_ptr<Entity>      &entity,
-                       const SpeedBoostEffectConfig &speedBoostEffectConfig,
-                       const float                  &deltaTime) {
+
+  void moveSpeedBoosts(const std::shared_ptr<Entity> &entity,
+                       const SpeedBoostEffectConfig  &speedBoostEffectConfig,
+                       const float                   &deltaTime) {
     if (entity == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Entity is null");
       return;
@@ -52,15 +50,15 @@ namespace MovementHelpers {
       return;
     }
 
-    Vec2 &position = entityCTransform->topLeftCornerPos;
-    Vec2 &velocity = entityCTransform->velocity;
+    Vec2       &position = entityCTransform->topLeftCornerPos;
+    const Vec2 &velocity = entityCTransform->velocity;
 
     position += velocity * deltaTime * speedBoostEffectConfig.speed * BASE_MOVEMENT_MULTIPLIER;
   }
 
-  void movePlayer(std::shared_ptr<Entity> &entity,
-                  const PlayerConfig      &playerConfig,
-                  const float             &deltaTime) {
+  void movePlayer(const std::shared_ptr<Entity> &entity,
+                  const PlayerConfig            &playerConfig,
+                  const float                   &deltaTime) {
     if (entity == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Entity is null");
       return;
@@ -113,13 +111,13 @@ namespace MovementHelpers {
       effectMultiplier = playerConfig.slownessMultiplier;
     }
 
-    position += velocity * ((playerConfig.baseSpeed * effectMultiplier) *
+    position += velocity * (playerConfig.baseSpeed * effectMultiplier *
                             (deltaTime * BASE_MOVEMENT_MULTIPLIER));
   }
 
-  void moveSlownessDebuffs(std::shared_ptr<Entity>    &entity,
-                           const SlownessEffectConfig &slownessEffectConfig,
-                           const float                &deltaTime) {
+  void moveSlownessDebuffs(const std::shared_ptr<Entity> &entity,
+                           const SlownessEffectConfig    &slownessEffectConfig,
+                           const float                   &deltaTime) {
 
     if (entity == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Entity is null");
@@ -148,13 +146,13 @@ namespace MovementHelpers {
       return;
     }
 
-    Vec2 &position = entityCTransform->topLeftCornerPos;
-    Vec2 &velocity = entityCTransform->velocity;
+    Vec2       &position = entityCTransform->topLeftCornerPos;
+    const Vec2 &velocity = entityCTransform->velocity;
 
     position += velocity * deltaTime * slownessEffectConfig.speed * BASE_MOVEMENT_MULTIPLIER;
-  };
+  }
 
-  void moveBullets(std::shared_ptr<Entity> &entity, const float &deltaTime) {
+  void moveBullets(const std::shared_ptr<Entity> &entity, const float &deltaTime) {
     if (entity == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Entity is null");
       return;
@@ -172,13 +170,13 @@ namespace MovementHelpers {
       return;
     }
 
-    Vec2 &position = entityCTransform->topLeftCornerPos;
-    Vec2 &velocity = entityCTransform->velocity;
+    Vec2       &position = entityCTransform->topLeftCornerPos;
+    const Vec2 &velocity = entityCTransform->velocity;
 
-    const float BULLET_MOVEMENT_MULTIPLIER = 3.0f;
+    constexpr float BULLET_MOVEMENT_MULTIPLIER = 3.0f;
     position += velocity * (deltaTime * BULLET_MOVEMENT_MULTIPLIER * BASE_MOVEMENT_MULTIPLIER);
   }
-  void moveItems(std::shared_ptr<Entity> &entity, const float &deltaTime) {
+  void moveItems(const std::shared_ptr<Entity> &entity, const float &deltaTime) {
     if (entity == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Entity is null");
       return;
@@ -201,9 +199,9 @@ namespace MovementHelpers {
     Vec2 &position = entityCTransform->topLeftCornerPos;
 
     // Use deltaTime to maintain consistent movement speed
-    const float ITEM_MOVEMENT_MULTIPLIER = .9f;
-    const float time                     = static_cast<float>(SDL_GetTicks64()) / 1000.0f;
-
+    constexpr float ITEM_MOVEMENT_MULTIPLIER = .9f;
+    const float     time                     = static_cast<float>(SDL_GetTicks64()) / 1000.0f;
+    // Entity id will be odd when the last bit is 1
     const bool ENTITY_ID_ODD = entity->id() & 1;
 
     if (ENTITY_ID_ODD) {

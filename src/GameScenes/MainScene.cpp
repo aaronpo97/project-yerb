@@ -15,13 +15,13 @@
 
 MainScene::MainScene(GameEngine *gameEngine) :
     Scene(gameEngine) {
-  SDL_Renderer  *renderer      = gameEngine->getRenderer();
-  ConfigManager &configManager = gameEngine->getConfigManager();
+  SDL_Renderer        *renderer      = gameEngine->getRenderer();
+  const ConfigManager &configManager = gameEngine->getConfigManager();
 
   m_entities = EntityManager();
   m_player   = SpawnHelpers::spawnPlayer(renderer, configManager, m_entities);
 
-  SpawnHelpers::spawnWalls(renderer, configManager, m_randomGenerator, m_entities);
+  SpawnHelpers::spawnWalls(renderer, configManager, m_entities);
 
   // WASD
   registerAction(SDLK_w, "FORWARD");
@@ -213,7 +213,7 @@ void MainScene::sMovement() {
   const SpeedBoostEffectConfig &speedBoostEffectConfig =
       configManager.getSpeedBoostEffectConfig();
 
-  for (std::shared_ptr<Entity> entity : m_entities.getEntities()) {
+  for (const std::shared_ptr<Entity> &entity : m_entities.getEntities()) {
     MovementHelpers::moveSpeedBoosts(entity, speedBoostEffectConfig, m_deltaTime);
     MovementHelpers::moveEnemies(entity, enemyConfig, m_deltaTime);
     MovementHelpers::movePlayer(entity, playerConfig, m_deltaTime);
@@ -224,10 +224,10 @@ void MainScene::sMovement() {
 }
 
 void MainScene::sSpawner() {
-  ConfigManager &configManager  = m_gameEngine->getConfigManager();
-  SDL_Renderer  *renderer       = m_gameEngine->getRenderer();
-  const Uint64   ticks          = SDL_GetTicks64();
-  const Uint64   SPAWN_INTERVAL = configManager.getGameConfig().spawnInterval;
+  const ConfigManager &configManager  = m_gameEngine->getConfigManager();
+  SDL_Renderer        *renderer       = m_gameEngine->getRenderer();
+  const Uint64         ticks          = SDL_GetTicks64();
+  const Uint64         SPAWN_INTERVAL = configManager.getGameConfig().spawnInterval;
 
   if (ticks - m_lastEnemySpawnTime < SPAWN_INTERVAL) {
     return;
@@ -264,7 +264,7 @@ void MainScene::sSpawner() {
                  .item = meetsSpawnPercentage(itemConfig.spawnPercentage)};
 
   if (decisions.enemy) {
-    SpawnHelpers::spawnEnemy(renderer, configManager, m_randomGenerator, m_entities);
+    SpawnHelpers::spawnEnemy(renderer, configManager, m_randomGenerator, m_entities, m_player);
   }
 
   if (decisions.speedBoost) {

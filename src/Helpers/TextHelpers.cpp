@@ -35,13 +35,10 @@ namespace TextHelpers {
     // Copy the texture to the renderer
     SDL_RenderCopy(renderer, texture, nullptr, &textRect);
 
-    if (texture) {
-      SDL_DestroyTexture(texture);
-      texture = nullptr;
-    }
-    if (surface) {
-      SDL_FreeSurface(surface);
-      surface = nullptr;
-    }
+    SDL_DestroyTexture(texture);
+    SDL_FreeSurface(surface);
+
+    texture = nullptr;
+    surface = nullptr;
   }
 } // namespace TextHelpers
