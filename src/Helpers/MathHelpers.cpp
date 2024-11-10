@@ -12,17 +12,17 @@ namespace MathHelpers {
   }
 
   /**
-   * @brief Pythagorean theorem, returns actual distance
+   * @brief Pythagorean theorem, returns actual value.
    */
   float pythagoras(const float a, const float b) {
-    const float c = sqrt((a * a) + (b * b));
+    const float c = sqrt(a * a + b * b);
     return c;
   }
   /**
    * @brief Version of the Pythagorean theorem that doesn't calculate the square root.
    */
   float pythagorasSquared(const float a, const float b) {
-    const float c = (a * a) + (b * b);
+    const float c = a * a + b * b;
     return c;
   }
 } // namespace MathHelpers

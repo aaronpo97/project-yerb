@@ -3,12 +3,12 @@
 #include "../GameEngine/GameEngine.hpp"
 #include "./Scene.hpp"
 
-class HowToPlayScene : public Scene {
+class HowToPlayScene final : public Scene {
 private:
-  void renderText();
+  void renderText() const;
 
 public:
-  HowToPlayScene(GameEngine *gameEngine);
+  explicit HowToPlayScene(GameEngine *gameEngine);
 
   void update() override;
   void onEnd() override;

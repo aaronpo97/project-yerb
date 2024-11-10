@@ -2,9 +2,6 @@
 #include "../../includes/GameScenes/MainScene.hpp"
 #include "../../includes/GameScenes/MenuScene.hpp"
 #include <filesystem>
-#include <iostream>
-
-// emscripten
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -39,9 +36,9 @@ GameEngine::GameEngine() {
   SDL_LogInfo(SDL_LOG_CATEGORY_VIDEO, "SDL video system initialized successfully!");
 
   // Create Window
-  m_window =
-      SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                       WINDOW_SIZE.x, WINDOW_SIZE.y, SDL_WINDOW_SHOWN);
+  m_window = SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED,
+                              SDL_WINDOWPOS_CENTERED, static_cast<int>(WINDOW_SIZE.x),
+                              static_cast<int>(WINDOW_SIZE.y), SDL_WINDOW_SHOWN);
   if (m_window == nullptr) {
     SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "Window could not be created: %s", SDL_GetError());
     cleanup();
@@ -59,7 +56,7 @@ GameEngine::GameEngine() {
   SDL_LogInfo(SDL_LOG_CATEGORY_VIDEO, "Renderer created successfully!");
 
   // Setup Renderer
-  const SDL_Color backgroundColor = {.r = 0, .g = 0, .b = 0, .a = 255};
+  constexpr SDL_Color backgroundColor = {.r = 0, .g = 0, .b = 0, .a = 255};
   SDL_SetRenderDrawColor(m_renderer, backgroundColor.r, backgroundColor.g, backgroundColor.b,
                          backgroundColor.a);
   SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
@@ -70,7 +67,7 @@ GameEngine::GameEngine() {
   m_isRunning = true;
 
   SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "Game engine initialized successfully!");
-  std::shared_ptr<Scene> menuScene = std::make_shared<MenuScene>(this);
+  const std::shared_ptr<Scene> menuScene = std::make_shared<MenuScene>(this);
   loadScene("Menu", menuScene);
 }
 
@@ -103,11 +100,11 @@ void GameEngine::update() {
   m_scenes[m_currentSceneName]->update();
 }
 
-SDL_Renderer *GameEngine::getRenderer() {
+SDL_Renderer *GameEngine::getRenderer() const {
   return m_renderer;
 }
 
-SDL_Window *GameEngine::getWindow() {
+SDL_Window *GameEngine::getWindow() const {
   return m_window;
 }
 
@@ -136,7 +133,7 @@ void GameEngine::loadScene(const std::string &sceneName, const std::shared_ptr<S
   m_currentSceneName = sceneName;
 }
 
-ConfigManager &GameEngine::getConfigManager() {
+ConfigManager &GameEngine::getConfigManager() const {
   if (!m_configManager) {
     SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "ConfigManager not initialized");
     throw std::runtime_error("ConfigManager not initialized");
@@ -145,13 +142,14 @@ ConfigManager &GameEngine::getConfigManager() {
   return *m_configManager;
 }
 
-FontManager &GameEngine::getFontManager() {
+FontManager &GameEngine::getFontManager() const {
   if (!m_fontManager) {
     SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "FontManager not initialized");
     throw std::runtime_error("FontManager not initialized");
   }
   return *m_fontManager;
 }
+
 void GameEngine::sUserInput() {
   SDL_Event event;
 
@@ -164,8 +162,7 @@ void GameEngine::sUserInput() {
     }
     if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
       // If current scene doesn't have an action associated with this key, skip it
-      if (activeScene->getActionMap().find(event.key.keysym.sym) ==
-          activeScene->getActionMap().end()) {
+      if (!activeScene->getActionMap().contains(event.key.keysym.sym)) {
         continue;
       }
 
@@ -179,8 +176,7 @@ void GameEngine::sUserInput() {
     }
 
     if (event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP) {
-      if (activeScene->getActionMap().find(event.button.button) ==
-          activeScene->getActionMap().end()) {
+      if (!activeScene->getActionMap().contains(event.button.button)) {
         continue;
       }
 

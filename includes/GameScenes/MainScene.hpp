@@ -8,7 +8,7 @@
 #include <iostream>
 #include <random>
 
-class MainScene : public Scene {
+class MainScene final : public Scene {
 private:
   Uint64                  m_lastEnemySpawnTime = 0;
   Uint64                  m_lastFrameTime      = 0;
@@ -22,10 +22,10 @@ private:
   bool                    m_gameOver      = false;
   std::random_device      m_rd;
   std::mt19937            m_randomGenerator = std::mt19937(m_rd());
-  void                    renderText();
+  void                    renderText() const;
 
 public:
-  MainScene(GameEngine *gameEngine);
+  explicit MainScene(GameEngine *gameEngine);
 
   void update() override;
   void onEnd() override;
@@ -36,11 +36,11 @@ public:
   void sMovement();
   void sSpawner();
   void sLifespan();
-  void sEffects();
+  void sEffects() const;
   void sTimer();
 
   int  getScore() const;
-  void setScore(const int score);
+  void setScore(int score);
   void decrementLives();
 
   void setGameOver();

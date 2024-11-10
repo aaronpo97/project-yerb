@@ -11,19 +11,20 @@
 #include <random>
 
 namespace SpawnHelpers {
-  std::shared_ptr<Entity> spawnPlayer(SDL_Renderer  *renderer,
-                                      ConfigManager &configManager,
-                                      EntityManager &entityManager);
+  std::shared_ptr<Entity> spawnPlayer(SDL_Renderer        *renderer,
+                                      const ConfigManager &configManager,
+                                      EntityManager       &entityManager);
 
-  void spawnEnemy(SDL_Renderer  *renderer,
-                  ConfigManager &configManager,
-                  std::mt19937  &randomGenerator,
-                  EntityManager &entityManager);
+  void spawnEnemy(SDL_Renderer                  *renderer,
+                  const ConfigManager           &configManager,
+                  std::mt19937                  &randomGenerator,
+                  EntityManager                 &entityManager,
+                  const std::shared_ptr<Entity> &player);
 
-  void spawnSpeedBoostEntity(SDL_Renderer  *renderer,
-                             ConfigManager &configManager,
-                             std::mt19937  &randomGenerator,
-                             EntityManager &entityManager);
+  void spawnSpeedBoostEntity(SDL_Renderer        *renderer,
+                             const ConfigManager &configManager,
+                             std::mt19937        &randomGenerator,
+                             EntityManager       &entityManager);
 
   void spawnSlownessEntity(SDL_Renderer        *renderer,
                            const ConfigManager &configManager,
@@ -32,11 +33,10 @@ namespace SpawnHelpers {
 
   void spawnWalls(SDL_Renderer        *renderer,
                   const ConfigManager &configManager,
-                  std::mt19937        &randomGenerator,
                   EntityManager       &entityManager);
 
   void spawnBullets(SDL_Renderer                  *renderer,
-                    ConfigManager                 &configManager,
+                    const ConfigManager           &configManager,
                     EntityManager                 &entityManager,
                     const std::shared_ptr<Entity> &player,
                     const Vec2                    &mousePosition);

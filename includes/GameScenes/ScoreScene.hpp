@@ -3,11 +3,11 @@
 #include "../GameEngine/GameEngine.hpp"
 #include "../GameScenes/Scene.hpp"
 
-class ScoreScene : public Scene {
+class ScoreScene final : public Scene {
 private:
   unsigned int m_score;
   unsigned int m_selectedIndex = 0;
-  void         renderText();
+  void         renderText() const;
 
 public:
   ScoreScene(GameEngine *gameEngine, int score);

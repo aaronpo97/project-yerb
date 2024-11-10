@@ -1,8 +1,7 @@
 
 #include "../../includes/EntityManagement/EntityManager.hpp"
 #include "../../includes/EntityManagement/Entity.hpp"
-
-#include <iostream>
+#include <ranges> // For std::ranges::views
 
 EntityManager::EntityManager() = default;
 
@@ -21,9 +20,7 @@ EntityVector &EntityManager::getEntities(const EntityTags tag) {
 
 void EntityManager::update() {
   auto removeDeadEntities = [](EntityVector &entityVec) {
-    entityVec.erase(std::remove_if(entityVec.begin(), entityVec.end(),
-                                   [](auto &entity) { return !entity->isActive(); }),
-                    entityVec.end());
+    std::erase_if(entityVec, [](auto &entity) { return !entity->isActive(); });
   };
 
   // add all entities in the `m_toAdd` vector to the main entity vector
@@ -35,8 +32,9 @@ void EntityManager::update() {
   // Remove dead entities from the vector of all entities
   removeDeadEntities(m_entities);
   // Remove dead entities from each vector in the entity map
-  for (auto &[tag, entityVec] : m_entityMap) {
+  for (auto &entityVec : m_entityMap | std::views::values) {
     removeDeadEntities(entityVec);
   }
+
   m_toAdd.clear();
 }

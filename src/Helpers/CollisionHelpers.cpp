@@ -1,11 +1,9 @@
-
 #include "../../includes/Helpers/CollisionHelpers.hpp"
 #include "../../includes/EntityManagement/Entity.hpp"
 #include "../../includes/GameScenes/MainScene.hpp"
 #include "../../includes/Helpers/EntityHelpers.hpp"
 
 #include <bitset>
-#include <iostream>
 
 enum Boundaries : Uint8 { TOP, BOTTOM, LEFT, RIGHT };
 enum RelativePosition : Uint8 { ABOVE, BELOW, LEFT_OF, RIGHT_OF };
@@ -29,10 +27,12 @@ namespace CollisionHelpers {
 
     const Vec2 &topLeftCornerPos = entity->cTransform->topLeftCornerPos;
 
-    const bool collidesWithTop    = topLeftCornerPos.y <= 0;
-    const bool collidesWithBottom = topLeftCornerPos.y + entityCShape->rect.h >= window_size.y;
-    const bool collidesWithLeft   = topLeftCornerPos.x <= 0;
-    const bool collidesWithRight  = topLeftCornerPos.x + entityCShape->rect.w >= window_size.x;
+    const bool collidesWithTop = topLeftCornerPos.y <= 0;
+    const bool collidesWithBottom =
+        topLeftCornerPos.y + static_cast<float>(entityCShape->rect.h) >= window_size.y;
+    const bool collidesWithLeft = topLeftCornerPos.x <= 0;
+    const bool collidesWithRight =
+        topLeftCornerPos.x + static_cast<float>(entityCShape->rect.w) >= window_size.x;
 
     std::bitset<4> collidesWithBoundary;
     collidesWithBoundary[TOP]    = collidesWithTop;
@@ -59,22 +59,24 @@ namespace CollisionHelpers {
                    entityB->id(), entityB->tag());
       return {0, 0};
     }
-    const Vec2 &playerPos     = entityA->cTransform->topLeftCornerPos;
-    const Vec2 &wallPos       = entityB->cTransform->topLeftCornerPos;
-    const Vec2 halfSizePlayer = Vec2(entityA->cShape->rect.w / 2, entityA->cShape->rect.h / 2);
-    const Vec2 halfSizeWall   = Vec2(entityB->cShape->rect.w / 2, entityB->cShape->rect.h / 2);
 
-    const Vec2 &playerCenter =
-        playerPos + Vec2(entityA->cShape->rect.w / 2, entityA->cShape->rect.h / 2);
-    const Vec2 &wallCenter =
-        wallPos + Vec2(entityB->cShape->rect.w / 2, entityB->cShape->rect.h / 2);
+    const float halfWidthA  = static_cast<float>(entityA->cShape->rect.w) / 2.0f;
+    const float halfHeightA = static_cast<float>(entityA->cShape->rect.h) / 2.0f;
 
-    const Vec2 delta =
-        Vec2(std::abs(playerCenter.x - wallCenter.x), std::abs(playerCenter.y - wallCenter.y));
+    const float halfWidthB  = static_cast<float>(entityB->cShape->rect.w) / 2.0f;
+    const float halfHeightB = static_cast<float>(entityB->cShape->rect.h) / 2.0f;
+
+    const auto halfSizeA = Vec2(halfWidthA, halfHeightA);
+    const auto halfSizeB = Vec2(halfWidthB, halfHeightB);
+
+    const Vec2 &centerA = entityA->getCenterPos();
+    const Vec2 &centerB = entityB->getCenterPos();
+
+    const auto delta = Vec2(std::abs(centerA.x - centerB.x), std::abs(centerA.y - centerB.y));
 
     const Vec2 overlap = {
-        halfSizePlayer.x + halfSizeWall.x - delta.x,
-        halfSizePlayer.y + halfSizeWall.y - delta.y,
+        halfSizeA.x + halfSizeB.x - delta.x,
+        halfSizeA.y + halfSizeB.y - delta.y,
     };
 
     return overlap;
@@ -116,24 +118,20 @@ namespace CollisionHelpers {
                    entityB->id(), entityB->tag());
       return std::bitset<4>({});
     }
-    const Vec2 &entityAPos = entityA->cTransform->topLeftCornerPos;
-    const Vec2 &entityBPos = entityB->cTransform->topLeftCornerPos;
 
-    const Vec2 &entityACenter =
-        entityAPos + Vec2(entityA->cShape->rect.w / 2, entityA->cShape->rect.h / 2);
-    const Vec2 &entityBCenter =
-        entityBPos + Vec2(entityB->cShape->rect.w / 2, entityB->cShape->rect.h / 2);
+    const Vec2 &centerA = entityA->getCenterPos();
+    const Vec2 &centerB = entityB->getCenterPos();
 
     std::bitset<4> relativePosition;
-    relativePosition[ABOVE]    = entityACenter.y < entityBCenter.y;
-    relativePosition[BELOW]    = entityACenter.y > entityBCenter.y;
-    relativePosition[LEFT_OF]  = entityACenter.x < entityBCenter.x;
-    relativePosition[RIGHT_OF] = entityACenter.x > entityBCenter.x;
+    relativePosition[ABOVE]    = centerA.y < centerB.y;
+    relativePosition[BELOW]    = centerA.y > centerB.y;
+    relativePosition[LEFT_OF]  = centerA.x < centerB.x;
+    relativePosition[RIGHT_OF] = centerA.x > centerB.x;
 
     return relativePosition;
   }
 
-}; // namespace CollisionHelpers
+} // namespace CollisionHelpers
 
 namespace CollisionHelpers::MainScene::Enforce {
   void enforcePlayerBounds(const std::shared_ptr<Entity> &entity,
@@ -152,13 +150,13 @@ namespace CollisionHelpers::MainScene::Enforce {
       leftCornerPosition.y = 0;
     }
     if (collides[BOTTOM]) {
-      leftCornerPosition.y = window_size.y - cShape->rect.h;
+      leftCornerPosition.y = window_size.y - static_cast<float>(cShape->rect.h);
     }
     if (collides[LEFT]) {
       leftCornerPosition.x = 0;
     }
     if (collides[RIGHT]) {
-      leftCornerPosition.x = window_size.x - cShape->rect.w;
+      leftCornerPosition.x = window_size.x - static_cast<float>(cShape->rect.w);
     }
   }
 
@@ -183,7 +181,7 @@ namespace CollisionHelpers::MainScene::Enforce {
       velocity.y           = -velocity.y;
     }
     if (collides[BOTTOM]) {
-      leftCornerPosition.y = window_size.y - cShape->rect.h;
+      leftCornerPosition.y = window_size.y - static_cast<float>(cShape->rect.h);
       velocity.y           = -velocity.y;
     }
     if (collides[LEFT]) {
@@ -191,10 +189,10 @@ namespace CollisionHelpers::MainScene::Enforce {
       velocity.x           = -velocity.x;
     }
     if (collides[RIGHT]) {
-      leftCornerPosition.x = window_size.x - cShape->rect.w;
+      leftCornerPosition.x = window_size.x - static_cast<float>(cShape->rect.w);
       velocity.x           = -velocity.x;
     }
-  };
+  }
 
   void enforceCollisionWithWall(const std::shared_ptr<Entity> &entity,
                                 const std::shared_ptr<Entity> &wall) {
@@ -339,40 +337,40 @@ namespace CollisionHelpers::MainScene::Enforce {
     bullet->destroy();
   }
 
-}; // namespace CollisionHelpers::MainScene::Enforce
+} // namespace CollisionHelpers::MainScene::Enforce
 
 namespace CollisionHelpers::MainScene {
   void handleEntityBounds(const std::shared_ptr<Entity> &entity, const Vec2 &windowSize) {
     const auto tag = entity->tag();
     if (tag == EntityTags::SpeedBoost) {
-      std::bitset<4> speedBoostCollides = detectOutOfBounds(entity, windowSize);
+      const std::bitset<4> speedBoostCollides = detectOutOfBounds(entity, windowSize);
       Enforce::enforceNonPlayerBounds(entity, speedBoostCollides, windowSize);
     }
 
     if (tag == EntityTags::Player) {
-      std::bitset<4> playerCollides = detectOutOfBounds(entity, windowSize);
+      const std::bitset<4> playerCollides = detectOutOfBounds(entity, windowSize);
       Enforce::enforcePlayerBounds(entity, playerCollides, windowSize);
     }
 
     if (tag == EntityTags::Enemy) {
-      std::bitset<4> enemyCollides = detectOutOfBounds(entity, windowSize);
+      const std::bitset<4> enemyCollides = detectOutOfBounds(entity, windowSize);
       Enforce::enforceNonPlayerBounds(entity, enemyCollides, windowSize);
     }
 
     if (tag == EntityTags::SlownessDebuff) {
-      std::bitset<4> slownessCollides = detectOutOfBounds(entity, windowSize);
+      const std::bitset<4> slownessCollides = detectOutOfBounds(entity, windowSize);
       Enforce::enforceNonPlayerBounds(entity, slownessCollides, windowSize);
     }
 
     if (tag == EntityTags::Bullet) {
-      std::bitset<4> bulletCollides = detectOutOfBounds(entity, windowSize);
+      const std::bitset<4> bulletCollides = detectOutOfBounds(entity, windowSize);
       Enforce::enforceBulletCollision(entity, bulletCollides.any());
     }
     if (tag == EntityTags::Item) {
-      std::bitset<4> itemCollides = detectOutOfBounds(entity, windowSize);
+      const std::bitset<4> itemCollides = detectOutOfBounds(entity, windowSize);
       Enforce::enforceNonPlayerBounds(entity, itemCollides, windowSize);
     }
-  };
+  }
 
   void handleEntityEntityCollision(const CollisionPair &collisionPair, const GameState &args) {
     const std::shared_ptr<Entity> &entity      = collisionPair.entityA;
@@ -381,22 +379,22 @@ namespace CollisionHelpers::MainScene {
     const EntityTags tag      = entity->tag();
     const EntityTags otherTag = otherEntity->tag();
 
-    const Uint64 minSlownessDuration   = 5000;
-    const Uint64 maxSlownessDuration   = 10000;
-    const Uint64 minSpeedBoostDuration = 9000;
-    const Uint64 maxSpeedBoostDuration = 15000;
+    constexpr Uint64 minSlownessDuration   = 5000;
+    constexpr Uint64 maxSlownessDuration   = 10000;
+    constexpr Uint64 minSpeedBoostDuration = 9000;
+    constexpr Uint64 maxSpeedBoostDuration = 15000;
 
     std::uniform_int_distribution<Uint64> randomSlownessDuration(minSlownessDuration,
                                                                  maxSlownessDuration);
     std::uniform_int_distribution<Uint64> randomSpeedBoostDuration(minSpeedBoostDuration,
                                                                    maxSpeedBoostDuration);
 
-    const int                m_score           = args.score;
-    std::function<void(int)> setScore          = args.setScore;
-    EntityManager           &m_entities        = args.entityManager;
-    std::mt19937            &m_randomGenerator = args.randomGenerator;
-    std::function<void()>    decrementLives    = args.decrementLives;
-    const Vec2              &windowSize        = args.windowSize;
+    const int                      m_score           = args.score;
+    EntityManager                 &m_entities        = args.entityManager;
+    std::mt19937                  &m_randomGenerator = args.randomGenerator;
+    const std::function<void()>    decrementLives    = args.decrementLives;
+    const std::function<void(int)> setScore          = args.setScore;
+    const Vec2                    &windowSize        = args.windowSize;
 
     if (entity == otherEntity) {
       return;
@@ -446,7 +444,7 @@ namespace CollisionHelpers::MainScene {
       const std::shared_ptr<CTransform> &cTransform = entity->cTransform;
       cTransform->topLeftCornerPos                  = {windowSize.x / 2, windowSize.y / 2};
 
-      const float        REMOVAL_RADIUS   = 150.0f;
+      constexpr float    REMOVAL_RADIUS   = 150.0f;
       const EntityVector entitiesToRemove = EntityHelpers::getEntitiesInRadius(
           entity, m_entities.getEntities(EntityTags::Enemy), REMOVAL_RADIUS);
 
@@ -469,7 +467,7 @@ namespace CollisionHelpers::MainScene {
                             slownessDebuffs.end());
       effectsToCheck.insert(effectsToCheck.end(), speedBoosts.begin(), speedBoosts.end());
 
-      const float        REMOVAL_RADIUS = 150.0f;
+      constexpr float    REMOVAL_RADIUS = 150.0f;
       const EntityVector entitiesToRemove =
           EntityHelpers::getEntitiesInRadius(entity, effectsToCheck, REMOVAL_RADIUS);
 
@@ -487,7 +485,7 @@ namespace CollisionHelpers::MainScene {
       const EntityVector &slownessDebuffs = m_entities.getEntities(EntityTags::SlownessDebuff);
       const EntityVector &speedBoosts     = m_entities.getEntities(EntityTags::SpeedBoost);
 
-      const float        REMOVAL_RADIUS = 150.0f;
+      constexpr float    REMOVAL_RADIUS = 150.0f;
       const EntityVector entitiesToRemove =
           EntityHelpers::getEntitiesInRadius(entity, speedBoosts, REMOVAL_RADIUS);
 
@@ -496,9 +494,11 @@ namespace CollisionHelpers::MainScene {
       }
 
       // set the lifespan of the speed boost to 10% of previous value
-      const float MULTIPLIER = 0.1f;
       for (const auto &speedBoost : speedBoosts) {
-        speedBoost->cLifespan->lifespan *= MULTIPLIER;
+        constexpr float MULTIPLIER = 0.1f;
+        Uint64         &lifespan   = speedBoost->cLifespan->lifespan;
+
+        lifespan = static_cast<Uint64>(std::round(static_cast<float>(lifespan) * MULTIPLIER));
       }
       for (const auto &slowDebuff : slownessDebuffs) {
         slowDebuff->destroy();
@@ -521,6 +521,6 @@ namespace CollisionHelpers::MainScene {
     if (tag == EntityTags::Item && otherTag == EntityTags::SlownessDebuff) {
       Enforce::enforceEntityEntityCollision(entity, otherEntity);
     }
-  };
+  }
 
 } // namespace CollisionHelpers::MainScene

@@ -1,3 +1,6 @@
-window.Module = {
-  canvas: document.getElementById("canvas"),
-};
+const canvas = document.querySelector("#canvas")
+canvas.addEventListener('contextmenu', (event) => {
+  event.preventDefault();
+});
+
+window.Module = { canvas };

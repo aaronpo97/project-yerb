@@ -12,17 +12,16 @@
 #include "../../includes/Helpers/SpawnHelpers.hpp"
 #include "../../includes/Helpers/TextHelpers.hpp"
 #include "../../includes/Helpers/Vec2.hpp"
-#include <memory>
 
 MainScene::MainScene(GameEngine *gameEngine) :
     Scene(gameEngine) {
-  SDL_Renderer  *renderer      = gameEngine->getRenderer();
-  ConfigManager &configManager = gameEngine->getConfigManager();
+  SDL_Renderer        *renderer      = gameEngine->getRenderer();
+  const ConfigManager &configManager = gameEngine->getConfigManager();
 
   m_entities = EntityManager();
   m_player   = SpawnHelpers::spawnPlayer(renderer, configManager, m_entities);
 
-  SpawnHelpers::spawnWalls(renderer, configManager, m_randomGenerator, m_entities);
+  SpawnHelpers::spawnWalls(renderer, configManager, m_entities);
 
   // WASD
   registerAction(SDLK_w, "FORWARD");
@@ -37,11 +36,11 @@ MainScene::MainScene(GameEngine *gameEngine) :
 
   // Go to menu
   registerAction(SDLK_BACKSPACE, "GO_BACK");
-};
+}
 
 void MainScene::update() {
   const Uint64 currentTime = SDL_GetTicks64();
-  m_deltaTime              = (currentTime - m_lastFrameTime) / 1000.0f;
+  m_deltaTime              = static_cast<float>(currentTime - m_lastFrameTime) / 1000.0f;
 
   if (!m_paused && !m_gameOver) {
     sMovement();
@@ -57,7 +56,6 @@ void MainScene::update() {
 }
 
 void MainScene::sDoAction(Action &action) {
-  const std::string &actionName  = action.getName();
   const ActionState &actionState = action.getState();
 
   if (m_player == nullptr) {
@@ -116,45 +114,45 @@ void MainScene::sDoAction(Action &action) {
   }
 }
 
-void MainScene::renderText() {
+void MainScene::renderText() const {
   SDL_Renderer *renderer = m_gameEngine->getRenderer();
   TTF_Font     *fontSm   = m_gameEngine->getFontManager().getFontSm();
   TTF_Font     *fontMd   = m_gameEngine->getFontManager().getFontMd();
 
-  const SDL_Color   scoreColor = {255, 255, 255, 255};
-  const std::string scoreText  = "Score: " + std::to_string(m_score);
-  const Vec2        scorePos   = {10, 10};
+  constexpr SDL_Color scoreColor = {255, 255, 255, 255};
+  const std::string   scoreText  = "Score: " + std::to_string(m_score);
+  const Vec2          scorePos   = {10, 10};
   TextHelpers::renderLineOfText(renderer, fontMd, scoreText, scoreColor, scorePos);
 
-  const SDL_Color   livesColor = {255, 255, 255, 255};
-  const std::string livesText  = "Lives: " + std::to_string(m_lives);
-  const Vec2        livesPos   = {10, 40};
+  constexpr SDL_Color livesColor = {255, 255, 255, 255};
+  const std::string   livesText  = "Lives: " + std::to_string(m_lives);
+  const Vec2          livesPos   = {10, 40};
   TextHelpers::renderLineOfText(renderer, fontMd, livesText, livesColor, livesPos);
 
-  const Uint64      timeRemaining = m_timeRemaining;
-  const Uint64      minutes       = timeRemaining / 60000;
-  const Uint64      seconds       = (timeRemaining % 60000) / 1000;
-  const SDL_Color   timeColor     = {255, 255, 255, 255};
-  const std::string timeText      = "Time: " + std::to_string(minutes) + ":" +
+  const Uint64        timeRemaining = m_timeRemaining;
+  const Uint64        minutes       = timeRemaining / 60000;
+  const Uint64        seconds       = timeRemaining % 60000 / 1000;
+  constexpr SDL_Color timeColor     = {255, 255, 255, 255};
+  const std::string   timeText      = "Time: " + std::to_string(minutes) + ":" +
                                (seconds < 10 ? "0" : "") + std::to_string(seconds);
   const Vec2 timePos = {10, 70};
 
   TextHelpers::renderLineOfText(renderer, fontMd, timeText, timeColor, timePos);
 
   if (m_player->cEffects->hasEffect(EffectTypes::Speed)) {
-    const SDL_Color   speedBoostColor = {0, 255, 0, 255};
-    const std::string speedBoostText  = "Speed Boost Active!";
-    const Vec2        speedBoostPos   = {10, 120};
+    constexpr SDL_Color speedBoostColor = {0, 255, 0, 255};
+    const std::string   speedBoostText  = "Speed Boost Active!";
+    const Vec2          speedBoostPos   = {10, 120};
     TextHelpers::renderLineOfText(renderer, fontSm, speedBoostText, speedBoostColor,
                                   speedBoostPos);
-  };
+  }
 
   if (m_player->cEffects->hasEffect(EffectTypes::Slowness)) {
-    const SDL_Color   slownessColor = {255, 0, 0, 255};
-    const std::string slownessText  = "Slowness Active!";
-    const Vec2        slownessPos   = {10, 120};
+    constexpr SDL_Color slownessColor = {255, 0, 0, 255};
+    const std::string   slownessText  = "Slowness Active!";
+    const Vec2          slownessPos   = {10, 120};
     TextHelpers::renderLineOfText(renderer, fontSm, slownessText, slownessColor, slownessPos);
-  };
+  }
 }
 
 void MainScene::sRender() {
@@ -162,19 +160,19 @@ void MainScene::sRender() {
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
   SDL_RenderClear(renderer);
 
-  for (auto &entity : m_entities.getEntities()) {
+  for (const auto &entity : m_entities.getEntities()) {
     if (entity->cShape == nullptr) {
       continue;
     }
 
-    SDL_Rect &rect = entity->cShape->rect;
-    Vec2     &pos  = entity->cTransform->topLeftCornerPos;
+    SDL_Rect   &rect = entity->cShape->rect;
+    const Vec2 &pos  = entity->cTransform->topLeftCornerPos;
 
     rect.x = static_cast<int>(pos.x);
     rect.y = static_cast<int>(pos.y);
 
-    const SDL_Color &color = entity->cShape->color;
-    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    const auto &[r, g, b, a] = entity->cShape->color;
+    SDL_SetRenderDrawColor(renderer, r, g, b, a);
     SDL_RenderFillRect(renderer, &rect);
   }
 
@@ -192,7 +190,7 @@ void MainScene::sCollision() {
   const GameState gameState = {.entityManager   = m_entities,
                                .randomGenerator = m_randomGenerator,
                                .score           = m_score,
-                               .setScore        = [this](int score) { setScore(score); },
+                               .setScore        = [this](const int score) { setScore(score); },
                                .decrementLives  = [this]() { decrementLives(); },
                                .windowSize      = windowSize};
 
@@ -201,7 +199,7 @@ void MainScene::sCollision() {
     for (auto &otherEntity : m_entities.getEntities()) {
       const CollisionPair collisionPair = {.entityA = entity, .entityB = otherEntity};
       handleEntityEntityCollision(collisionPair, gameState);
-    };
+    }
   }
 
   m_entities.update();
@@ -215,7 +213,7 @@ void MainScene::sMovement() {
   const SpeedBoostEffectConfig &speedBoostEffectConfig =
       configManager.getSpeedBoostEffectConfig();
 
-  for (std::shared_ptr<Entity> entity : m_entities.getEntities()) {
+  for (const std::shared_ptr<Entity> &entity : m_entities.getEntities()) {
     MovementHelpers::moveSpeedBoosts(entity, speedBoostEffectConfig, m_deltaTime);
     MovementHelpers::moveEnemies(entity, enemyConfig, m_deltaTime);
     MovementHelpers::movePlayer(entity, playerConfig, m_deltaTime);
@@ -226,10 +224,10 @@ void MainScene::sMovement() {
 }
 
 void MainScene::sSpawner() {
-  ConfigManager &configManager  = m_gameEngine->getConfigManager();
-  SDL_Renderer  *renderer       = m_gameEngine->getRenderer();
-  const Uint64   ticks          = SDL_GetTicks64();
-  const Uint64   SPAWN_INTERVAL = configManager.getGameConfig().spawnInterval;
+  const ConfigManager &configManager  = m_gameEngine->getConfigManager();
+  SDL_Renderer        *renderer       = m_gameEngine->getRenderer();
+  const Uint64         ticks          = SDL_GetTicks64();
+  const Uint64         SPAWN_INTERVAL = configManager.getGameConfig().spawnInterval;
 
   if (ticks - m_lastEnemySpawnTime < SPAWN_INTERVAL) {
     return;
@@ -247,12 +245,13 @@ void MainScene::sSpawner() {
 
   std::uniform_int_distribution<unsigned int> distribution(0, 100);
 
-  std::mt19937 &randomGenerator = m_randomGenerator;
-  auto meetsSpawnPercentage = [&randomGenerator, &distribution](unsigned int chance) -> bool {
+  std::mt19937 &randomGenerator      = m_randomGenerator;
+  auto          meetsSpawnPercentage = [&randomGenerator,
+                               &distribution](const unsigned int chance) -> bool {
     return distribution(randomGenerator) < chance;
   };
 
-  struct SpawnDecisions {
+  const struct SpawnDecisions {
     bool enemy;
     bool speedBoost;
     bool slowness;
@@ -265,7 +264,7 @@ void MainScene::sSpawner() {
                  .item = meetsSpawnPercentage(itemConfig.spawnPercentage)};
 
   if (decisions.enemy) {
-    SpawnHelpers::spawnEnemy(renderer, configManager, m_randomGenerator, m_entities);
+    SpawnHelpers::spawnEnemy(renderer, configManager, m_randomGenerator, m_entities, m_player);
   }
 
   if (decisions.speedBoost) {
@@ -282,20 +281,20 @@ void MainScene::sSpawner() {
   }
 }
 
-void MainScene::sEffects() {
+void MainScene::sEffects() const {
   const std::vector<Effect> effects = m_player->cEffects->getEffects();
   if (effects.empty()) {
     return;
   }
 
   const Uint64 currentTime = SDL_GetTicks64();
-  for (const Effect &effect : effects) {
-    const bool effectExpired = currentTime - effect.startTime > effect.duration;
+  for (const auto &[startTime, duration, type] : effects) {
+    const bool effectExpired = currentTime - startTime > duration;
     if (!effectExpired) {
       return;
     }
 
-    m_player->cEffects->removeEffect(effect.type);
+    m_player->cEffects->removeEffect(type);
   }
 }
 
@@ -317,7 +316,7 @@ void MainScene::sTimer() {
 }
 
 void MainScene::sLifespan() {
-  for (auto &entity : m_entities.getEntities()) {
+  for (const auto &entity : m_entities.getEntities()) {
     const auto tag = entity->tag();
     if (tag == EntityTags::Player) {
       continue;
@@ -336,13 +335,14 @@ void MainScene::sLifespan() {
     const Uint64 elapsedTime = currentTime - entity->cLifespan->birthTime;
     // Calculate the lifespan percentage, ensuring it's clamped between 0 and 1
     const float lifespanPercentage =
-        std::min(1.0f, static_cast<float>(elapsedTime) / entity->cLifespan->lifespan);
+        std::min(1.0f, static_cast<float>(elapsedTime) /
+                           static_cast<float>(entity->cLifespan->lifespan));
 
     const bool entityExpired = elapsedTime > entity->cLifespan->lifespan;
     if (!entityExpired) {
-      const float MAX_COLOR_VALUE = 255.0f;
-      const Uint8 alpha           = std::max(
-          0.0f, std::min(MAX_COLOR_VALUE, MAX_COLOR_VALUE * (1.0f - lifespanPercentage)));
+      constexpr float MAX_COLOR_VALUE = 255.0f;
+      const Uint8     alpha           = static_cast<Uint8>(std::max(
+          0.0f, std::min(MAX_COLOR_VALUE, MAX_COLOR_VALUE * (1.0f - lifespanPercentage))));
 
       SDL_Color &color = entity->cShape->color;
       color            = {.r = color.r, .g = color.g, .b = color.b, .a = alpha};
@@ -371,7 +371,6 @@ void MainScene::setScore(const int score) {
   if (m_score < 0) {
     m_score = 0;
     setGameOver();
-    return;
   }
 }
 

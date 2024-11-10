@@ -37,7 +37,7 @@ void MenuScene::sRender() {
   SDL_RenderPresent(renderer);
 }
 
-void MenuScene::renderText() {
+void MenuScene::renderText() const {
   SDL_Renderer *renderer      = m_gameEngine->getRenderer();
   TTF_Font     *fontLg        = m_gameEngine->getFontManager().getFontLg();
   TTF_Font     *fontMd        = m_gameEngine->getFontManager().getFontMd();
@@ -90,6 +90,5 @@ void MenuScene::sDoAction(Action &action) {
 
   if (action.getName() == "DOWN") {
     m_selectedIndex < 1 ? m_selectedIndex += 1 : m_selectedIndex = 0;
-    return;
   }
 }

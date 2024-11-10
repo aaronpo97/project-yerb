@@ -2,7 +2,6 @@
 #include "../../includes/GameScenes/MenuScene.hpp"
 #include "../../includes/Helpers/TextHelpers.hpp"
 #include <SDL2/SDL.h>
-#include <iostream>
 
 HowToPlayScene::HowToPlayScene(GameEngine *gameEngine) :
     Scene(gameEngine) {
@@ -26,12 +25,12 @@ void HowToPlayScene::sRender() {
   SDL_RenderPresent(renderer);
 }
 
-void HowToPlayScene::renderText() {
-  SDL_Renderer   *renderer  = m_gameEngine->getRenderer();
-  TTF_Font       *fontSm    = m_gameEngine->getFontManager().getFontSm();
-  TTF_Font       *fontMd    = m_gameEngine->getFontManager().getFontMd();
-  TTF_Font       *fontLg    = m_gameEngine->getFontManager().getFontLg();
-  const SDL_Color textColor = {255, 255, 255, 255};
+void HowToPlayScene::renderText() const {
+  SDL_Renderer       *renderer  = m_gameEngine->getRenderer();
+  TTF_Font           *fontSm    = m_gameEngine->getFontManager().getFontSm();
+  TTF_Font           *fontMd    = m_gameEngine->getFontManager().getFontMd();
+  TTF_Font           *fontLg    = m_gameEngine->getFontManager().getFontLg();
+  constexpr SDL_Color textColor = {.r = 255, .g = 255, .b = 255, .a = 255};
 
   const bool fontsLoaded = fontSm != nullptr && fontMd != nullptr && fontLg != nullptr;
 
