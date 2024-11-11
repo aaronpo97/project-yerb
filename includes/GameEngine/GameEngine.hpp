@@ -1,8 +1,9 @@
 #pragma once
 
+#include "../AssetManagement/AudioManager.hpp"
+#include "../AssetManagement/FontManager.hpp"
 #include "../Configuration/ConfigManager.hpp"
-#include "../Configuration/FontManager.hpp"
-#include "../Helpers/AudioManager.hpp"
+
 #include <SDL2/SDL.h>
 #include <map>
 #include <memory>

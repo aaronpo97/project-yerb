@@ -1,4 +1,13 @@
-#include "../../includes/Helpers/AudioManager.hpp"
+#include "../../includes/AssetManagement/AudioManager.hpp"
+
+#define MAIN_MENU_MUSIC_PATH "assets/audio/tracks/main_menu.ogg"
+#define PLAY_MUSIC_PATH "assets/audio/tracks/play.ogg"
+#define ITEM_ACQUIRED_SOUND_PATH "assets/audio/samples/item_acquired.wav"
+#define ENEMY_COLLIDES_SOUND_PATH "assets/audio/samples/enemy_collides.wav"
+#define SPEED_BOOST_COLLIDES_SOUND_PATH "assets/audio/samples/speed_boost_collides.wav"
+#define SLOWNESS_DEBUFF_COLLIDES_SOUND_PATH "assets/audio/samples/slowness_debuff_collides.wav"
+#define MENU_MOVE_SOUND_PATH "assets/audio/samples/menu_move.wav"
+#define MENU_SELECT_SOUND_PATH "assets/audio/samples/menu_select.wav"
 
 AudioManager::AudioManager(int frequency, Uint16 format, int channels, int chunksize) {
   if (SDL_Init(SDL_INIT_AUDIO) != 0) {
@@ -18,16 +27,15 @@ AudioManager::~AudioManager() {
 }
 
 void AudioManager::loadAllAudio() {
-  loadMusic(MusicTrack::MainMenu, "assets/audio/tracks/main_menu.ogg");
-  loadMusic(MusicTrack::Play, "assets/audio/tracks/play.ogg");
+  loadMusic(MusicTrack::MainMenu, MAIN_MENU_MUSIC_PATH);
+  loadMusic(MusicTrack::Play, PLAY_MUSIC_PATH);
 
-  loadSample(SoundEffect::ItemAcquired, "assets/audio/samples/item_acquired.wav");
-  loadSample(SoundEffect::EnemyCollides, "assets/audio/samples/enemy_collides.wav");
-  loadSample(SoundEffect::SpeedBoostCollides, "assets/audio/samples/speed_boost_collides.wav");
-  loadSample(SoundEffect::SlownessDebuffCollides,
-             "assets/audio/samples/slowness_debuff_collides.wav");
-  loadSample(SoundEffect::MenuMove, "assets/audio/samples/menu_move.wav");
-  loadSample(SoundEffect::MenuSelect, "assets/audio/samples/menu_select.wav");
+  loadSample(SoundEffect::ItemAcquired, ITEM_ACQUIRED_SOUND_PATH);
+  loadSample(SoundEffect::EnemyCollides, ENEMY_COLLIDES_SOUND_PATH);
+  loadSample(SoundEffect::SpeedBoostCollides, SPEED_BOOST_COLLIDES_SOUND_PATH);
+  loadSample(SoundEffect::SlownessDebuffCollides, SLOWNESS_DEBUFF_COLLIDES_SOUND_PATH);
+  loadSample(SoundEffect::MenuMove, MENU_MOVE_SOUND_PATH);
+  loadSample(SoundEffect::MenuSelect, MENU_SELECT_SOUND_PATH);
 }
 
 void AudioManager::loadMusic(MusicTrack track, const std::string &filepath) {
@@ -89,17 +97,17 @@ bool AudioManager::isMusicPaused() const {
 }
 
 void AudioManager::cleanup() {
-  for (auto &pair : m_music) {
-    if (pair.second) {
-      Mix_FreeMusic(pair.second);
-      pair.second = nullptr;
+  for (auto &[_sampleName, sample] : m_soundEffects) {
+    if (sample != nullptr) {
+      Mix_FreeChunk(sample);
+      sample = nullptr;
     }
   }
 
-  for (auto &pair : m_soundEffects) {
-    if (pair.second) {
-      Mix_FreeChunk(pair.second);
-      pair.second = nullptr;
+  for (auto &[_trackName, track] : m_music) {
+    if (track != nullptr) {
+      Mix_FreeMusic(track);
+      track = nullptr;
     }
   }
 

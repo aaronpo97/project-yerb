@@ -27,17 +27,17 @@ if(NOT EMSCRIPTEN)
 
         FetchContent_MakeAvailable(SDL_ttf)
 
-        # Configure SDL_mixer build options
-        # Configure SDL_mixer build options - disable all optional formats
+        # Disable all audio formats except OGG and WAV
         set(SDL2MIXER_OPUS OFF CACHE BOOL "")
         set(SDL2MIXER_OPUS_SHARED OFF CACHE BOOL "")
         set(SDL2MIXER_FLAC OFF CACHE BOOL "")
         set(SDL2MIXER_MOD OFF CACHE BOOL "")
         set(SDL2MIXER_MIDI OFF CACHE BOOL "")
-        set(SDL2MIXER_VORBIS OFF CACHE BOOL "")
-        set(SDL2MIXER_WAVPACK OFF CACHE BOOL "") # Disable WAV pack support
-        set(SDL2MIXER_MP3 OFF CACHE BOOL "") # Keep MP3 support
-        set(SDL2MIXER_OGG ON CACHE BOOL "") # Disable OGG support
+        set(SDL2MIXER_WAVPACK OFF CACHE BOOL "")
+        set(SDL2MIXER_MP3 OFF CACHE BOOL "")
+        set(SDL2MIXER_OGG ON CACHE BOOL "")
+
+
         FetchContent_Declare(
                 SDL_mixer
                 GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
