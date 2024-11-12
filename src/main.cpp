@@ -7,7 +7,7 @@
 
 int main(int argc, char *argv[]) {
 #ifndef __EMSCRIPTEN__
-  SDL_LogSetAllPriority(SDL_LOG_PRIORITY_INFO);
+  SDL_LogSetAllPriority(SDL_LOG_PRIORITY_DEBUG);
 #endif
   auto gameEngine = GameEngine();
   gameEngine.run();

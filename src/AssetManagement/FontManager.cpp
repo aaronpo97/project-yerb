@@ -21,7 +21,7 @@ void FontManager::loadFonts(const std::string &fontPath) {
   m_font_lg = TTF_OpenFont(fontPath.c_str(), LARGE_FONT_POINT_SIZE);
 
   const bool fontsLoaded =
-      (m_font_lg != nullptr && m_font_md != nullptr && m_font_sm != nullptr);
+      m_font_lg != nullptr && m_font_md != nullptr && m_font_sm != nullptr;
 
   if (!fontsLoaded) {
     SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to load fonts: %s", TTF_GetError());

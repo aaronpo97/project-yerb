@@ -1,6 +1,5 @@
-#include <ranges>
-
 #include "../../includes/AssetManagement/AudioManager.hpp"
+
 #define MAIN_MENU_MUSIC_PATH "assets/audio/tracks/main_menu.ogg"
 #define PLAY_MUSIC_PATH "assets/audio/tracks/play.ogg"
 #define ITEM_ACQUIRED_SOUND_PATH "assets/audio/samples/item_acquired.wav"
@@ -44,8 +43,8 @@ void AudioManager::loadAllAudio() {
 }
 
 void AudioManager::loadTrack(const AudioTrack track, const std::string &filepath) {
-  m_music[track] = Mix_LoadMUS(filepath.c_str());
-  if (!m_music[track]) {
+  m_audioTracks[track] = Mix_LoadMUS(filepath.c_str());
+  if (!m_audioTracks[track]) {
     SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "Mix_LoadMUS error: %s", Mix_GetError());
     cleanup();
     throw std::runtime_error("Mix_LoadMUS error");
@@ -53,8 +52,8 @@ void AudioManager::loadTrack(const AudioTrack track, const std::string &filepath
 }
 
 void AudioManager::loadSample(const AudioSample effect, const std::string &filepath) {
-  m_soundEffects[effect] = Mix_LoadWAV(filepath.c_str());
-  if (!m_soundEffects[effect]) {
+  m_audioSamples[effect] = Mix_LoadWAV(filepath.c_str());
+  if (!m_audioSamples[effect]) {
     SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "Mix_LoadWAV error: %s", Mix_GetError());
     cleanup();
     throw std::runtime_error("Mix_LoadWAV error");
@@ -69,16 +68,16 @@ void AudioManager::playTrack(const AudioTrack track, const int loops) {
   }
 
   m_lastAudioTrack = m_currentAudioTrack;
-  if (m_music[track]) {
+  if (m_audioTracks[track]) {
     m_currentAudioTrack = track;
-    Mix_PlayMusic(m_music[track], loops);
+    Mix_PlayMusic(m_audioTracks[track], loops);
   }
 }
 
-void AudioManager::playSample(const AudioSample effect, const int loops) {
-  if (m_soundEffects[effect]) {
-    Mix_PlayChannel(-1, m_soundEffects[effect], loops);
-    m_lastAudioSample = effect;
+void AudioManager::playSample(const AudioSample sample, const int loops) {
+  if (m_audioSamples[sample]) {
+    Mix_PlayChannel(-1, m_audioSamples[sample], loops);
+    m_lastAudioSample = sample;
   }
 }
 
@@ -110,8 +109,27 @@ void AudioManager::setTrackVolume(int volume) {
   Mix_VolumeMusic(volume);
 }
 
-void AudioManager::setSampleVolume(const AudioSample effect, const int volume) {
-  Mix_VolumeChunk(m_soundEffects[effect], volume);
+void AudioManager::setSampleVolume(const AudioSample sample, int volume) {
+  if (volume > MIX_MAX_VOLUME) {
+    volume = MIX_MAX_VOLUME;
+  }
+
+  if (volume < 0) {
+    volume = 0;
+  }
+
+  Mix_VolumeChunk(m_audioSamples[sample], volume);
+}
+
+int AudioManager::getSampleVolume(const AudioSample sampleTag) {
+  const auto sample = m_audioSamples[sampleTag];
+  // Use -1 to query for the current sample volume.
+  return Mix_VolumeChunk(sample, -1);
+}
+
+int AudioManager::getTrackVolume() {
+  // Use -1 to query for the current track volume.
+  return Mix_VolumeMusic(-1);
 }
 
 bool AudioManager::isTrackPlaying() {
@@ -126,15 +144,17 @@ void AudioManager::cleanup() {
   m_currentAudioTrack = AudioTrack::None;
   m_lastAudioSample   = AudioSample::None;
 
-  for (auto &sample : m_soundEffects | std::views::values) {
+  for (auto &[sampleTag, sample] : m_audioSamples) {
     if (sample != nullptr) {
+      SDL_LogInfo(SDL_LOG_CATEGORY_AUDIO, "Freeing audio sample %d", sampleTag);
       Mix_FreeChunk(sample);
       sample = nullptr;
     }
   }
 
-  for (auto &track : m_music | std::views::values) {
+  for (auto &[trackTag, track] : m_audioTracks) {
     if (track != nullptr) {
+      SDL_LogInfo(SDL_LOG_CATEGORY_AUDIO, "Freeing audio track %d", trackTag);
       Mix_FreeMusic(track);
       track = nullptr;
     }
@@ -156,4 +176,79 @@ AudioTrack AudioManager::getLastAudioTrack() const {
 
 AudioSample AudioManager::getLastAudioSample() const {
   return m_lastAudioSample;
+}
+
+void AudioManager::muteTracks() {
+  if (!m_tracksMuted) {
+    // -1 queries for the current volume
+    m_savedTrackVolume = getTrackVolume();
+    Mix_VolumeMusic(0);
+    m_tracksMuted = true;
+  }
+}
+
+void AudioManager::unmuteTracks() {
+  if (m_tracksMuted) {
+    Mix_VolumeMusic(m_savedTrackVolume);
+    m_tracksMuted = false;
+  }
+}
+
+void AudioManager::muteSamples() {
+  if (m_samplesMuted) {
+    return;
+  }
+
+  for (const auto &[sampleTag, sample] : m_audioSamples) {
+    if (sample != nullptr) {
+      m_savedSampleVolumes[sampleTag] = getSampleVolume(sampleTag);
+      setSampleVolume(sampleTag, 0);
+    }
+  }
+
+  m_samplesMuted = true;
+}
+
+void AudioManager::unmuteSamples() {
+  if (!m_samplesMuted) {
+    return;
+  }
+
+  for (const auto &[sampleTag, audioSample] : m_audioSamples) {
+    if (audioSample != nullptr) {
+      const int savedVolume = m_savedSampleVolumes[sampleTag];
+      setSampleVolume(sampleTag, savedVolume);
+    }
+  }
+  m_samplesMuted = false;
+}
+
+void AudioManager::muteAll() {
+  muteTracks();
+  muteSamples();
+}
+
+void AudioManager::unmuteAll() {
+  unmuteTracks();
+  unmuteSamples();
+}
+
+void AudioManager::toggleMuteAll() {
+  const bool anyMuted = m_tracksMuted || m_samplesMuted;
+
+  if (anyMuted) {
+    unmuteTracks();
+    unmuteSamples();
+  } else {
+    muteTracks();
+    muteSamples();
+  }
+}
+
+void AudioManager::toggleMuteTracks() {
+  m_tracksMuted ? unmuteTracks() : muteTracks();
+}
+
+void AudioManager::toggleMuteSamples() {
+  m_samplesMuted ? unmuteSamples() : muteSamples();
 }

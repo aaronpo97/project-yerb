@@ -26,11 +26,11 @@ enum class AudioTrack {
 
 class AudioManager {
 private:
-  std::map<AudioTrack, Mix_Music *> m_music = {
+  std::map<AudioTrack, Mix_Music *> m_audioTracks = {
       {AudioTrack::MainMenu, nullptr},
       {AudioTrack::Play, nullptr},
   };
-  std::map<AudioSample, Mix_Chunk *> m_soundEffects = {
+  std::map<AudioSample, Mix_Chunk *> m_audioSamples = {
       {AudioSample::ItemAcquired, nullptr},
       {AudioSample::EnemyCollides, nullptr},
       {AudioSample::SpeedBoostCollides, nullptr},
@@ -49,6 +49,11 @@ private:
   AudioSample m_lastAudioSample   = AudioSample::None;
   bool        m_audioTrackPaused  = false;
 
+  bool                       m_tracksMuted      = false;
+  bool                       m_samplesMuted     = false;
+  int                        m_savedTrackVolume = MIX_MAX_VOLUME;
+  std::map<AudioSample, int> m_savedSampleVolumes;
+
   void loadTrack(AudioTrack track, const std::string &filepath);
   void loadSample(AudioSample effect, const std::string &filepath);
   void cleanup();
@@ -64,12 +69,26 @@ public:
   void loadAllAudio();
 
   void        playTrack(AudioTrack track, int loops = -1);
-  void        playSample(AudioSample effect, int loops = 0);
+  void        playSample(AudioSample sample, int loops = 0);
   void        stopTrack();
   void        pauseTrack();
   void        resumeTrack();
   static void setTrackVolume(int volume);
-  void        setSampleVolume(AudioSample effect, int volume);
+  void        setSampleVolume(AudioSample sample, int volume);
+
+  int        getSampleVolume(AudioSample sampleTag);
+  static int getTrackVolume();
+
+  void muteTracks();
+  void unmuteTracks();
+  void muteSamples();
+  void unmuteSamples();
+  void muteAll();
+  void unmuteAll();
+
+  void toggleMuteAll();
+  void toggleMuteTracks();
+  void toggleMuteSamples();
 
   AudioTrack  getCurrentAudioTrack() const;
   AudioTrack  getLastAudioTrack() const;
