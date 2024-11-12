@@ -8,7 +8,8 @@ html {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: #111111;
+  background-color: white;
+  user-select: none;
 }
 
 main {
@@ -21,6 +22,22 @@ main {
 }
 
 canvas {
+  height: 90%;
   max-width: 100%;
   width: fit-content;
+}
+
+.game-info {
+  height: 10%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  margin-top: 5px;
+  font-weight: bold;
+  font-style: italic;
+  font-family: sans-serif;
+  font-size: medium;
 }
