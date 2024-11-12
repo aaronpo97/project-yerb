@@ -1,7 +1,9 @@
 #pragma once
 
+#include "../AssetManagement/AudioManager.hpp"
+#include "../AssetManagement/FontManager.hpp"
 #include "../Configuration/ConfigManager.hpp"
-#include "../Configuration/FontManager.hpp"
+
 #include <SDL2/SDL.h>
 #include <map>
 #include <memory>
@@ -16,12 +18,20 @@ protected:
   bool                                          m_isRunning = false;
   std::unique_ptr<ConfigManager>                m_configManager;
   std::unique_ptr<FontManager>                  m_fontManager;
+  std::unique_ptr<AudioManager>                 m_audioManager;
 
-  void        update();
-  void        quit();
-  static void mainLoop(void *arg);
-  void        cleanup();
-  void        sUserInput();
+  void                                  update();
+  void                                  quit();
+  static void                           mainLoop(void *arg);
+  void                                  cleanup();
+  void                                  sUserInput();
+  static std::unique_ptr<ConfigManager> createConfigManager(const std::string &configPath);
+  std::unique_ptr<FontManager>          createFontManager();
+  static std::unique_ptr<AudioManager>  createAudioManager();
+  void                                  initializeVideoSystem();
+  SDL_Renderer                         *createRenderer();
+  void                                  setupRenderer();
+  SDL_Window                           *createWindow();
 
 public:
   GameEngine();
@@ -32,6 +42,7 @@ public:
 
   ConfigManager &getConfigManager() const;
   FontManager   &getFontManager() const;
+  AudioManager  &getAudioManager() const;
   SDL_Renderer  *getRenderer() const;
   SDL_Window    *getWindow() const;
 

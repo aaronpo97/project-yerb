@@ -11,6 +11,11 @@ HowToPlayScene::HowToPlayScene(GameEngine *gameEngine) :
 
 void HowToPlayScene::update() {
   sRender();
+  sAudio();
+
+  if (m_endTriggered) {
+    onEnd();
+  }
 }
 
 void HowToPlayScene::onEnd() {
@@ -121,10 +126,25 @@ void HowToPlayScene::sDoAction(Action &action) {
   }
 
   if (action.getName() == "SELECT") {
-    onEnd();
+    m_nextAudioSample = AudioSample::MenuSelect;
+    m_endTriggered    = true;
   }
 
   if (action.getName() == "GO_BACK") {
-    onEnd();
+    m_nextAudioSample = AudioSample::MenuSelect;
+    m_endTriggered    = true;
+  }
+}
+
+void HowToPlayScene::sAudio() {
+  AudioManager &audioManager = m_gameEngine->getAudioManager();
+
+  if (audioManager.getCurrentAudioTrack() != AudioTrack::MainMenu) {
+    m_gameEngine->getAudioManager().playTrack(AudioTrack::MainMenu, -1);
+  }
+
+  if (m_nextAudioSample != AudioSample::None) {
+    audioManager.playSample(m_nextAudioSample);
+    m_nextAudioSample = AudioSample::None;
   }
 }

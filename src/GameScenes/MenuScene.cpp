@@ -15,6 +15,11 @@ MenuScene::MenuScene(GameEngine *gameEngine) :
 
 void MenuScene::update() {
   sRender();
+  sAudio();
+
+  if (m_endTriggered) {
+    onEnd();
+  }
 }
 
 void MenuScene::onEnd() {
@@ -78,17 +83,35 @@ void MenuScene::sDoAction(Action &action) {
   }
 
   if (action.getName() == "SELECT") {
-    onEnd();
+    m_nextAudioSample = AudioSample::MenuSelect;
+    m_endTriggered    = true;
     return;
   }
 
   // UP takes precedence over DOWN if both are pressed
   if (action.getName() == "UP") {
+    m_nextAudioSample = AudioSample::MenuMove;
     m_selectedIndex > 0 ? m_selectedIndex -= 1 : m_selectedIndex = 1;
     return;
   }
 
   if (action.getName() == "DOWN") {
+    m_nextAudioSample = AudioSample::MenuMove;
     m_selectedIndex < 1 ? m_selectedIndex += 1 : m_selectedIndex = 0;
+  }
+}
+
+void MenuScene::sAudio() {
+  AudioManager &audioManager = m_gameEngine->getAudioManager();
+  // TEMPORARY FOR NOW
+  audioManager.muteTracks();
+
+  if (audioManager.getCurrentAudioTrack() != AudioTrack::MainMenu) {
+    m_gameEngine->getAudioManager().playTrack(AudioTrack::MainMenu, -1);
+  }
+
+  if (m_nextAudioSample != AudioSample::None) {
+    audioManager.playSample(m_nextAudioSample);
+    m_nextAudioSample = AudioSample::None;
   }
 }

@@ -16,59 +16,138 @@ GameEngine::GameEngine() {
 
   const std::string CONFIG_PATH = "./assets/config.json";
 
-  m_configManager = std::make_unique<ConfigManager>(CONFIG_PATH);
+  m_configManager = createConfigManager(CONFIG_PATH);
+  m_audioManager  = createAudioManager();
+  m_fontManager   = createFontManager();
 
-  const auto &gameConfig = m_configManager->getGameConfig();
+  initializeVideoSystem();
 
-  const std::string &FONT_PATH    = gameConfig.fontPath;
-  const std::string &WINDOW_TITLE = gameConfig.windowTitle;
-  const Vec2        &WINDOW_SIZE  = gameConfig.windowSize;
+  m_window   = createWindow();
+  m_renderer = createRenderer();
+  setupRenderer();
 
-  m_fontManager = std::make_unique<FontManager>(FONT_PATH);
+  m_isRunning = true;
 
-  // Create Video System
+  SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "Game engine initialized successfully!");
+  const std::shared_ptr<Scene> menuScene = std::make_shared<MenuScene>(this);
+  loadScene("Menu", menuScene);
+}
+
+GameEngine::~GameEngine() {
+  cleanup();
+}
+
+std::unique_ptr<ConfigManager> GameEngine::createConfigManager(const std::string &configPath) {
+  return std::make_unique<ConfigManager>(configPath);
+}
+
+std::unique_ptr<AudioManager> GameEngine::createAudioManager() {
+  constexpr int    FREQUENCY = 44100;
+  constexpr Uint16 FORMAT    = MIX_DEFAULT_FORMAT;
+  constexpr int    CHANNELS  = 2;
+  constexpr int    CHUNKSIZE = 2048;
+
+  return std::make_unique<AudioManager>(FREQUENCY, FORMAT, CHANNELS, CHUNKSIZE);
+}
+
+/**
+ * @brief Create a FontManager object
+ * @throws std::runtime_error if ConfigManager is not initialized
+ */
+std::unique_ptr<FontManager> GameEngine::createFontManager() {
+  if (m_configManager == nullptr) {
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "ConfigManager not initialized");
+    cleanup();
+    throw std::runtime_error("ConfigManager not initialized");
+  }
+
+  const std::string &fontPath = m_configManager->getGameConfig().fontPath;
+  return std::make_unique<FontManager>(fontPath);
+}
+
+/**
+ * @brief Initialize the video system
+ * @throws std::runtime_error if SDL video system could not be initialized
+ */
+void GameEngine::initializeVideoSystem() {
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-    SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "SDL video system is not ready to go: %s",
-                 SDL_GetError());
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "SDL video system is not ready: %s", SDL_GetError());
     cleanup();
     throw std::runtime_error("SDL video system is not ready to go");
   }
   SDL_LogInfo(SDL_LOG_CATEGORY_VIDEO, "SDL video system initialized successfully!");
+}
 
-  // Create Window
-  m_window = SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED,
-                              SDL_WINDOWPOS_CENTERED, static_cast<int>(WINDOW_SIZE.x),
-                              static_cast<int>(WINDOW_SIZE.y), SDL_WINDOW_SHOWN);
-  if (m_window == nullptr) {
+/**
+ * @brief Create a window
+ * @throws std::runtime_error if ConfigManager is not initialized
+ * @throws std::runtime_error if window could not be created
+ */
+SDL_Window *GameEngine::createWindow() {
+  if (m_configManager == nullptr) {
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "ConfigManager not initialized");
+    cleanup();
+    throw std::runtime_error("ConfigManager not initialized");
+  }
+
+  const auto &gameConfig = m_configManager->getGameConfig();
+
+  const auto WINDOW_TITLE  = gameConfig.windowTitle.c_str();
+  const auto WINDOW_WIDTH  = static_cast<int>(gameConfig.windowSize.x);
+  const auto WINDOW_HEIGHT = static_cast<int>(gameConfig.windowSize.y);
+
+  SDL_Window *window =
+      SDL_CreateWindow(WINDOW_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                       WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+
+  if (window == nullptr) {
     SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "Window could not be created: %s", SDL_GetError());
     cleanup();
     throw std::runtime_error("Window could not be created.");
   }
   SDL_LogInfo(SDL_LOG_CATEGORY_VIDEO, "Window created successfully!");
+  return window;
+}
 
-  // Create Renderer
-  m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
-  if (m_renderer == nullptr) {
+/**
+ * @brief Create a renderer
+ * @throws std::runtime_error if window is not initialized
+ * @throws std::runtime_error if renderer could not be created
+ */
+SDL_Renderer *GameEngine::createRenderer() {
+  if (m_window == nullptr) {
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "Window is not initialized");
+    cleanup();
+    throw std::runtime_error("Window is not initialized");
+  }
+
+  SDL_Renderer *renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
+  if (renderer == nullptr) {
     SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "Renderer could not be created: %s", SDL_GetError());
     cleanup();
     throw std::runtime_error("Renderer could not be created");
   }
   SDL_LogInfo(SDL_LOG_CATEGORY_VIDEO, "Renderer created successfully!");
+  return renderer;
+}
 
-  // Setup Renderer
+/**
+ * @brief Set up the renderer
+ * @throws std::runtime_error if renderer is not initialized
+ */
+void GameEngine::setupRenderer() {
+  if (m_renderer == nullptr) {
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "Renderer is not initialized");
+    cleanup();
+    throw std::runtime_error("Renderer is not initialized");
+  }
+
   constexpr SDL_Color backgroundColor = {.r = 0, .g = 0, .b = 0, .a = 255};
   SDL_SetRenderDrawColor(m_renderer, backgroundColor.r, backgroundColor.g, backgroundColor.b,
                          backgroundColor.a);
   SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
   SDL_RenderClear(m_renderer);
   SDL_RenderPresent(m_renderer);
-
-  // Initialization successful, set running flag to true and load the first scene
-  m_isRunning = true;
-
-  SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "Game engine initialized successfully!");
-  const std::shared_ptr<Scene> menuScene = std::make_shared<MenuScene>(this);
-  loadScene("Menu", menuScene);
 }
 
 void GameEngine::cleanup() {
@@ -85,10 +164,6 @@ void GameEngine::cleanup() {
 
   SDL_Quit();
   SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "Game engine cleaned up successfully!");
-}
-
-GameEngine::~GameEngine() {
-  cleanup();
 }
 
 void GameEngine::update() {
@@ -150,6 +225,13 @@ FontManager &GameEngine::getFontManager() const {
   return *m_fontManager;
 }
 
+AudioManager &GameEngine::getAudioManager() const {
+  if (!m_audioManager) {
+    SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "AudioManager not initialized");
+    throw std::runtime_error("AudioManager not initialized");
+  }
+  return *m_audioManager;
+}
 void GameEngine::sUserInput() {
   SDL_Event event;
 

@@ -11,10 +11,12 @@ protected:
   GameEngine *m_gameEngine;
   Uint64      m_lastFrameTime  = 0;
   float       m_deltaTime      = 0;
+  bool        m_endTriggered   = false;
   bool        m_hasEnded       = false;
   bool        m_paused         = false;
   Uint64      m_SceneStartTime = 0;
   ActionMap   m_actionMap;
+  AudioSample m_nextAudioSample = AudioSample::None;
 
 public:
   explicit Scene(GameEngine *gameEngine) :
@@ -25,7 +27,9 @@ public:
   virtual void onEnd()                   = 0;
   virtual void sRender()                 = 0;
   virtual void sDoAction(Action &action) = 0;
-  void         registerAction(const int inputKey, const std::string &actionName) {
+  virtual void sAudio()                  = 0;
+
+  void registerAction(const int inputKey, const std::string &actionName) {
     m_actionMap[inputKey] = actionName;
   }
   void setPaused(const bool paused) {
