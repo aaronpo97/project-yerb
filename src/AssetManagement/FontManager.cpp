@@ -12,9 +12,9 @@ FontManager::FontManager(const std::string &fontPath) :
 }
 
 void FontManager::loadFonts(const std::string &fontPath) {
-  const int SMALL_FONT_POINT_SIZE  = 18;
-  const int MEDIUM_FONT_POINT_SIZE = 28;
-  const int LARGE_FONT_POINT_SIZE  = 48;
+  constexpr int SMALL_FONT_POINT_SIZE  = 18;
+  constexpr int MEDIUM_FONT_POINT_SIZE = 28;
+  constexpr int LARGE_FONT_POINT_SIZE  = 48;
 
   m_font_sm = TTF_OpenFont(fontPath.c_str(), SMALL_FONT_POINT_SIZE);
   m_font_md = TTF_OpenFont(fontPath.c_str(), MEDIUM_FONT_POINT_SIZE);
@@ -31,15 +31,15 @@ void FontManager::loadFonts(const std::string &fontPath) {
   SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "Fonts loaded successfully!");
 }
 
-TTF_Font *FontManager::getFontLg() {
+TTF_Font *FontManager::getFontLg() const {
   return m_font_lg;
 }
 
-TTF_Font *FontManager::getFontMd() {
+TTF_Font *FontManager::getFontMd() const {
   return m_font_md;
 }
 
-TTF_Font *FontManager::getFontSm() {
+TTF_Font *FontManager::getFontSm() const {
   return m_font_sm;
 }
 

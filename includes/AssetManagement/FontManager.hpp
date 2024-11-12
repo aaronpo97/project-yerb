@@ -11,11 +11,11 @@ private:
   TTF_Font   *m_font_sm = nullptr;
 
 public:
-  FontManager(const std::string &fontPath);
+  explicit FontManager(const std::string &fontPath);
   ~FontManager();
 
   void      loadFonts(const std::string &fontPath);
-  TTF_Font *getFontLg();
-  TTF_Font *getFontMd();
-  TTF_Font *getFontSm();
+  TTF_Font *getFontLg() const;
+  TTF_Font *getFontMd() const;
+  TTF_Font *getFontSm() const;
 };

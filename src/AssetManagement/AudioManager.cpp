@@ -1,5 +1,6 @@
-#include "../../includes/AssetManagement/AudioManager.hpp"
+#include <ranges>
 
+#include "../../includes/AssetManagement/AudioManager.hpp"
 #define MAIN_MENU_MUSIC_PATH "assets/audio/tracks/main_menu.ogg"
 #define PLAY_MUSIC_PATH "assets/audio/tracks/play.ogg"
 #define ITEM_ACQUIRED_SOUND_PATH "assets/audio/samples/item_acquired.wav"
@@ -9,7 +10,10 @@
 #define MENU_MOVE_SOUND_PATH "assets/audio/samples/menu_move.wav"
 #define MENU_SELECT_SOUND_PATH "assets/audio/samples/menu_select.wav"
 
-AudioManager::AudioManager(int frequency, Uint16 format, int channels, int chunksize) :
+AudioManager::AudioManager(const int    frequency,
+                           const Uint16 format,
+                           const int    channels,
+                           const int    chunksize) :
     m_frequency(frequency), m_format(format), m_channels(channels), m_chunksize(chunksize) {
   if (SDL_Init(SDL_INIT_AUDIO) != 0) {
     throw std::runtime_error("SDL_Init failed");
@@ -39,7 +43,7 @@ void AudioManager::loadAllAudio() {
   loadSample(AudioSample::MenuSelect, MENU_SELECT_SOUND_PATH);
 }
 
-void AudioManager::loadTrack(AudioTrack track, const std::string &filepath) {
+void AudioManager::loadTrack(const AudioTrack track, const std::string &filepath) {
   m_music[track] = Mix_LoadMUS(filepath.c_str());
   if (!m_music[track]) {
     SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "Mix_LoadMUS error: %s", Mix_GetError());
@@ -48,7 +52,7 @@ void AudioManager::loadTrack(AudioTrack track, const std::string &filepath) {
   }
 }
 
-void AudioManager::loadSample(AudioSample effect, const std::string &filepath) {
+void AudioManager::loadSample(const AudioSample effect, const std::string &filepath) {
   m_soundEffects[effect] = Mix_LoadWAV(filepath.c_str());
   if (!m_soundEffects[effect]) {
     SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "Mix_LoadWAV error: %s", Mix_GetError());
@@ -57,7 +61,7 @@ void AudioManager::loadSample(AudioSample effect, const std::string &filepath) {
   }
 }
 
-void AudioManager::playTrack(AudioTrack track, int loops) {
+void AudioManager::playTrack(const AudioTrack track, const int loops) {
   if (track == m_currentAudioTrack) {
     SDL_LogInfo(SDL_LOG_CATEGORY_AUDIO, "Track %d is already playing, ignoring request.",
                 static_cast<int>(track));
@@ -71,7 +75,7 @@ void AudioManager::playTrack(AudioTrack track, int loops) {
   }
 }
 
-void AudioManager::playSample(AudioSample effect, int loops) {
+void AudioManager::playSample(const AudioSample effect, const int loops) {
   if (m_soundEffects[effect]) {
     Mix_PlayChannel(-1, m_soundEffects[effect], loops);
     m_lastAudioSample = effect;
@@ -106,15 +110,15 @@ void AudioManager::setTrackVolume(int volume) {
   Mix_VolumeMusic(volume);
 }
 
-void AudioManager::setSampleVolume(AudioSample effect, int volume) {
+void AudioManager::setSampleVolume(const AudioSample effect, const int volume) {
   Mix_VolumeChunk(m_soundEffects[effect], volume);
 }
 
-bool AudioManager::isTrackPlaying() const {
+bool AudioManager::isTrackPlaying() {
   return Mix_PlayingMusic() == 1;
 }
 
-bool AudioManager::isTrackPaused() const {
+bool AudioManager::isTrackPaused() {
   return Mix_PausedMusic() == 1;
 }
 
@@ -122,14 +126,14 @@ void AudioManager::cleanup() {
   m_currentAudioTrack = AudioTrack::None;
   m_lastAudioSample   = AudioSample::None;
 
-  for (auto &[_sampleName, sample] : m_soundEffects) {
+  for (auto &sample : m_soundEffects | std::views::values) {
     if (sample != nullptr) {
       Mix_FreeChunk(sample);
       sample = nullptr;
     }
   }
 
-  for (auto &[_trackName, track] : m_music) {
+  for (auto &track : m_music | std::views::values) {
     if (track != nullptr) {
       Mix_FreeMusic(track);
       track = nullptr;

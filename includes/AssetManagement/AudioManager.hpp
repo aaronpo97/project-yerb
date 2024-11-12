@@ -63,18 +63,18 @@ public:
 
   void loadAllAudio();
 
-  void playTrack(AudioTrack track, int loops = -1);
-  void playSample(AudioSample effect, int loops = 0);
-  void stopTrack();
-  void pauseTrack();
-  void resumeTrack();
-  void setTrackVolume(int volume);
-  void setSampleVolume(AudioSample effect, int volume);
+  void        playTrack(AudioTrack track, int loops = -1);
+  void        playSample(AudioSample effect, int loops = 0);
+  void        stopTrack();
+  void        pauseTrack();
+  void        resumeTrack();
+  static void setTrackVolume(int volume);
+  void        setSampleVolume(AudioSample effect, int volume);
 
   AudioTrack  getCurrentAudioTrack() const;
   AudioTrack  getLastAudioTrack() const;
   AudioSample getLastAudioSample() const;
 
-  [[nodiscard]] bool isTrackPlaying() const;
-  [[nodiscard]] bool isTrackPaused() const;
+  [[nodiscard]] static bool isTrackPlaying();
+  [[nodiscard]] static bool isTrackPaused();
 };
