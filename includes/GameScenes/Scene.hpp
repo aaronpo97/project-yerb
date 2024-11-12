@@ -11,6 +11,7 @@ protected:
   GameEngine *m_gameEngine;
   Uint64      m_lastFrameTime  = 0;
   float       m_deltaTime      = 0;
+  bool        m_endTriggered   = false;
   bool        m_hasEnded       = false;
   bool        m_paused         = false;
   Uint64      m_SceneStartTime = 0;

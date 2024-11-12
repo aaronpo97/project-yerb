@@ -15,6 +15,10 @@ ScoreScene::ScoreScene(GameEngine *gameEngine, const int score) :
 void ScoreScene::update() {
   sRender();
   sAudio();
+
+  if (m_endTriggered) {
+    onEnd();
+  }
 }
 
 void ScoreScene::onEnd() {
@@ -75,17 +79,20 @@ void ScoreScene::sDoAction(Action &action) {
   }
 
   if (action.getName() == "SELECT") {
-    onEnd();
+    m_nextAudioSample = AudioSample::MenuSelect;
+    m_endTriggered    = true;
     return;
   }
 
   // UP takes precedence over DOWN if both are pressed
   if (action.getName() == "UP") {
+    m_nextAudioSample = AudioSample::MenuMove;
     m_selectedIndex > 0 ? m_selectedIndex -= 1 : m_selectedIndex = 1;
     return;
   }
 
   if (action.getName() == "DOWN") {
+    m_nextAudioSample = AudioSample::MenuMove;
     m_selectedIndex < 1 ? m_selectedIndex += 1 : m_selectedIndex = 0;
   }
 }

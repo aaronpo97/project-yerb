@@ -54,6 +54,10 @@ void MainScene::update() {
   sAudio();
   sRender();
   m_lastFrameTime = currentTime;
+
+  if (m_endTriggered) {
+    onEnd();
+  }
 }
 
 void MainScene::sDoAction(Action &action) {
@@ -107,11 +111,13 @@ void MainScene::sDoAction(Action &action) {
   }
 
   if (action.getName() == "PAUSE") {
-    m_paused = !m_paused;
+    m_nextAudioSample = AudioSample::MenuSelect;
+    m_paused          = !m_paused;
   }
 
   if (action.getName() == "GO_BACK") {
-    onEnd();
+    m_nextAudioSample = AudioSample::MenuSelect;
+    m_endTriggered    = true;
   }
 }
 
@@ -193,7 +199,10 @@ void MainScene::sCollision() {
                                .score           = m_score,
                                .setScore        = [this](const int score) { setScore(score); },
                                .decrementLives  = [this]() { decrementLives(); },
-                               .windowSize      = windowSize};
+                               .nextAudioSample = m_nextAudioSample,
+                               .windowSize      = windowSize
+
+  };
 
   for (auto &entity : m_entities.getEntities()) {
     handleEntityBounds(entity, windowSize);
@@ -363,8 +372,8 @@ void MainScene::setGameOver() {
   if (m_gameOver) {
     return;
   }
-  m_gameOver = true;
-  onEnd();
+  m_gameOver     = true;
+  m_endTriggered = true;
 }
 
 void MainScene::setScore(const int score) {

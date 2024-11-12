@@ -12,6 +12,10 @@ HowToPlayScene::HowToPlayScene(GameEngine *gameEngine) :
 void HowToPlayScene::update() {
   sRender();
   sAudio();
+
+  if (m_endTriggered) {
+    onEnd();
+  }
 }
 
 void HowToPlayScene::onEnd() {
@@ -122,11 +126,13 @@ void HowToPlayScene::sDoAction(Action &action) {
   }
 
   if (action.getName() == "SELECT") {
-    onEnd();
+    m_nextAudioSample = AudioSample::MenuSelect;
+    m_endTriggered    = true;
   }
 
   if (action.getName() == "GO_BACK") {
-    onEnd();
+    m_nextAudioSample = AudioSample::MenuSelect;
+    m_endTriggered    = true;
   }
 }
 

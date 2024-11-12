@@ -16,6 +16,10 @@ MenuScene::MenuScene(GameEngine *gameEngine) :
 void MenuScene::update() {
   sRender();
   sAudio();
+
+  if (m_endTriggered) {
+    onEnd();
+  }
 }
 
 void MenuScene::onEnd() {
@@ -79,8 +83,8 @@ void MenuScene::sDoAction(Action &action) {
   }
 
   if (action.getName() == "SELECT") {
-    m_gameEngine->getAudioManager().playSample(AudioSample::MenuSelect);
-    onEnd();
+    m_nextAudioSample = AudioSample::MenuSelect;
+    m_endTriggered    = true;
     return;
   }
 
