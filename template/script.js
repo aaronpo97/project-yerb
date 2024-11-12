@@ -1,4 +1,5 @@
-const canvas = document.querySelector("#canvas")
+const canvas = document.querySelector('#canvas');
+
 canvas.addEventListener('contextmenu', (event) => {
   event.preventDefault();
 });
