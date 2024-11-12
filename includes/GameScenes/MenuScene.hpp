@@ -18,4 +18,5 @@ public:
   void onEnd() override;
   void sRender() override;
   void sDoAction(Action &action) override;
+  void sAudio() override;
 };

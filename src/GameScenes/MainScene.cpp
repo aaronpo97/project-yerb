@@ -51,6 +51,7 @@ void MainScene::update() {
     sTimer();
   }
 
+  sAudio();
   sRender();
   m_lastFrameTime = currentTime;
 }
@@ -392,4 +393,16 @@ void MainScene::onEnd() {
     return;
   }
   m_gameEngine->loadScene("ScoreScene", std::make_shared<ScoreScene>(m_gameEngine, m_score));
+}
+
+void MainScene::sAudio() {
+  AudioManager &audioManager = m_gameEngine->getAudioManager();
+  if (audioManager.getCurrentAudioTrack() != AudioTrack::Play) {
+    m_gameEngine->getAudioManager().playTrack(AudioTrack::Play, -1);
+  }
+
+  if (m_nextAudioSample != AudioSample::None) {
+    audioManager.playSample(m_nextAudioSample);
+    m_nextAudioSample = AudioSample::None;
+  }
 }

@@ -14,6 +14,7 @@ ScoreScene::ScoreScene(GameEngine *gameEngine, const int score) :
 
 void ScoreScene::update() {
   sRender();
+  sAudio();
 }
 
 void ScoreScene::onEnd() {
@@ -86,5 +87,18 @@ void ScoreScene::sDoAction(Action &action) {
 
   if (action.getName() == "DOWN") {
     m_selectedIndex < 1 ? m_selectedIndex += 1 : m_selectedIndex = 0;
+  }
+}
+
+void ScoreScene::sAudio() {
+  AudioManager &audioManager = m_gameEngine->getAudioManager();
+
+  if (audioManager.getCurrentAudioTrack() != AudioTrack::MainMenu) {
+    m_gameEngine->getAudioManager().playTrack(AudioTrack::MainMenu, -1);
+  }
+
+  if (m_nextAudioSample != AudioSample::None) {
+    audioManager.playSample(m_nextAudioSample);
+    m_nextAudioSample = AudioSample::None;
   }
 }
