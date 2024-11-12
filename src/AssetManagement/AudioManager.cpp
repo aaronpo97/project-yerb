@@ -27,18 +27,18 @@ AudioManager::~AudioManager() {
 }
 
 void AudioManager::loadAllAudio() {
-  loadMusic(MusicTrack::MainMenu, MAIN_MENU_MUSIC_PATH);
-  loadMusic(MusicTrack::Play, PLAY_MUSIC_PATH);
+  loadTrack(Track::MainMenu, MAIN_MENU_MUSIC_PATH);
+  loadTrack(Track::Play, PLAY_MUSIC_PATH);
 
-  loadSample(SoundEffect::ItemAcquired, ITEM_ACQUIRED_SOUND_PATH);
-  loadSample(SoundEffect::EnemyCollides, ENEMY_COLLIDES_SOUND_PATH);
-  loadSample(SoundEffect::SpeedBoostCollides, SPEED_BOOST_COLLIDES_SOUND_PATH);
-  loadSample(SoundEffect::SlownessDebuffCollides, SLOWNESS_DEBUFF_COLLIDES_SOUND_PATH);
-  loadSample(SoundEffect::MenuMove, MENU_MOVE_SOUND_PATH);
-  loadSample(SoundEffect::MenuSelect, MENU_SELECT_SOUND_PATH);
+  loadSample(Sample::ItemAcquired, ITEM_ACQUIRED_SOUND_PATH);
+  loadSample(Sample::EnemyCollides, ENEMY_COLLIDES_SOUND_PATH);
+  loadSample(Sample::SpeedBoostCollides, SPEED_BOOST_COLLIDES_SOUND_PATH);
+  loadSample(Sample::SlownessDebuffCollides, SLOWNESS_DEBUFF_COLLIDES_SOUND_PATH);
+  loadSample(Sample::MenuMove, MENU_MOVE_SOUND_PATH);
+  loadSample(Sample::MenuSelect, MENU_SELECT_SOUND_PATH);
 }
 
-void AudioManager::loadMusic(MusicTrack track, const std::string &filepath) {
+void AudioManager::loadTrack(Track track, const std::string &filepath) {
   m_music[track] = Mix_LoadMUS(filepath.c_str());
   if (!m_music[track]) {
     SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "Mix_LoadMUS error: %s", Mix_GetError());
@@ -47,7 +47,7 @@ void AudioManager::loadMusic(MusicTrack track, const std::string &filepath) {
   }
 }
 
-void AudioManager::loadSample(SoundEffect effect, const std::string &filepath) {
+void AudioManager::loadSample(Sample effect, const std::string &filepath) {
   m_soundEffects[effect] = Mix_LoadWAV(filepath.c_str());
   if (!m_soundEffects[effect]) {
     SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "Mix_LoadWAV error: %s", Mix_GetError());
@@ -56,43 +56,51 @@ void AudioManager::loadSample(SoundEffect effect, const std::string &filepath) {
   }
 }
 
-void AudioManager::playMusic(MusicTrack track, int loops) {
+void AudioManager::playTrack(Track track, int loops) {
   if (m_music[track]) {
     Mix_PlayMusic(m_music[track], loops);
   }
 }
 
-void AudioManager::playSample(SoundEffect effect, int loops) {
+void AudioManager::playSample(Sample effect, int loops) {
   if (m_soundEffects[effect]) {
     Mix_PlayChannel(-1, m_soundEffects[effect], loops);
   }
 }
 
-void AudioManager::stopMusic() {
+void AudioManager::stopTrack() {
   Mix_HaltMusic();
 }
 
-void AudioManager::pauseMusic() {
+void AudioManager::pauseTrack() {
   Mix_PauseMusic();
 }
 
-void AudioManager::resumeMusic() {
+void AudioManager::resumeTrack() {
   Mix_ResumeMusic();
 }
 
-void AudioManager::setMusicVolume(int volume) {
+void AudioManager::setTrackVolume(int volume) {
+  if (volume > MIX_MAX_VOLUME) {
+    volume = MIX_MAX_VOLUME;
+  }
+
+  if (volume < 0) {
+    volume = 0;
+  }
+
   Mix_VolumeMusic(volume);
 }
 
-void AudioManager::setSoundVolume(SoundEffect effect, int volume) {
+void AudioManager::setSampleVolume(Sample effect, int volume) {
   Mix_VolumeChunk(m_soundEffects[effect], volume);
 }
 
-bool AudioManager::isMusicPlaying() const {
+bool AudioManager::isTrackPlaying() const {
   return Mix_PlayingMusic() == 1;
 }
 
-bool AudioManager::isMusicPaused() const {
+bool AudioManager::isTrackPaused() const {
   return Mix_PausedMusic() == 1;
 }
 

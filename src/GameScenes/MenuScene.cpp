@@ -7,7 +7,7 @@
 
 MenuScene::MenuScene(GameEngine *gameEngine) :
     Scene(gameEngine) {
-  m_gameEngine->getAudioManager().playMusic(MusicTrack::MainMenu, -1);
+  m_gameEngine->getAudioManager().playTrack(Track::MainMenu, -1);
   m_selectedIndex = 0;
   registerAction(SDLK_RETURN, "SELECT");
   registerAction(SDLK_w, "UP");
@@ -19,7 +19,7 @@ void MenuScene::update() {
 }
 
 void MenuScene::onEnd() {
-  m_gameEngine->getAudioManager().stopMusic();
+  m_gameEngine->getAudioManager().stopTrack();
   switch (m_selectedIndex) {
     case 0:
       m_gameEngine->loadScene("Main", std::make_shared<MainScene>(m_gameEngine));
@@ -80,20 +80,20 @@ void MenuScene::sDoAction(Action &action) {
   }
 
   if (action.getName() == "SELECT") {
-    m_gameEngine->getAudioManager().playSample(SoundEffect::MenuSelect);
+    m_gameEngine->getAudioManager().playSample(Sample::MenuSelect);
     onEnd();
     return;
   }
 
   // UP takes precedence over DOWN if both are pressed
   if (action.getName() == "UP") {
-    m_gameEngine->getAudioManager().playSample(SoundEffect::MenuMove);
+    m_gameEngine->getAudioManager().playSample(Sample::MenuMove);
     m_selectedIndex > 0 ? m_selectedIndex -= 1 : m_selectedIndex = 1;
     return;
   }
 
   if (action.getName() == "DOWN") {
-    m_gameEngine->getAudioManager().playSample(SoundEffect::MenuMove);
+    m_gameEngine->getAudioManager().playSample(Sample::MenuMove);
     m_selectedIndex < 1 ? m_selectedIndex += 1 : m_selectedIndex = 0;
   }
 }

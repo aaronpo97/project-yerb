@@ -20,11 +20,18 @@ protected:
   std::unique_ptr<FontManager>                  m_fontManager;
   std::unique_ptr<AudioManager>                 m_audioManager;
 
-  void        update();
-  void        quit();
-  static void mainLoop(void *arg);
-  void        cleanup();
-  void        sUserInput();
+  void                           update();
+  void                           quit();
+  static void                    mainLoop(void *arg);
+  void                           cleanup();
+  void                           sUserInput();
+  std::unique_ptr<ConfigManager> createConfigManager(const std::string &configPath);
+  std::unique_ptr<FontManager>   createFontManager();
+  std::unique_ptr<AudioManager>  createAudioManager();
+  void                           initializeVideoSystem();
+  SDL_Renderer                  *createRenderer();
+  void                           setupRenderer();
+  SDL_Window                    *createWindow();
 
 public:
   GameEngine();
