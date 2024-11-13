@@ -9,6 +9,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 FetchContent_MakeAvailable(json)
 
+FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/5376968f6948923e2411081fd9372e71a59d8e77.zip
+)
 
 if(NOT EMSCRIPTEN)
         FetchContent_Declare(
@@ -36,7 +40,6 @@ if(NOT EMSCRIPTEN)
         set(SDL2MIXER_WAVPACK OFF CACHE BOOL "")
         set(SDL2MIXER_MP3 OFF CACHE BOOL "")
         set(SDL2MIXER_OGG ON CACHE BOOL "")
-
 
         FetchContent_Declare(
                 SDL_mixer
@@ -69,14 +72,17 @@ if(APPLE)
         )
 endif()
 
-
+# Directories for source and object files
 set(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
 set(OBJ_DIR "${CMAKE_BINARY_DIR}/objects")
 
+# Gather all source files
 file(GLOB_RECURSE SRC_FILES "${SRC_DIR}/*.cpp")
 
+# Define the main executable
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 
+# Handle Emscripten-specific settings
 if(EMSCRIPTEN)
         set_target_properties(${PROJECT_NAME} PROPERTIES
                 CMAKE_EXECUTABLE_SUFFIX ".js"
@@ -114,8 +120,17 @@ else()
         )
 endif()
 
+
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build"
 )
+
+add_executable(example tests/Helpers/Vec2.cpp)
+target_link_libraries(example gtest_main)
+add_test(NAME example_test COMMAND example)
+
+
+enable_testing()
+

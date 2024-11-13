@@ -6,4 +6,5 @@ dist-web
 makefile
 .idea
 cmake-build-debug
+build
 cmake-build-release
