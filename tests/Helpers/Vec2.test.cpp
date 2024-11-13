@@ -1,5 +1,4 @@
 #include "../../includes/Helpers/Vec2.hpp"
-#include "../../src/Helpers/Vec2.cpp"
 #include "gtest/gtest.h"
 #include <cmath>
 

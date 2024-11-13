@@ -13,6 +13,7 @@ FetchContent_Declare(
         googletest
         URL https://github.com/google/googletest/archive/5376968f6948923e2411081fd9372e71a59d8e77.zip
 )
+FetchContent_MakeAvailable(googletest)  # Added this line
 
 if(NOT EMSCRIPTEN)
         FetchContent_Declare(
@@ -72,17 +73,15 @@ if(APPLE)
         )
 endif()
 
-# Directories for source and object files
 set(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
 set(OBJ_DIR "${CMAKE_BINARY_DIR}/objects")
 
-# Gather all source files
 file(GLOB_RECURSE SRC_FILES "${SRC_DIR}/*.cpp")
+file(GLOB_RECURSE TEST_FILES "tests/*.cpp")
 
-# Define the main executable
+# Create the main game executable
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 
-# Handle Emscripten-specific settings
 if(EMSCRIPTEN)
         set_target_properties(${PROJECT_NAME} PROPERTIES
                 CMAKE_EXECUTABLE_SUFFIX ".js"
@@ -120,17 +119,53 @@ else()
         )
 endif()
 
-
-target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+    nlohmann_json::nlohmann_json
+    vec2_lib)  # Link vec2_lib to main executable
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build"
 )
 
-add_executable(example tests/Helpers/Vec2.cpp)
-target_link_libraries(example gtest_main)
-add_test(NAME example_test COMMAND example)
-
-
 enable_testing()
 
+# Vec2 test
+add_library(vec2_lib
+    src/Helpers/Vec2.cpp)
+target_include_directories(vec2_lib PUBLIC 
+    ${CMAKE_SOURCE_DIR}/includes)
+
+add_executable(vec2_tests
+    tests/Helpers/Vec2.test.cpp)
+target_link_libraries(vec2_tests PRIVATE
+    gtest
+    gtest_main
+    vec2_lib)
+target_include_directories(vec2_tests PRIVATE
+    ${CMAKE_SOURCE_DIR}/includes)
+
+# EntityManager test
+add_library(EntityManager_lib
+    src/EntityManagement/EntityManager.cpp)
+target_include_directories(EntityManager_lib PUBLIC
+        ${CMAKE_SOURCE_DIR}/includes)
+
+add_executable(EntityManager_tests
+        tests/EntityManagement/EntityManager.test.cpp)
+target_link_libraries(EntityManager_tests PRIVATE
+        gtest
+        gtest_main
+        SDL2 
+        SDL2_ttf 
+        SDL2_mixer
+        EntityManager_lib)
+target_include_directories(EntityManager_tests PRIVATE
+        ${CMAKE_SOURCE_DIR}/includes)
+
+
+
+
+# Add the test to CTest
+
+add_test(NAME vec2_tests COMMAND vec2_tests)
+add_test(NAME EntityManager_tests COMMAND EntityManager_tests)
