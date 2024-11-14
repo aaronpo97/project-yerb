@@ -424,6 +424,13 @@ namespace CollisionHelpers::MainScene {
     }
 
     if (tag == EntityTags::Bullet && otherTag == EntityTags::Enemy) {
+
+      std::uniform_int_distribution<int> randomSample(1, 2);
+      int                                sample = randomSample(m_randomGenerator);
+      AudioSample                        nextSample =
+          sample == 1 ? AudioSample::BulletHit01 : AudioSample::BulletHit02;
+      args.nextAudioSample = nextSample;
+
       setScore(m_score + 5);
       otherEntity->destroy();
       entity->destroy();
@@ -437,11 +444,13 @@ namespace CollisionHelpers::MainScene {
     }
 
     if (tag == EntityTags::Player && otherTag == EntityTags::Enemy) {
+      args.nextAudioSample = AudioSample::EnemyCollides;
       setScore(m_score > 10 ? m_score - 10 : 0);
       otherEntity->destroy();
       decrementLives();
 
       const std::shared_ptr<CTransform> &cTransform = entity->cTransform;
+      const std::shared_ptr<CEffects>   &cEffects   = entity->cEffects;
       cTransform->topLeftCornerPos                  = {windowSize.x / 2, windowSize.y / 2};
 
       constexpr float    REMOVAL_RADIUS   = 150.0f;
@@ -451,6 +460,8 @@ namespace CollisionHelpers::MainScene {
       for (const std::shared_ptr<Entity> &entityToRemove : entitiesToRemove) {
         entityToRemove->destroy();
       }
+
+      cEffects->clearEffects();
     }
 
     if (tag == EntityTags::Player && otherTag == EntityTags::SlownessDebuff) {
@@ -467,12 +478,19 @@ namespace CollisionHelpers::MainScene {
                             slownessDebuffs.end());
       effectsToCheck.insert(effectsToCheck.end(), speedBoosts.begin(), speedBoosts.end());
 
+      const AudioSample nextSample = AudioSample::SlownessDebuffAcquired;
+      args.nextAudioSample         = nextSample;
+
       constexpr float    REMOVAL_RADIUS = 150.0f;
       const EntityVector entitiesToRemove =
           EntityHelpers::getEntitiesInRadius(entity, effectsToCheck, REMOVAL_RADIUS);
 
       for (const auto &entityToRemove : entitiesToRemove) {
         entityToRemove->destroy();
+      }
+
+      for (const auto &speedBoost : speedBoosts) {
+        speedBoost->destroy();
       }
     }
 
@@ -481,6 +499,9 @@ namespace CollisionHelpers::MainScene {
       const Uint64 duration  = randomSpeedBoostDuration(m_randomGenerator);
       entity->cEffects->addEffect(
           {.startTime = startTime, .duration = duration, .type = EffectTypes::Speed});
+
+      const AudioSample nextSample = AudioSample::SpeedBoostAcquired;
+      args.nextAudioSample         = nextSample;
 
       const EntityVector &slownessDebuffs = m_entities.getEntities(EntityTags::SlownessDebuff);
       const EntityVector &speedBoosts     = m_entities.getEntities(EntityTags::SpeedBoost);
@@ -506,6 +527,7 @@ namespace CollisionHelpers::MainScene {
     }
 
     if (tag == EntityTags::Player && otherTag == EntityTags::Item) {
+      args.nextAudioSample = AudioSample::ItemAcquired;
       setScore(m_score + 60);
       otherEntity->destroy();
     }
