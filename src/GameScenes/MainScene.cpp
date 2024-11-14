@@ -106,6 +106,7 @@ void MainScene::sDoAction(Action &action) {
 
     const Vec2 mousePosition = *position;
 
+    m_nextAudioSample = AudioSample::Shoot;
     SpawnHelpers::spawnBullets(m_gameEngine->getRenderer(), m_gameEngine->getConfigManager(),
                                m_entities, m_player, mousePosition);
   }

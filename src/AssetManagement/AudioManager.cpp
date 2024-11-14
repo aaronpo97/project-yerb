@@ -1,14 +1,5 @@
 #include "../../includes/AssetManagement/AudioManager.hpp"
 
-#define MAIN_MENU_MUSIC_PATH "assets/audio/tracks/main_menu.ogg"
-#define PLAY_MUSIC_PATH "assets/audio/tracks/play.ogg"
-#define ITEM_ACQUIRED_SOUND_PATH "assets/audio/samples/item_acquired.wav"
-#define ENEMY_COLLIDES_SOUND_PATH "assets/audio/samples/enemy_collides.wav"
-#define SPEED_BOOST_COLLIDES_SOUND_PATH "assets/audio/samples/speed_boost_collides.wav"
-#define SLOWNESS_DEBUFF_COLLIDES_SOUND_PATH "assets/audio/samples/slowness_debuff_collides.wav"
-#define MENU_MOVE_SOUND_PATH "assets/audio/samples/menu_move.wav"
-#define MENU_SELECT_SOUND_PATH "assets/audio/samples/menu_select.wav"
-
 AudioManager::AudioManager(const int    frequency,
                            const Uint16 format,
                            const int    channels,
@@ -36,10 +27,13 @@ void AudioManager::loadAllAudio() {
 
   loadSample(AudioSample::ItemAcquired, ITEM_ACQUIRED_SOUND_PATH);
   loadSample(AudioSample::EnemyCollides, ENEMY_COLLIDES_SOUND_PATH);
-  loadSample(AudioSample::SpeedBoostCollides, SPEED_BOOST_COLLIDES_SOUND_PATH);
-  loadSample(AudioSample::SlownessDebuffCollides, SLOWNESS_DEBUFF_COLLIDES_SOUND_PATH);
+  loadSample(AudioSample::SpeedBoostAcquired, SPEED_BOOST_ACQUIRED_SOUND_PATH);
+  loadSample(AudioSample::SlownessDebuffAcquired, SLOWNESS_DEBUFF_ACQUIRED_SOUND_PATH);
   loadSample(AudioSample::MenuMove, MENU_MOVE_SOUND_PATH);
   loadSample(AudioSample::MenuSelect, MENU_SELECT_SOUND_PATH);
+  loadSample(AudioSample::Shoot, SHOOT_SOUND_PATH);
+  loadSample(AudioSample::BulletHit01, BULLET_HIT_01_SOUND_PATH);
+  loadSample(AudioSample::BulletHit02, BULLET_HIT_02_SOUND_PATH);
 }
 
 void AudioManager::loadTrack(const AudioTrack track, const std::string &filepath) {

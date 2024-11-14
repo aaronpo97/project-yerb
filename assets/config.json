@@ -31,7 +31,7 @@
   "enemyConfig": {
     "spawnPercentage": 85,
     "lifespan": 30000,
-    "speed": 2.0,
+    "speed": 3.5,
     "shape": {
       "height": 38,
       "width": 38,
