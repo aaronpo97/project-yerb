@@ -19,9 +19,9 @@ MainScene::MainScene(GameEngine *gameEngine) :
   const ConfigManager &configManager = gameEngine->getConfigManager();
 
   m_entities = EntityManager();
-  m_player   = SpawnHelpers::spawnPlayer(renderer, configManager, m_entities);
+  m_player   = SpawnHelpers::MainScene::spawnPlayer(renderer, configManager, m_entities);
 
-  SpawnHelpers::spawnWalls(renderer, configManager, m_entities);
+  SpawnHelpers::MainScene::spawnWalls(renderer, configManager, m_entities);
 
   // WASD
   registerAction(SDLK_w, "FORWARD");
@@ -107,8 +107,9 @@ void MainScene::sDoAction(Action &action) {
     const Vec2 mousePosition = *position;
 
     m_nextAudioSample = AudioSample::Shoot;
-    SpawnHelpers::spawnBullets(m_gameEngine->getRenderer(), m_gameEngine->getConfigManager(),
-                               m_entities, m_player, mousePosition);
+    SpawnHelpers::MainScene::spawnBullets(m_gameEngine->getRenderer(),
+                                          m_gameEngine->getConfigManager(), m_entities,
+                                          m_player, mousePosition);
   }
 
   if (action.getName() == "PAUSE") {
@@ -275,20 +276,23 @@ void MainScene::sSpawner() {
                  .item = meetsSpawnPercentage(itemConfig.spawnPercentage)};
 
   if (decisions.enemy) {
-    SpawnHelpers::spawnEnemy(renderer, configManager, m_randomGenerator, m_entities, m_player);
+    SpawnHelpers::MainScene::spawnEnemy(renderer, configManager, m_randomGenerator, m_entities,
+                                        m_player);
   }
 
   if (decisions.speedBoost) {
-    SpawnHelpers::spawnSpeedBoostEntity(renderer, configManager, m_randomGenerator,
-                                        m_entities);
+    SpawnHelpers::MainScene::spawnSpeedBoostEntity(renderer, configManager, m_randomGenerator,
+                                                   m_entities, m_player);
   }
 
   if (decisions.slowness) {
-    SpawnHelpers::spawnSlownessEntity(renderer, configManager, m_randomGenerator, m_entities);
+    SpawnHelpers::MainScene::spawnSlownessEntity(renderer, configManager, m_randomGenerator,
+                                                 m_entities, m_player);
   }
 
   if (decisions.item) {
-    SpawnHelpers::spawnItem(renderer, configManager, m_randomGenerator, m_entities);
+    SpawnHelpers::MainScene::spawnItem(renderer, configManager, m_randomGenerator, m_entities,
+                                       m_player);
   }
 }
 

@@ -4,6 +4,75 @@
 #include "../../includes/Helpers/MathHelpers.hpp"
 
 namespace SpawnHelpers {
+  Vec2 createRandomPosition(std::mt19937 &randomGenerator, const Vec2 &windowSize) {
+    std::uniform_int_distribution<int> randomXPos(0, static_cast<int>(windowSize.x));
+    std::uniform_int_distribution<int> randomYPos(0, static_cast<int>(windowSize.y));
+    const int                          xPos = randomXPos(randomGenerator);
+    const int                          yPos = randomYPos(randomGenerator);
+    return {static_cast<float>(xPos), static_cast<float>(yPos)};
+  };
+
+  Vec2 createValidVelocity(std::mt19937 &randomGenerator, const int attempts) {
+    std::uniform_int_distribution<int> randomVel(-1, 1);
+
+    /*
+     * 8/9 chance of generating a valid velocity on the first attempt.
+     */
+    const auto velocity = Vec2(static_cast<float>(randomVel(randomGenerator)),
+                               static_cast<float>(randomVel(randomGenerator)))
+                              .normalize();
+
+    /*
+     *  Has a (1/9)^n chance of falling back to the default vector after n attempts.
+     */
+    if (attempts <= 0) {
+      return Vec2(1, 0).normalize();
+    }
+
+    return (velocity == Vec2(0, 0)) ? createValidVelocity(randomGenerator, attempts - 1)
+                                    : velocity;
+  };
+
+  bool validateSpawnPosition(const std::shared_ptr<Entity> &entity,
+                             const std::shared_ptr<Entity> &player,
+                             EntityManager                 &entityManager,
+                             const Vec2                    &windowSize) {
+    constexpr int MIN_DISTANCE_TO_PLAYER = 40;
+
+    const bool touchesBoundary = CollisionHelpers::detectOutOfBounds(entity, windowSize).any();
+
+    if (touchesBoundary) {
+      return false;
+    }
+
+    auto calculateDistanceSquared = [](const std::shared_ptr<Entity> &entityA,
+                                       const std::shared_ptr<Entity> &entityB) -> float {
+      const auto centerA = entityA->getCenterPos();
+      const auto centerB = entityB->getCenterPos();
+      return MathHelpers::pythagorasSquared(centerA.x - centerB.x, centerA.y - centerB.y);
+    };
+
+    const float distanceSquared = calculateDistanceSquared(player, entity);
+    if (distanceSquared < MIN_DISTANCE_TO_PLAYER * MIN_DISTANCE_TO_PLAYER) {
+      return false;
+    }
+
+    auto collisionCheck = [&](const std::shared_ptr<Entity> &entityToCheck) -> bool {
+      return CollisionHelpers::calculateCollisionBetweenEntities(entity, entityToCheck);
+    };
+
+    bool isCollidingWithOtherEntities =
+        std::ranges::any_of(entityManager.getEntities(), collisionCheck);
+
+    // Assuming CollisionHelpers and entityManager are correctly defined
+    if (isCollidingWithOtherEntities) {
+      return false;
+    }
+    return true;
+  };
+} // namespace SpawnHelpers
+
+namespace SpawnHelpers::MainScene {
   std::shared_ptr<Entity> spawnPlayer(SDL_Renderer        *renderer,
                                       const ConfigManager &configManager,
                                       EntityManager       &entityManager) {
@@ -27,9 +96,10 @@ namespace SpawnHelpers {
     const auto playerWidth  = static_cast<float>(playerCShape->rect.w);
 
     const Vec2 playerPosition = windowSize / 2 - Vec2(playerWidth / 2, playerHeight / 2);
-    playerCTransform          = std::make_shared<CTransform>(playerPosition, Vec2(0, 0), 0);
-    playerCInput              = std::make_shared<CInput>();
-    playerCEffects            = std::make_shared<CEffects>();
+    const Vec2 playerVelocity = {0, 0};
+    playerCTransform = std::make_shared<CTransform>(playerPosition, playerVelocity, 0);
+    playerCInput     = std::make_shared<CInput>();
+    playerCEffects   = std::make_shared<CEffects>();
 
     entityManager.update();
 
@@ -41,97 +111,28 @@ namespace SpawnHelpers {
                   std::mt19937                  &randomGenerator,
                   EntityManager                 &entityManager,
                   const std::shared_ptr<Entity> &player) {
-
-    const GameConfig &gameConfig = configManager.getGameConfig();
-    const Vec2       &windowSize = gameConfig.windowSize;
-
-    std::uniform_int_distribution<int> randomXPos(0, static_cast<int>(windowSize.x));
-    std::uniform_int_distribution<int> randomYPos(0, static_cast<int>(windowSize.y));
-
-    std::uniform_int_distribution<int> randomXVel(-1, 1);
-    std::uniform_int_distribution<int> randomYVel(-1, 1);
-
-    const int xPos = randomXPos(randomGenerator);
-    const int yPos = randomYPos(randomGenerator);
-
-    const int xVel = randomXVel(randomGenerator);
-    const int yVel = randomYVel(randomGenerator);
-
-    const std::shared_ptr<Entity> enemy           = entityManager.addEntity(EntityTags::Enemy);
-    std::shared_ptr<CTransform>  &enemyCTransform = enemy->cTransform;
-    std::shared_ptr<CShape>      &enemyCShape     = enemy->cShape;
-    std::shared_ptr<CLifespan>   &enemyCLifespan  = enemy->cLifespan;
-
-    const auto enemyPosition = Vec2(static_cast<float>(xPos), static_cast<float>(yPos));
-    const auto enemyVelocity = Vec2(static_cast<float>(xVel), static_cast<float>(yVel));
-    enemyCTransform          = std::make_shared<CTransform>(enemyPosition, enemyVelocity, 0);
-
+    const GameConfig  &gameConfig  = configManager.getGameConfig();
     const EnemyConfig &enemyConfig = configManager.getEnemyConfig();
-    enemyCShape                    = std::make_shared<CShape>(renderer, enemyConfig.shape);
-    enemyCLifespan                 = std::make_shared<CLifespan>(enemyConfig.lifespan);
-    bool touchesBoundary      = CollisionHelpers::detectOutOfBounds(enemy, windowSize).any();
-    bool touchesOtherEntities = false;
+    const Vec2        &windowSize  = gameConfig.windowSize;
 
-    for (auto &entity : entityManager.getEntities()) {
-      if (CollisionHelpers::calculateCollisionBetweenEntities(entity, enemy)) {
-        touchesOtherEntities = true;
-        break;
-      }
-    }
-
-    bool isValidVelocity = enemyVelocity != Vec2(0, 0);
-
-    while (!isValidVelocity) {
-      const int newXVel = randomXVel(randomGenerator);
-      const int newYVel = randomYVel(randomGenerator);
-
-      const auto newVelocity = Vec2(static_cast<float>(newXVel), static_cast<float>(newYVel));
-      enemy->cTransform->velocity = newVelocity;
-      isValidVelocity             = newVelocity != Vec2(0, 0);
-    }
-
-    auto calculateDistanceSquared = [&](const std::shared_ptr<Entity> &entityA,
-                                        const std::shared_ptr<Entity> &entityB) -> float {
-      const auto centerA = entityA->getCenterPos();
-      const auto centerB = entityB->getCenterPos();
-      const auto distanceSquared =
-          MathHelpers::pythagorasSquared(centerA.x - centerB.x, centerA.y - centerB.y);
-
-      return distanceSquared;
-    };
-
-    constexpr int MIN_DISTANCE_TO_PLAYER = 40;
-    // Calculate squared distance between enemy and player
-
-    const float distanceSquared = calculateDistanceSquared(player, enemy);
-
-    bool tooCloseToPlayer = distanceSquared < MIN_DISTANCE_TO_PLAYER * MIN_DISTANCE_TO_PLAYER;
-
-    bool isValidSpawn = !touchesBoundary && !touchesOtherEntities && !tooCloseToPlayer;
     constexpr int MAX_SPAWN_ATTEMPTS = 10;
-    int           spawnAttempt       = 1;
+    const auto    velocity           = createValidVelocity(randomGenerator);
+    const auto    position           = createRandomPosition(randomGenerator, windowSize);
+
+    const auto &enemy = entityManager.addEntity(EntityTags::Enemy);
+    enemy->cTransform = std::make_shared<CTransform>(position, velocity, 0);
+    enemy->cShape     = std::make_shared<CShape>(renderer, enemyConfig.shape);
+    enemy->cLifespan  = std::make_shared<CLifespan>(enemyConfig.lifespan);
+
+    bool isValidSpawn = validateSpawnPosition(enemy, player, entityManager, windowSize);
+    int  spawnAttempt = 1;
 
     while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
-      const int newX = randomXPos(randomGenerator);
-      const int newY = randomYPos(randomGenerator);
+      const auto newPosition              = createRandomPosition(randomGenerator, windowSize);
+      enemy->cTransform->topLeftCornerPos = newPosition;
 
-      enemy->cTransform->topLeftCornerPos =
-          Vec2(static_cast<float>(newX), static_cast<float>(newY));
-      const float newDistanceSquared = calculateDistanceSquared(enemy, player);
-
-      touchesBoundary      = CollisionHelpers::detectOutOfBounds(enemy, windowSize).any();
-      touchesOtherEntities = false;
-      tooCloseToPlayer = newDistanceSquared < MIN_DISTANCE_TO_PLAYER * MIN_DISTANCE_TO_PLAYER;
-
-      for (auto &entity : entityManager.getEntities()) {
-        if (CollisionHelpers::calculateCollisionBetweenEntities(entity, enemy)) {
-          touchesOtherEntities = true;
-          break;
-        }
-      }
-
+      isValidSpawn = validateSpawnPosition(enemy, player, entityManager, windowSize);
       spawnAttempt += 1;
-      isValidSpawn = !touchesBoundary && !touchesOtherEntities && !tooCloseToPlayer;
     }
 
     if (!isValidSpawn) {
@@ -141,170 +142,76 @@ namespace SpawnHelpers {
     entityManager.update();
   }
 
-  void spawnSpeedBoostEntity(SDL_Renderer        *renderer,
-                             const ConfigManager &configManager,
-                             std::mt19937        &randomGenerator,
-                             EntityManager       &entityManager) {
-    const GameConfig                  &gameConfig = configManager.getGameConfig();
-    const Vec2                        &windowSize = gameConfig.windowSize;
-    std::uniform_int_distribution<int> randomXPos(0, static_cast<int>(windowSize.x));
-    std::uniform_int_distribution<int> randomYPos(0, static_cast<int>(windowSize.y));
+  void spawnSpeedBoostEntity(SDL_Renderer                  *renderer,
+                             const ConfigManager           &configManager,
+                             std::mt19937                  &randomGenerator,
+                             EntityManager                 &entityManager,
+                             const std::shared_ptr<Entity> &player) {
+    const GameConfig &gameConfig = configManager.getGameConfig();
+    const Vec2       &windowSize = gameConfig.windowSize;
 
-    std::uniform_int_distribution<int> randomXVel(-1, 1);
-    std::uniform_int_distribution<int> randomYVel(-1, 1);
-
-    const int  positionX = randomXPos(randomGenerator);
-    const int  positionY = randomYPos(randomGenerator);
-    const auto position  = Vec2(static_cast<float>(positionX), static_cast<float>(positionY));
-
-    const int  velocityX = randomXVel(randomGenerator);
-    const int  velocityY = randomYVel(randomGenerator);
-    const auto velocity  = Vec2(static_cast<float>(velocityX), static_cast<float>(velocityY));
-
-    const std::shared_ptr<Entity> speedBoost = entityManager.addEntity(EntityTags::SpeedBoost);
-    std::shared_ptr<CTransform>  &entityCTransform = speedBoost->cTransform;
-    std::shared_ptr<CShape>      &entityCShape     = speedBoost->cShape;
-    std::shared_ptr<CLifespan>   &entityLifespan   = speedBoost->cLifespan;
-
-    const auto &[spawnPercentage, lifespan, speed, shape] =
-        configManager.getSpeedBoostEffectConfig();
-
-    entityCTransform = std::make_shared<CTransform>(position, velocity, 0);
-    entityCShape     = std::make_shared<CShape>(renderer, shape);
-    entityLifespan   = std::make_shared<CLifespan>(lifespan);
-
-    bool touchesBoundary = CollisionHelpers::detectOutOfBounds(speedBoost, windowSize).any();
-    bool touchesOtherEntities = false;
-
-    for (auto &entity : entityManager.getEntities()) {
-      if (CollisionHelpers::calculateCollisionBetweenEntities(entity, speedBoost)) {
-        touchesOtherEntities = true;
-        break;
-      }
-    }
-
-    bool isValidVelocity = velocity != Vec2(0, 0);
-
-    while (!isValidVelocity) {
-      const int  newVelocityX = randomXVel(randomGenerator);
-      const int  newVelocityY = randomYVel(randomGenerator);
-      const auto newVelocity =
-          Vec2(static_cast<float>(newVelocityX), static_cast<float>(newVelocityY));
-
-      speedBoost->cTransform->velocity = newVelocity;
-      isValidVelocity                  = newVelocity != Vec2(0, 0);
-    }
-
-    bool          isValidSpawn       = !touchesBoundary && !touchesOtherEntities;
     constexpr int MAX_SPAWN_ATTEMPTS = 10;
-    int           spawnAttempt       = 1;
+    const auto    velocity           = createValidVelocity(randomGenerator);
+    const auto    position           = createRandomPosition(randomGenerator, windowSize);
+
+    const auto &speedBoost = entityManager.addEntity(EntityTags::SpeedBoost);
+    speedBoost->cTransform = std::make_shared<CTransform>(position, velocity, 0);
+    speedBoost->cShape =
+        std::make_shared<CShape>(renderer, configManager.getSpeedBoostEffectConfig().shape);
+    speedBoost->cLifespan =
+        std::make_shared<CLifespan>(configManager.getSpeedBoostEffectConfig().lifespan);
+
+    bool isValidSpawn = validateSpawnPosition(speedBoost, player, entityManager, windowSize);
+    int  spawnAttempt = 1;
 
     while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
-      const int  newPositionX = randomXPos(randomGenerator);
-      const int  newPositionY = randomYPos(randomGenerator);
-      const auto newPosition =
-          Vec2(static_cast<float>(newPositionX), static_cast<float>(newPositionY));
-
+      const auto newPosition = createRandomPosition(randomGenerator, windowSize);
       speedBoost->cTransform->topLeftCornerPos = newPosition;
-      touchesBoundary      = CollisionHelpers::detectOutOfBounds(speedBoost, windowSize).any();
-      touchesOtherEntities = false;
 
-      for (auto &entity : entityManager.getEntities()) {
-        if (CollisionHelpers::calculateCollisionBetweenEntities(entity, speedBoost)) {
-          touchesOtherEntities = true;
-          break;
-        }
-      }
-
+      isValidSpawn = validateSpawnPosition(speedBoost, player, entityManager, windowSize);
       spawnAttempt += 1;
-      isValidSpawn = !touchesBoundary && !touchesOtherEntities;
     }
 
     if (!isValidSpawn) {
       speedBoost->destroy();
     }
+
     entityManager.update();
   }
 
-  void spawnSlownessEntity(SDL_Renderer        *renderer,
-                           const ConfigManager &configManager,
-                           std::mt19937        &randomGenerator,
-                           EntityManager       &entityManager) {
+  void spawnSlownessEntity(SDL_Renderer                  *renderer,
+                           const ConfigManager           &configManager,
+                           std::mt19937                  &randomGenerator,
+                           EntityManager                 &entityManager,
+                           const std::shared_ptr<Entity> &player) {
     const GameConfig &gameConfig = configManager.getGameConfig();
     const Vec2       &windowSize = gameConfig.windowSize;
 
-    std::uniform_int_distribution<int> randomXPos(0, static_cast<int>(windowSize.x));
-    std::uniform_int_distribution<int> randomYPos(0, static_cast<int>(windowSize.y));
-
-    std::uniform_int_distribution<int> randomXVel(-1, 1);
-    std::uniform_int_distribution<int> randomYVel(-1, 1);
-
-    const int  positionX = randomXPos(randomGenerator);
-    const int  positionY = randomYPos(randomGenerator);
-    const auto position  = Vec2(static_cast<float>(positionX), static_cast<float>(positionY));
-
-    const int  velocityX = randomXVel(randomGenerator);
-    const int  velocityY = randomYVel(randomGenerator);
-    const auto velocity  = Vec2(static_cast<float>(velocityX), static_cast<float>(velocityY));
-
-    const std::shared_ptr<Entity> slownessEntity =
-        entityManager.addEntity(EntityTags::SlownessDebuff);
-    std::shared_ptr<CTransform> &entityCTransform = slownessEntity->cTransform;
-    std::shared_ptr<CShape>     &entityCShape     = slownessEntity->cShape;
-    std::shared_ptr<CLifespan>  &entityLifespan   = slownessEntity->cLifespan;
-
-    const auto &[spawnPercentage, lifespan, speed, shape] =
-        configManager.getSlownessEffectConfig();
-
-    entityCTransform = std::make_shared<CTransform>(position, velocity, 0);
-    entityCShape     = std::make_shared<CShape>(renderer, shape);
-    entityLifespan   = std::make_shared<CLifespan>(lifespan);
-
-    bool touchesBoundary =
-        CollisionHelpers::detectOutOfBounds(slownessEntity, windowSize).any();
-    bool touchesOtherEntities = false;
-
-    for (auto &entity : entityManager.getEntities()) {
-      if (CollisionHelpers::calculateCollisionBetweenEntities(entity, slownessEntity)) {
-        touchesOtherEntities = true;
-        break;
-      }
-    }
-
-    bool isValidSpawn    = !touchesBoundary && !touchesOtherEntities;
-    bool isValidVelocity = velocity != Vec2(0, 0);
-    int  spawnAttempt    = 1;
-
     constexpr int MAX_SPAWN_ATTEMPTS = 10;
-    while (!isValidVelocity) {
-      const int  newXVel     = randomXVel(randomGenerator);
-      const int  newYVel     = randomYVel(randomGenerator);
-      const auto newVelocity = Vec2(static_cast<float>(newXVel), static_cast<float>(newYVel));
+    const auto    velocity           = createValidVelocity(randomGenerator);
+    const auto    position           = createRandomPosition(randomGenerator, windowSize);
 
-      slownessEntity->cTransform->velocity = newVelocity;
-      isValidVelocity                      = newVelocity != Vec2(0, 0);
-    }
+    const auto &slownessEntity = entityManager.addEntity(EntityTags::SlownessDebuff);
+    slownessEntity->cTransform = std::make_shared<CTransform>(position, velocity, 0);
+    slownessEntity->cShape =
+        std::make_shared<CShape>(renderer, configManager.getSlownessEffectConfig().shape);
+    slownessEntity->cLifespan =
+        std::make_shared<CLifespan>(configManager.getSlownessEffectConfig().lifespan);
+
+    bool isValidSpawn =
+        validateSpawnPosition(slownessEntity, player, entityManager, windowSize);
+    int spawnAttempt = 1;
 
     while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
-      const int  newXPos = randomXPos(randomGenerator);
-      const int  newYPos = randomYPos(randomGenerator);
-      const auto newPos  = Vec2(static_cast<float>(newXPos), static_cast<float>(newYPos));
+      const auto newPosition = createRandomPosition(randomGenerator, windowSize);
+      slownessEntity->cTransform->topLeftCornerPos = newPosition;
 
-      slownessEntity->cTransform->topLeftCornerPos = newPos;
-      touchesBoundary = CollisionHelpers::detectOutOfBounds(slownessEntity, windowSize).any();
-      touchesOtherEntities = false;
-
-      for (auto &entity : entityManager.getEntities()) {
-        if (CollisionHelpers::calculateCollisionBetweenEntities(entity, slownessEntity)) {
-          touchesOtherEntities = true;
-          break;
-        }
-      }
-
+      isValidSpawn = validateSpawnPosition(slownessEntity, player, entityManager, windowSize);
       spawnAttempt += 1;
-      isValidSpawn = !touchesBoundary && !touchesOtherEntities;
     }
+
     if (!isValidSpawn) {
+      std::cout << "Slowness entity could not be spawned" << std::endl;
       slownessEntity->destroy();
     }
 
@@ -385,64 +292,33 @@ namespace SpawnHelpers {
     entityManager.update();
   }
 
-  void spawnItem(SDL_Renderer        *renderer,
-                 const ConfigManager &configManager,
-                 std::mt19937        &randomGenerator,
-                 EntityManager       &entityManager) {
+  void spawnItem(SDL_Renderer                  *renderer,
+                 const ConfigManager           &configManager,
+                 std::mt19937                  &randomGenerator,
+                 EntityManager                 &entityManager,
+                 const std::shared_ptr<Entity> &player) {
     const GameConfig &gameConfig                          = configManager.getGameConfig();
     const auto &[spawnPercentage, lifespan, speed, shape] = configManager.getItemConfig();
     const Vec2 &windowSize                                = gameConfig.windowSize;
 
-    std::uniform_int_distribution<int> randomXPos(0, static_cast<int>(windowSize.x));
-    std::uniform_int_distribution<int> randomYPos(0, static_cast<int>(windowSize.y));
-
-    const int  positionX = randomXPos(randomGenerator);
-    const int  positionY = randomYPos(randomGenerator);
-    const auto position  = Vec2(static_cast<float>(positionX), static_cast<float>(positionY));
-    const auto velocity  = Vec2(0, 0);
-
-    const std::shared_ptr<Entity> item             = entityManager.addEntity(EntityTags::Item);
-    std::shared_ptr<CTransform>  &entityCTransform = item->cTransform;
-    std::shared_ptr<CShape>      &entityCShape     = item->cShape;
-    std::shared_ptr<CLifespan>   &entityLifespan   = item->cLifespan;
-
-    entityCTransform = std::make_shared<CTransform>(position, velocity, 0);
-    entityLifespan   = std::make_shared<CLifespan>(lifespan);
-    entityCShape     = std::make_shared<CShape>(renderer, shape);
-
-    bool touchesBoundary      = CollisionHelpers::detectOutOfBounds(item, windowSize).any();
-    bool touchesOtherEntities = false;
-
-    for (auto &entity : entityManager.getEntities()) {
-      if (CollisionHelpers::calculateCollisionBetweenEntities(entity, item)) {
-        touchesOtherEntities = true;
-        break;
-      }
-    }
-
-    bool          isValidSpawn       = !touchesBoundary && !touchesOtherEntities;
     constexpr int MAX_SPAWN_ATTEMPTS = 10;
-    int           spawnAttempt       = 1;
+    const auto    position           = createRandomPosition(randomGenerator, windowSize);
+    const auto    velocity           = Vec2(0, 0);
+
+    const auto &item = entityManager.addEntity(EntityTags::Item);
+    item->cTransform = std::make_shared<CTransform>(position, velocity, 0);
+    item->cShape     = std::make_shared<CShape>(renderer, shape);
+    item->cLifespan  = std::make_shared<CLifespan>(lifespan);
+
+    bool isValidSpawn = validateSpawnPosition(item, player, entityManager, windowSize);
+    int  spawnAttempt = 1;
 
     while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
-      const int newXPos = randomXPos(randomGenerator);
-      const int newYPos = randomYPos(randomGenerator);
-
-      const auto newPosition = Vec2(static_cast<float>(newXPos), static_cast<float>(newYPos));
-
+      const auto newPosition             = createRandomPosition(randomGenerator, windowSize);
       item->cTransform->topLeftCornerPos = newPosition;
-      touchesBoundary      = CollisionHelpers::detectOutOfBounds(item, windowSize).any();
-      touchesOtherEntities = false;
 
-      for (auto &entity : entityManager.getEntities()) {
-        if (CollisionHelpers::calculateCollisionBetweenEntities(entity, item)) {
-          touchesOtherEntities = true;
-          break;
-        }
-      }
-
+      isValidSpawn = validateSpawnPosition(item, player, entityManager, windowSize);
       spawnAttempt += 1;
-      isValidSpawn = !touchesBoundary && !touchesOtherEntities;
     }
 
     if (!isValidSpawn) {
@@ -451,4 +327,4 @@ namespace SpawnHelpers {
 
     entityManager.update();
   }
-} // namespace SpawnHelpers
+} // namespace SpawnHelpers::MainScene

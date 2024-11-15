@@ -85,7 +85,7 @@ namespace MovementHelpers {
 
     Vec2 &position = entityCTransform->topLeftCornerPos;
     Vec2 &velocity = entityCTransform->velocity;
-    // reset the velocity
+
     velocity = {0, 0};
 
     if (entityCInput->forward) {
@@ -101,8 +101,9 @@ namespace MovementHelpers {
       velocity.x = 1;
     }
 
-    float effectMultiplier = 1;
+    velocity.normalize();
 
+    float effectMultiplier = 1;
     if (entity->cEffects->hasEffect(EffectTypes::Speed)) {
       effectMultiplier = playerConfig.speedBoostMultiplier;
     }
@@ -111,8 +112,9 @@ namespace MovementHelpers {
       effectMultiplier = playerConfig.slownessMultiplier;
     }
 
-    position += velocity * (playerConfig.baseSpeed * effectMultiplier *
-                            (deltaTime * BASE_MOVEMENT_MULTIPLIER));
+    velocity *=
+        effectMultiplier * deltaTime * BASE_MOVEMENT_MULTIPLIER * playerConfig.baseSpeed;
+    position += velocity;
   }
 
   void moveSlownessDebuffs(const std::shared_ptr<Entity> &entity,
