@@ -21,15 +21,17 @@ namespace SpawnHelpers {
                   EntityManager                 &entityManager,
                   const std::shared_ptr<Entity> &player);
 
-  void spawnSpeedBoostEntity(SDL_Renderer        *renderer,
-                             const ConfigManager &configManager,
-                             std::mt19937        &randomGenerator,
-                             EntityManager       &entityManager);
+  void spawnSpeedBoostEntity(SDL_Renderer                  *renderer,
+                             const ConfigManager           &configManager,
+                             std::mt19937                  &randomGenerator,
+                             EntityManager                 &entityManager,
+                             const std::shared_ptr<Entity> &player);
 
-  void spawnSlownessEntity(SDL_Renderer        *renderer,
-                           const ConfigManager &configManager,
-                           std::mt19937        &randomGenerator,
-                           EntityManager       &entityManager);
+  void spawnSlownessEntity(SDL_Renderer                  *renderer,
+                           const ConfigManager           &configManager,
+                           std::mt19937                  &randomGenerator,
+                           EntityManager                 &entityManager,
+                           const std::shared_ptr<Entity> &player);
 
   void spawnWalls(SDL_Renderer        *renderer,
                   const ConfigManager &configManager,
@@ -41,8 +43,9 @@ namespace SpawnHelpers {
                     const std::shared_ptr<Entity> &player,
                     const Vec2                    &mousePosition);
 
-  void spawnItem(SDL_Renderer        *renderer,
-                 const ConfigManager &configManager,
-                 std::mt19937        &randomGenerator,
-                 EntityManager       &entityManager);
+  void spawnItem(SDL_Renderer                  *renderer,
+                 const ConfigManager           &configManager,
+                 std::mt19937                  &randomGenerator,
+                 EntityManager                 &entityManager,
+                 const std::shared_ptr<Entity> &player);
 } // namespace SpawnHelpers

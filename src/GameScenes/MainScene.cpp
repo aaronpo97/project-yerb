@@ -279,16 +279,17 @@ void MainScene::sSpawner() {
   }
 
   if (decisions.speedBoost) {
-    SpawnHelpers::spawnSpeedBoostEntity(renderer, configManager, m_randomGenerator,
-                                        m_entities);
+    SpawnHelpers::spawnSpeedBoostEntity(renderer, configManager, m_randomGenerator, m_entities,
+                                        m_player);
   }
 
   if (decisions.slowness) {
-    SpawnHelpers::spawnSlownessEntity(renderer, configManager, m_randomGenerator, m_entities);
+    SpawnHelpers::spawnSlownessEntity(renderer, configManager, m_randomGenerator, m_entities,
+                                      m_player);
   }
 
   if (decisions.item) {
-    SpawnHelpers::spawnItem(renderer, configManager, m_randomGenerator, m_entities);
+    SpawnHelpers::spawnItem(renderer, configManager, m_randomGenerator, m_entities, m_player);
   }
 }
 
