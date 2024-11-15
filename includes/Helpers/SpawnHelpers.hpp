@@ -10,7 +10,16 @@
 #include <memory>
 #include <random>
 
+
 namespace SpawnHelpers {
+  Vec2 createRandomPosition(std::mt19937 &randomGenerator, const Vec2 &windowSize);
+  Vec2 createValidVelocity(std::mt19937 &randomGenerator,  int attempts = 5);
+  bool validateSpawnPosition(const std::shared_ptr<Entity> &entity,
+                             const std::shared_ptr<Entity> &player,
+                             EntityManager                 &entityManager,
+                             const Vec2                    &windowSize);
+}
+namespace SpawnHelpers::MainScene {
   std::shared_ptr<Entity> spawnPlayer(SDL_Renderer        *renderer,
                                       const ConfigManager &configManager,
                                       EntityManager       &entityManager);
