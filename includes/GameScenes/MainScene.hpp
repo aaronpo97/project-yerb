@@ -1,8 +1,8 @@
 #pragma once
 
+#include "../../includes/AssetManagement/AudioSampleManager.hpp"
 #include "../EntityManagement/EntityManager.hpp"
 #include "../GameScenes/Scene.hpp"
-
 #include <SDL2/SDL.h>
 #include <random>
 
@@ -20,6 +20,7 @@ private:
   bool                    m_gameOver      = false;
   std::random_device      m_rd;
   std::mt19937            m_randomGenerator = std::mt19937(m_rd());
+  AudioSampleManager      m_audioSampleManager;
   void                    renderText() const;
 
 public:

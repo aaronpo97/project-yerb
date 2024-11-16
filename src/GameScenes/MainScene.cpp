@@ -63,6 +63,7 @@ void MainScene::update() {
 void MainScene::sDoAction(Action &action) {
   const ActionState &actionState = action.getState();
 
+
   if (m_player == nullptr) {
     SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Player entity is null, cannot process action.");
     return;
@@ -106,20 +107,20 @@ void MainScene::sDoAction(Action &action) {
 
     const Vec2 mousePosition = *position;
 
-    m_nextAudioSample = AudioSample::Shoot;
+    m_audioSampleManager.queueSample(AudioSample::Shoot, AudioPriority::STANDARD);
     SpawnHelpers::MainScene::spawnBullets(m_gameEngine->getRenderer(),
                                           m_gameEngine->getConfigManager(), m_entities,
                                           m_player, mousePosition);
   }
 
   if (action.getName() == "PAUSE") {
-    m_nextAudioSample = AudioSample::MenuSelect;
-    m_paused          = !m_paused;
+    m_audioSampleManager.queueSample(AudioSample::MenuSelect, AudioPriority::CRITICAL);
+    m_paused = !m_paused;
   }
 
   if (action.getName() == "GO_BACK") {
-    m_nextAudioSample = AudioSample::MenuSelect;
-    m_endTriggered    = true;
+    m_audioSampleManager.queueSample(AudioSample::MenuSelect, AudioPriority::CRITICAL);
+    m_endTriggered = true;
   }
 }
 
@@ -201,10 +202,8 @@ void MainScene::sCollision() {
                                .score           = m_score,
                                .setScore        = [this](const int score) { setScore(score); },
                                .decrementLives  = [this]() { decrementLives(); },
-                               .nextAudioSample = m_nextAudioSample,
-                               .windowSize      = windowSize
-
-  };
+                               .windowSize      = windowSize,
+                               .audioSampleManager = m_audioSampleManager};
 
   for (auto &entity : m_entities.getEntities()) {
     handleEntityBounds(entity, windowSize);
@@ -410,13 +409,10 @@ void MainScene::onEnd() {
 }
 
 void MainScene::sAudio() {
-  AudioManager &audioManager = m_gameEngine->getAudioManager();
+  AudioManager       &audioManager       = m_gameEngine->getAudioManager();
   if (audioManager.getCurrentAudioTrack() != AudioTrack::Play) {
-    m_gameEngine->getAudioManager().playTrack(AudioTrack::Play, -1);
+    audioManager.playTrack(AudioTrack::Play, -1);
   }
 
-  if (m_nextAudioSample != AudioSample::None) {
-    audioManager.playSample(m_nextAudioSample);
-    m_nextAudioSample = AudioSample::None;
-  }
+  m_audioSampleManager.update(audioManager);
 }

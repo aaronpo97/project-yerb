@@ -31,7 +31,6 @@ enum class AudioSample {
   Shoot,
   BulletHit01,
   BulletHit02,
-  s
 };
 
 enum class AudioTrack {
