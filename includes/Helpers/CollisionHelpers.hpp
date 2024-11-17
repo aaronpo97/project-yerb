@@ -40,7 +40,7 @@ namespace CollisionHelpers::MainScene {
     const int                       score;
     const std::function<void(int)> &setScore;
     const std::function<void()>     decrementLives;
-    AudioSampleQueue             &audioSampleManager;
+    AudioSampleQueue               &audioSampleManager;
     const Vec2                      windowSize;
   };
 

@@ -61,7 +61,7 @@ void MainScene::update() {
 }
 
 void MainScene::sDoAction(Action &action) {
-  const ActionState &actionState        = action.getState();
+  const ActionState &actionState      = action.getState();
   AudioSampleQueue  &audioSampleQueue = m_gameEngine->getAudioSampleQueue();
 
   if (m_player == nullptr) {
@@ -107,19 +107,19 @@ void MainScene::sDoAction(Action &action) {
 
     const Vec2 mousePosition = *position;
 
-    audioSampleQueue.queueSample(AudioSample::SHOOT, AudioPriority::STANDARD);
+    audioSampleQueue.queueSample(AudioSample::SHOOT, AudioSamplePriority::STANDARD);
     SpawnHelpers::MainScene::spawnBullets(m_gameEngine->getRenderer(),
                                           m_gameEngine->getConfigManager(), m_entities,
                                           m_player, mousePosition);
   }
 
   if (action.getName() == "PAUSE") {
-    audioSampleQueue.queueSample(AudioSample::MENU_SELECT, AudioPriority::CRITICAL);
+    audioSampleQueue.queueSample(AudioSample::MENU_SELECT, AudioSamplePriority::CRITICAL);
     m_paused = !m_paused;
   }
 
   if (action.getName() == "GO_BACK") {
-    audioSampleQueue.queueSample(AudioSample::MENU_SELECT, AudioPriority::CRITICAL);
+    audioSampleQueue.queueSample(AudioSample::MENU_SELECT, AudioSamplePriority::CRITICAL);
     m_endTriggered = true;
   }
 }

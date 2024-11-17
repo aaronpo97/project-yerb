@@ -37,7 +37,7 @@ protected:
   SDL_Window                           *createWindow();
 
 public:
-   GameEngine();
+  GameEngine();
   ~GameEngine();
 
   bool isRunning() const;
