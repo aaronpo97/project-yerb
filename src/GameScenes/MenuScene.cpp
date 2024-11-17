@@ -109,8 +109,8 @@ void MenuScene::sAudio() {
   // TEMPORARY FOR NOW
   audioManager.muteTracks();
 
-  if (audioManager.getCurrentAudioTrack() != AudioTrack::MainMenu) {
-    m_gameEngine->getAudioManager().playTrack(AudioTrack::MainMenu, -1);
+  if (audioManager.getCurrentAudioTrack() != AudioTrack::MAIN_MENU) {
+    m_gameEngine->getAudioManager().playTrack(AudioTrack::MAIN_MENU, -1);
   }
   audioSampleQueue.update();
 }

@@ -22,8 +22,8 @@ AudioManager::~AudioManager() {
 }
 
 void AudioManager::loadAllAudio() {
-  loadTrack(AudioTrack::MainMenu, MAIN_MENU_MUSIC_PATH);
-  loadTrack(AudioTrack::Play, PLAY_MUSIC_PATH);
+  loadTrack(AudioTrack::MAIN_MENU, MAIN_MENU_MUSIC_PATH);
+  loadTrack(AudioTrack::PLAY, PLAY_MUSIC_PATH);
 
   loadSample(AudioSample::ITEM_ACQUIRED, ITEM_ACQUIRED_SOUND_PATH);
   loadSample(AudioSample::ENEMY_COLLIDES, ENEMY_COLLIDES_SOUND_PATH);
@@ -77,7 +77,7 @@ void AudioManager::playSample(const AudioSample sample, const int loops) {
 
 void AudioManager::stopTrack() {
   m_lastAudioTrack    = m_currentAudioTrack;
-  m_currentAudioTrack = AudioTrack::None;
+  m_currentAudioTrack = AudioTrack::NONE;
   Mix_HaltMusic();
 }
 
@@ -135,7 +135,7 @@ bool AudioManager::isTrackPaused() {
 }
 
 void AudioManager::cleanup() {
-  m_currentAudioTrack = AudioTrack::None;
+  m_currentAudioTrack = AudioTrack::NONE;
   m_lastAudioSample   = AudioSample::NONE;
 
   for (auto &[sampleTag, sample] : m_audioSamples) {

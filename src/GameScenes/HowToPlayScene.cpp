@@ -140,8 +140,8 @@ void HowToPlayScene::sDoAction(Action &action) {
 void HowToPlayScene::sAudio() {
   AudioManager     &audioManager     = m_gameEngine->getAudioManager();
   AudioSampleQueue &audioSampleQueue = m_gameEngine->getAudioSampleQueue();
-  if (audioManager.getCurrentAudioTrack() != AudioTrack::MainMenu) {
-    audioManager.playTrack(AudioTrack::MainMenu, -1);
+  if (audioManager.getCurrentAudioTrack() != AudioTrack::MAIN_MENU) {
+    audioManager.playTrack(AudioTrack::MAIN_MENU, -1);
   }
 
   audioSampleQueue.update();

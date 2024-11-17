@@ -34,9 +34,9 @@ enum class AudioSample {
 };
 
 enum class AudioTrack {
-  None,
-  MainMenu,
-  Play,
+  NONE,
+  MAIN_MENU,
+  PLAY,
 };
 
 class AudioManager {
@@ -49,8 +49,8 @@ private:
   int    m_channels  = 0;
   int    m_chunksize = 0;
 
-  AudioTrack  m_currentAudioTrack = AudioTrack::None;
-  AudioTrack  m_lastAudioTrack    = AudioTrack::None;
+  AudioTrack  m_currentAudioTrack = AudioTrack::NONE;
+  AudioTrack  m_lastAudioTrack    = AudioTrack::NONE;
   AudioSample m_lastAudioSample   = AudioSample::NONE;
   bool        m_audioTrackPaused  = false;
 
