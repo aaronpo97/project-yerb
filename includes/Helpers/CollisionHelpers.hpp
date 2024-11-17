@@ -7,6 +7,7 @@
 #include <random>
 
 #include "../AssetManagement/AudioManager.hpp"
+#include "../AssetManagement/AudioSampleQueue.hpp"
 #include "../EntityManagement/Entity.hpp"
 #include "../EntityManagement/EntityManager.hpp"
 #include "../Helpers/Vec2.hpp"
@@ -39,7 +40,7 @@ namespace CollisionHelpers::MainScene {
     const int                       score;
     const std::function<void(int)> &setScore;
     const std::function<void()>     decrementLives;
-    AudioSample                    &nextAudioSample;
+    AudioSampleQueue               &audioSampleManager;
     const Vec2                      windowSize;
   };
 

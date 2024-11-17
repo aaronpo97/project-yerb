@@ -16,12 +16,11 @@ GameEngine::GameEngine() {
 
   const std::string CONFIG_PATH = "./assets/config.json";
 
-  m_configManager = createConfigManager(CONFIG_PATH);
-  m_audioManager  = createAudioManager();
-  m_fontManager   = createFontManager();
-
+  m_configManager    = createConfigManager(CONFIG_PATH);
+  m_audioManager     = createAudioManager();
+  m_audioSampleQueue = initializeAudioSampleQueue();
+  m_fontManager      = createFontManager();
   initializeVideoSystem();
-
   m_window   = createWindow();
   m_renderer = createRenderer();
   setupRenderer();
@@ -48,6 +47,15 @@ std::unique_ptr<AudioManager> GameEngine::createAudioManager() {
   constexpr int    CHUNKSIZE = 2048;
 
   return std::make_unique<AudioManager>(FREQUENCY, FORMAT, CHANNELS, CHUNKSIZE);
+}
+
+std::unique_ptr<AudioSampleQueue> GameEngine::initializeAudioSampleQueue() {
+  if (m_audioManager == nullptr) {
+    SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "AudioManager not initialized");
+    cleanup();
+    throw std::runtime_error("AudioManager not initialized");
+  }
+  return std::make_unique<AudioSampleQueue>(*m_audioManager);
 }
 
 /**
@@ -232,6 +240,15 @@ AudioManager &GameEngine::getAudioManager() const {
   }
   return *m_audioManager;
 }
+
+AudioSampleQueue &GameEngine::getAudioSampleQueue() const {
+  if (!m_audioSampleQueue) {
+    SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "AudioSampleManager not initialized");
+    throw std::runtime_error("AudioSampleManager not initialized");
+  }
+  return *m_audioSampleQueue;
+}
+
 void GameEngine::sUserInput() {
   SDL_Event event;
 

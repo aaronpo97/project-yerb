@@ -21,17 +21,16 @@
 #define BULLET_HIT_02_SOUND_PATH "assets/audio/samples/bullet_hit_02.wav"
 
 enum class AudioSample {
-  None,
-  ItemAcquired,
-  EnemyCollides,
-  SpeedBoostAcquired,
-  SlownessDebuffAcquired,
-  MenuMove,
-  MenuSelect,
-  Shoot,
-  BulletHit01,
-  BulletHit02,
-  s
+  NONE,
+  ITEM_ACQUIRED,
+  ENEMY_COLLIDES,
+  SPEED_BOOST_ACQUIRED,
+  SLOWNESS_DEBUFF_ACQUIRED,
+  MENU_MOVE,
+  MENU_SELECT,
+  SHOOT,
+  BULLET_HIT_01,
+  BULLET_HIT_02,
 };
 
 enum class AudioTrack {
@@ -42,18 +41,8 @@ enum class AudioTrack {
 
 class AudioManager {
 private:
-  std::map<AudioTrack, Mix_Music *> m_audioTracks = {
-      {AudioTrack::MainMenu, nullptr},
-      {AudioTrack::Play, nullptr},
-  };
-  std::map<AudioSample, Mix_Chunk *> m_audioSamples = {
-      {AudioSample::ItemAcquired, nullptr},
-      {AudioSample::EnemyCollides, nullptr},
-      {AudioSample::SpeedBoostAcquired, nullptr},
-      {AudioSample::SlownessDebuffAcquired, nullptr},
-      {AudioSample::MenuMove, nullptr},
-      {AudioSample::MenuSelect, nullptr},
-  };
+  std::unordered_map<AudioTrack, Mix_Music *>  m_audioTracks;
+  std::unordered_map<AudioSample, Mix_Chunk *> m_audioSamples;
 
   int    m_frequency = 0;
   Uint16 m_format    = 0;
@@ -62,7 +51,7 @@ private:
 
   AudioTrack  m_currentAudioTrack = AudioTrack::None;
   AudioTrack  m_lastAudioTrack    = AudioTrack::None;
-  AudioSample m_lastAudioSample   = AudioSample::None;
+  AudioSample m_lastAudioSample   = AudioSample::NONE;
   bool        m_audioTrackPaused  = false;
 
   bool                       m_tracksMuted      = false;
@@ -90,10 +79,9 @@ public:
   void        pauseTrack();
   void        resumeTrack();
   static void setTrackVolume(int volume);
-  void        setSampleVolume(AudioSample sample, int volume);
-
-  int        getSampleVolume(AudioSample sampleTag);
-  static int getTrackVolume();
+  void        setSampleVolume(AudioSample sampleTag, int volume);
+  int         getSampleVolume(AudioSample sampleTag);
+  static int  getTrackVolume();
 
   void muteTracks();
   void unmuteTracks();

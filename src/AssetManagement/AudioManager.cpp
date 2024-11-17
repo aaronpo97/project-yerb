@@ -25,15 +25,15 @@ void AudioManager::loadAllAudio() {
   loadTrack(AudioTrack::MainMenu, MAIN_MENU_MUSIC_PATH);
   loadTrack(AudioTrack::Play, PLAY_MUSIC_PATH);
 
-  loadSample(AudioSample::ItemAcquired, ITEM_ACQUIRED_SOUND_PATH);
-  loadSample(AudioSample::EnemyCollides, ENEMY_COLLIDES_SOUND_PATH);
-  loadSample(AudioSample::SpeedBoostAcquired, SPEED_BOOST_ACQUIRED_SOUND_PATH);
-  loadSample(AudioSample::SlownessDebuffAcquired, SLOWNESS_DEBUFF_ACQUIRED_SOUND_PATH);
-  loadSample(AudioSample::MenuMove, MENU_MOVE_SOUND_PATH);
-  loadSample(AudioSample::MenuSelect, MENU_SELECT_SOUND_PATH);
-  loadSample(AudioSample::Shoot, SHOOT_SOUND_PATH);
-  loadSample(AudioSample::BulletHit01, BULLET_HIT_01_SOUND_PATH);
-  loadSample(AudioSample::BulletHit02, BULLET_HIT_02_SOUND_PATH);
+  loadSample(AudioSample::ITEM_ACQUIRED, ITEM_ACQUIRED_SOUND_PATH);
+  loadSample(AudioSample::ENEMY_COLLIDES, ENEMY_COLLIDES_SOUND_PATH);
+  loadSample(AudioSample::SPEED_BOOST_ACQUIRED, SPEED_BOOST_ACQUIRED_SOUND_PATH);
+  loadSample(AudioSample::SLOWNESS_DEBUFF_ACQUIRED, SLOWNESS_DEBUFF_ACQUIRED_SOUND_PATH);
+  loadSample(AudioSample::MENU_MOVE, MENU_MOVE_SOUND_PATH);
+  loadSample(AudioSample::MENU_SELECT, MENU_SELECT_SOUND_PATH);
+  loadSample(AudioSample::SHOOT, SHOOT_SOUND_PATH);
+  loadSample(AudioSample::BULLET_HIT_01, BULLET_HIT_01_SOUND_PATH);
+  loadSample(AudioSample::BULLET_HIT_02, BULLET_HIT_02_SOUND_PATH);
 }
 
 void AudioManager::loadTrack(const AudioTrack track, const std::string &filepath) {
@@ -103,7 +103,7 @@ void AudioManager::setTrackVolume(int volume) {
   Mix_VolumeMusic(volume);
 }
 
-void AudioManager::setSampleVolume(const AudioSample sample, int volume) {
+void AudioManager::setSampleVolume(const AudioSample sampleTag, int volume) {
   if (volume > MIX_MAX_VOLUME) {
     volume = MIX_MAX_VOLUME;
   }
@@ -112,7 +112,7 @@ void AudioManager::setSampleVolume(const AudioSample sample, int volume) {
     volume = 0;
   }
 
-  Mix_VolumeChunk(m_audioSamples[sample], volume);
+  Mix_VolumeChunk(m_audioSamples[sampleTag], volume);
 }
 
 int AudioManager::getSampleVolume(const AudioSample sampleTag) {
@@ -136,7 +136,7 @@ bool AudioManager::isTrackPaused() {
 
 void AudioManager::cleanup() {
   m_currentAudioTrack = AudioTrack::None;
-  m_lastAudioSample   = AudioSample::None;
+  m_lastAudioSample   = AudioSample::NONE;
 
   for (auto &[sampleTag, sample] : m_audioSamples) {
     if (sample != nullptr) {
