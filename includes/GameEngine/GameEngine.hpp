@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../AssetManagement/AudioManager.hpp"
+#include "../AssetManagement/AudioSampleManager.hpp"
 #include "../AssetManagement/FontManager.hpp"
 #include "../Configuration/ConfigManager.hpp"
 
@@ -19,6 +20,7 @@ protected:
   std::unique_ptr<ConfigManager>                m_configManager;
   std::unique_ptr<FontManager>                  m_fontManager;
   std::unique_ptr<AudioManager>                 m_audioManager;
+  std::unique_ptr<AudioSampleManager>           m_audioSampleManager;
 
   void                                  update();
   void                                  quit();
@@ -40,11 +42,12 @@ public:
   bool isRunning() const;
   void loadScene(const std::string &sceneName, const std::shared_ptr<Scene> &scene);
 
-  ConfigManager &getConfigManager() const;
-  FontManager   &getFontManager() const;
-  AudioManager  &getAudioManager() const;
-  SDL_Renderer  *getRenderer() const;
-  SDL_Window    *getWindow() const;
+  ConfigManager      &getConfigManager() const;
+  FontManager        &getFontManager() const;
+  AudioManager       &getAudioManager() const;
+  AudioSampleManager &getAudioSampleManager() const;
+  SDL_Renderer       *getRenderer() const;
+  SDL_Window         *getWindow() const;
 
   void run();
 };

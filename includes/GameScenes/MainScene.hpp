@@ -20,7 +20,6 @@ private:
   bool                    m_gameOver      = false;
   std::random_device      m_rd;
   std::mt19937            m_randomGenerator = std::mt19937(m_rd());
-  AudioSampleManager      m_audioSampleManager;
   void                    renderText() const;
 
 public:

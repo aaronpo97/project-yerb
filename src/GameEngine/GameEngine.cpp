@@ -16,9 +16,10 @@ GameEngine::GameEngine() {
 
   const std::string CONFIG_PATH = "./assets/config.json";
 
-  m_configManager = createConfigManager(CONFIG_PATH);
-  m_audioManager  = createAudioManager();
-  m_fontManager   = createFontManager();
+  m_configManager      = createConfigManager(CONFIG_PATH);
+  m_audioManager       = createAudioManager();
+  m_audioSampleManager = std::make_unique<AudioSampleManager>();
+  m_fontManager        = createFontManager();
 
   initializeVideoSystem();
 
@@ -232,6 +233,15 @@ AudioManager &GameEngine::getAudioManager() const {
   }
   return *m_audioManager;
 }
+
+AudioSampleManager &GameEngine::getAudioSampleManager() const {
+  if (!m_audioSampleManager) {
+    SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "AudioSampleManager not initialized");
+    throw std::runtime_error("AudioSampleManager not initialized");
+  }
+  return *m_audioSampleManager;
+}
+
 void GameEngine::sUserInput() {
   SDL_Event event;
 
