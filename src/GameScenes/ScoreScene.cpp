@@ -79,20 +79,20 @@ void ScoreScene::sDoAction(Action &action) {
   }
 
   if (action.getName() == "SELECT") {
-    m_nextAudioSample = AudioSample::MenuSelect;
+    m_nextAudioSample = AudioSample::MENU_SELECT;
     m_endTriggered    = true;
     return;
   }
 
   // UP takes precedence over DOWN if both are pressed
   if (action.getName() == "UP") {
-    m_nextAudioSample = AudioSample::MenuMove;
+    m_nextAudioSample = AudioSample::MENU_MOVE;
     m_selectedIndex > 0 ? m_selectedIndex -= 1 : m_selectedIndex = 1;
     return;
   }
 
   if (action.getName() == "DOWN") {
-    m_nextAudioSample = AudioSample::MenuMove;
+    m_nextAudioSample = AudioSample::MENU_MOVE;
     m_selectedIndex < 1 ? m_selectedIndex += 1 : m_selectedIndex = 0;
   }
 }
@@ -104,8 +104,8 @@ void ScoreScene::sAudio() {
     m_gameEngine->getAudioManager().playTrack(AudioTrack::MainMenu, -1);
   }
 
-  if (m_nextAudioSample != AudioSample::None) {
+  if (m_nextAudioSample != AudioSample::NONE) {
     audioManager.playSample(m_nextAudioSample);
-    m_nextAudioSample = AudioSample::None;
+    m_nextAudioSample = AudioSample::NONE;
   }
 }

@@ -28,13 +28,13 @@ private:
   static constexpr Uint64                 MIN_REPLAY_INTERVAL  = 50;
   static constexpr size_t                 MAX_SOUNDS_PER_FRAME = 4;
   std::unordered_map<AudioSample, Uint64> m_cooldowns          = {
-      {AudioSample::Shoot, 100},
-      {AudioSample::EnemyCollides, 200},
-      {AudioSample::ItemAcquired, 150},
-      {AudioSample::SpeedBoostAcquired, 150},
-      {AudioSample::SlownessDebuffAcquired, 150},
-      {AudioSample::BulletHit01, 100},
-      {AudioSample::BulletHit02, 100},
+      {AudioSample::SHOOT, 100},
+      {AudioSample::ENEMY_COLLIDES, 200},
+      {AudioSample::ITEM_ACQUIRED, 150},
+      {AudioSample::SPEED_BOOST_ACQUIRED, 150},
+      {AudioSample::SLOWNESS_DEBUFF_ACQUIRED, 150},
+      {AudioSample::BULLET_HIT_01, 100},
+      {AudioSample::BULLET_HIT_02, 100},
   };
 
 public:

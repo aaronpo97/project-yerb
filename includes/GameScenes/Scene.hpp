@@ -16,7 +16,7 @@ protected:
   bool        m_paused         = false;
   Uint64      m_SceneStartTime = 0;
   ActionMap   m_actionMap;
-  AudioSample m_nextAudioSample = AudioSample::None;
+  AudioSample m_nextAudioSample = AudioSample::NONE;
 
 public:
   explicit Scene(GameEngine *gameEngine) :

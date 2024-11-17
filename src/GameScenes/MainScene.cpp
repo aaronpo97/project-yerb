@@ -107,19 +107,19 @@ void MainScene::sDoAction(Action &action) {
 
     const Vec2 mousePosition = *position;
 
-    audioSampleManager.queueSample(AudioSample::Shoot, AudioPriority::STANDARD);
+    audioSampleManager.queueSample(AudioSample::SHOOT, AudioPriority::STANDARD);
     SpawnHelpers::MainScene::spawnBullets(m_gameEngine->getRenderer(),
                                           m_gameEngine->getConfigManager(), m_entities,
                                           m_player, mousePosition);
   }
 
   if (action.getName() == "PAUSE") {
-    audioSampleManager.queueSample(AudioSample::MenuSelect, AudioPriority::CRITICAL);
+    audioSampleManager.queueSample(AudioSample::MENU_SELECT, AudioPriority::CRITICAL);
     m_paused = !m_paused;
   }
 
   if (action.getName() == "GO_BACK") {
-    audioSampleManager.queueSample(AudioSample::MenuSelect, AudioPriority::CRITICAL);
+    audioSampleManager.queueSample(AudioSample::MENU_SELECT, AudioPriority::CRITICAL);
     m_endTriggered = true;
   }
 }
