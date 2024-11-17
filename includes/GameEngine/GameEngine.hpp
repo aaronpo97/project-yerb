@@ -30,6 +30,7 @@ protected:
   static std::unique_ptr<ConfigManager> createConfigManager(const std::string &configPath);
   std::unique_ptr<FontManager>          createFontManager();
   static std::unique_ptr<AudioManager>  createAudioManager();
+  std::unique_ptr<AudioSampleManager>   createAudioSampleManager();
   void                                  initializeVideoSystem();
   SDL_Renderer                         *createRenderer();
   void                                  setupRenderer();

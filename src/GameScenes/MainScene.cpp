@@ -418,5 +418,5 @@ void MainScene::sAudio() {
     audioManager.playTrack(AudioTrack::Play, -1);
   }
 
-  audioSampleManager.update(audioManager);
+  audioSampleManager.update();
 }

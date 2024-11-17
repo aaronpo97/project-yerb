@@ -23,6 +23,7 @@ class AudioSampleManager {
 private:
   std::priority_queue<QueuedSample>       m_sampleQueue;
   std::unordered_map<AudioSample, Uint64> m_lastPlayTimes;
+  AudioManager                           &m_audioManager;
 
   static constexpr Uint64                 MIN_REPLAY_INTERVAL  = 50;
   static constexpr size_t                 MAX_SOUNDS_PER_FRAME = 4;
@@ -37,6 +38,9 @@ private:
   };
 
 public:
+  explicit AudioSampleManager(AudioManager &audioManager) :
+      m_audioManager(audioManager) {}
+
   void queueSample(const AudioSample sample, const AudioPriority priority) {
     const Uint64 currentTime = SDL_GetTicks64();
 
@@ -51,7 +55,7 @@ public:
     m_sampleQueue.push({.sample = sample, .priority = priority, .timestamp = currentTime});
   }
 
-  void update(AudioManager &audioManager) {
+  void update() {
     const Uint64 currentTime           = SDL_GetTicks64();
     size_t       soundsPlayedThisFrame = 0;
 
@@ -66,7 +70,7 @@ public:
         continue;
       }
 
-      audioManager.playSample(sample);
+      m_audioManager.playSample(sample);
       m_lastPlayTimes[sample] = currentTime;
 
       m_sampleQueue.pop();

@@ -18,11 +18,9 @@ GameEngine::GameEngine() {
 
   m_configManager      = createConfigManager(CONFIG_PATH);
   m_audioManager       = createAudioManager();
-  m_audioSampleManager = std::make_unique<AudioSampleManager>();
+  m_audioSampleManager = createAudioSampleManager();
   m_fontManager        = createFontManager();
-
   initializeVideoSystem();
-
   m_window   = createWindow();
   m_renderer = createRenderer();
   setupRenderer();
@@ -49,6 +47,15 @@ std::unique_ptr<AudioManager> GameEngine::createAudioManager() {
   constexpr int    CHUNKSIZE = 2048;
 
   return std::make_unique<AudioManager>(FREQUENCY, FORMAT, CHANNELS, CHUNKSIZE);
+}
+
+std::unique_ptr<AudioSampleManager> GameEngine::createAudioSampleManager() {
+  if (m_audioManager == nullptr) {
+    SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "AudioManager not initialized");
+    cleanup();
+    throw std::runtime_error("AudioManager not initialized");
+  }
+  return std::make_unique<AudioSampleManager>(*m_audioManager);
 }
 
 /**
