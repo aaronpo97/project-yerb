@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../AssetManagement/AudioManager.hpp"
-#include "../AssetManagement/AudioSampleManager.hpp"
+#include "../AssetManagement/AudioSampleQueue.hpp"
 #include "../AssetManagement/FontManager.hpp"
 #include "../Configuration/ConfigManager.hpp"
 
@@ -20,7 +20,7 @@ protected:
   std::unique_ptr<ConfigManager>                m_configManager;
   std::unique_ptr<FontManager>                  m_fontManager;
   std::unique_ptr<AudioManager>                 m_audioManager;
-  std::unique_ptr<AudioSampleManager>           m_audioSampleManager;
+  std::unique_ptr<AudioSampleQueue>             m_audioSampleQueue;
 
   void                                  update();
   void                                  quit();
@@ -30,25 +30,25 @@ protected:
   static std::unique_ptr<ConfigManager> createConfigManager(const std::string &configPath);
   std::unique_ptr<FontManager>          createFontManager();
   static std::unique_ptr<AudioManager>  createAudioManager();
-  std::unique_ptr<AudioSampleManager>   createAudioSampleManager();
+  std::unique_ptr<AudioSampleQueue>     initializeAudioSampleQueue();
   void                                  initializeVideoSystem();
   SDL_Renderer                         *createRenderer();
   void                                  setupRenderer();
   SDL_Window                           *createWindow();
 
 public:
-  GameEngine();
+   GameEngine();
   ~GameEngine();
 
   bool isRunning() const;
   void loadScene(const std::string &sceneName, const std::shared_ptr<Scene> &scene);
 
-  ConfigManager      &getConfigManager() const;
-  FontManager        &getFontManager() const;
-  AudioManager       &getAudioManager() const;
-  AudioSampleManager &getAudioSampleManager() const;
-  SDL_Renderer       *getRenderer() const;
-  SDL_Window         *getWindow() const;
+  ConfigManager    &getConfigManager() const;
+  FontManager      &getFontManager() const;
+  AudioManager     &getAudioManager() const;
+  AudioSampleQueue &getAudioSampleQueue() const;
+  SDL_Renderer     *getRenderer() const;
+  SDL_Window       *getWindow() const;
 
   void run();
 };

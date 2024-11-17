@@ -61,8 +61,8 @@ void MainScene::update() {
 }
 
 void MainScene::sDoAction(Action &action) {
-  const ActionState  &actionState        = action.getState();
-  AudioSampleManager &audioSampleManager = m_gameEngine->getAudioSampleManager();
+  const ActionState &actionState        = action.getState();
+  AudioSampleQueue  &audioSampleQueue = m_gameEngine->getAudioSampleQueue();
 
   if (m_player == nullptr) {
     SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Player entity is null, cannot process action.");
@@ -107,19 +107,19 @@ void MainScene::sDoAction(Action &action) {
 
     const Vec2 mousePosition = *position;
 
-    audioSampleManager.queueSample(AudioSample::SHOOT, AudioPriority::STANDARD);
+    audioSampleQueue.queueSample(AudioSample::SHOOT, AudioPriority::STANDARD);
     SpawnHelpers::MainScene::spawnBullets(m_gameEngine->getRenderer(),
                                           m_gameEngine->getConfigManager(), m_entities,
                                           m_player, mousePosition);
   }
 
   if (action.getName() == "PAUSE") {
-    audioSampleManager.queueSample(AudioSample::MENU_SELECT, AudioPriority::CRITICAL);
+    audioSampleQueue.queueSample(AudioSample::MENU_SELECT, AudioPriority::CRITICAL);
     m_paused = !m_paused;
   }
 
   if (action.getName() == "GO_BACK") {
-    audioSampleManager.queueSample(AudioSample::MENU_SELECT, AudioPriority::CRITICAL);
+    audioSampleQueue.queueSample(AudioSample::MENU_SELECT, AudioPriority::CRITICAL);
     m_endTriggered = true;
   }
 }
@@ -197,14 +197,14 @@ void MainScene::sCollision() {
   const ConfigManager &configManager = m_gameEngine->getConfigManager();
   const Vec2          &windowSize    = configManager.getGameConfig().windowSize;
 
-  AudioSampleManager &audioSampleManager = m_gameEngine->getAudioSampleManager();
-  const GameState     gameState          = {.entityManager   = m_entities,
-                                            .randomGenerator = m_randomGenerator,
-                                            .score           = m_score,
-                                            .setScore = [this](const int score) { setScore(score); },
-                                            .decrementLives     = [this]() { decrementLives(); },
-                                            .windowSize         = windowSize,
-                                            .audioSampleManager = audioSampleManager};
+  AudioSampleQueue &audioSampleManager = m_gameEngine->getAudioSampleQueue();
+  const GameState   gameState          = {.entityManager   = m_entities,
+                                          .randomGenerator = m_randomGenerator,
+                                          .score           = m_score,
+                                          .setScore = [this](const int score) { setScore(score); },
+                                          .decrementLives     = [this]() { decrementLives(); },
+                                          .windowSize         = windowSize,
+                                          .audioSampleManager = audioSampleManager};
 
   for (auto &entity : m_entities.getEntities()) {
     handleEntityBounds(entity, windowSize);
@@ -411,12 +411,12 @@ void MainScene::onEnd() {
 
 void MainScene::sAudio() {
 
-  AudioManager       &audioManager       = m_gameEngine->getAudioManager();
-  AudioSampleManager &audioSampleManager = m_gameEngine->getAudioSampleManager();
+  AudioManager     &audioManager     = m_gameEngine->getAudioManager();
+  AudioSampleQueue &audioSampleQueue = m_gameEngine->getAudioSampleQueue();
 
   if (audioManager.getCurrentAudioTrack() != AudioTrack::Play) {
     audioManager.playTrack(AudioTrack::Play, -1);
   }
 
-  audioSampleManager.update();
+  audioSampleQueue.update();
 }

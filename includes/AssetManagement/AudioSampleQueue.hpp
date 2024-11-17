@@ -19,7 +19,7 @@ struct QueuedSample {
   }
 };
 
-class AudioSampleManager {
+class AudioSampleQueue {
 private:
   std::priority_queue<QueuedSample>       m_sampleQueue;
   std::unordered_map<AudioSample, Uint64> m_lastPlayTimes;
@@ -38,7 +38,7 @@ private:
   };
 
 public:
-  explicit AudioSampleManager(AudioManager &audioManager) :
+  explicit AudioSampleQueue(AudioManager &audioManager) :
       m_audioManager(audioManager) {}
 
   void queueSample(const AudioSample sample, const AudioPriority priority) {
@@ -62,7 +62,7 @@ public:
     while (!m_sampleQueue.empty() && soundsPlayedThisFrame < MAX_SOUNDS_PER_FRAME) {
       const auto &[sample, priority, timestamp] = m_sampleQueue.top();
 
-      // Check if sound is still in cooldown
+      // Check if sound is stilAl in cooldown
       const bool soundInCooldown = currentTime - timestamp > 500;
 
       if (soundInCooldown) {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../includes/AssetManagement/AudioSampleManager.hpp"
+#include "../../includes/AssetManagement/AudioSampleQueue.hpp"
 #include "../EntityManagement/EntityManager.hpp"
 #include "../GameScenes/Scene.hpp"
 #include <SDL2/SDL.h>
