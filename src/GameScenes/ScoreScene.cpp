@@ -83,7 +83,7 @@ void ScoreScene::sDoAction(Action &action) {
 
   if (action.getName() == "SELECT") {
     audioSampleQueue.queueSample(AudioSample::MENU_SELECT, AudioSamplePriority::BACKGROUND);
-    m_endTriggered    = true;
+    m_endTriggered = true;
     return;
   }
 
@@ -101,7 +101,7 @@ void ScoreScene::sDoAction(Action &action) {
 }
 
 void ScoreScene::sAudio() {
-  AudioManager &audioManager = m_gameEngine->getAudioManager();
+  AudioManager     &audioManager     = m_gameEngine->getAudioManager();
   AudioSampleQueue &audioSampleQueue = m_gameEngine->getAudioSampleQueue();
   if (audioManager.getCurrentAudioTrack() != AudioTrack::MAIN_MENU) {
     m_gameEngine->getAudioManager().playTrack(AudioTrack::MAIN_MENU, -1);
