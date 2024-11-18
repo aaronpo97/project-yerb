@@ -60,7 +60,7 @@ private:
   std::map<AudioSample, int> m_savedSampleVolumes;
 
   void loadTrack(AudioTrack track, const std::string &filepath);
-  void loadSample(AudioSample effect, const std::string &filepath);
+  void loadSample(AudioSample sample, const std::string &filepath);
   void cleanup();
 
 public:
@@ -68,6 +68,10 @@ public:
                         Uint16 format    = MIX_DEFAULT_FORMAT,
                         int    channels  = 2,
                         int    chunksize = 2048);
+
+  static constexpr size_t MAX_SAMPLES_PER_FRAME = 4;
+  static constexpr int    DEFAULT_SAMPLE_VOLUME = MIX_MAX_VOLUME / MAX_SAMPLES_PER_FRAME;
+  static constexpr int    DEFAULT_TRACK_VOLUME  = MIX_MAX_VOLUME * 0.8;
 
   ~AudioManager();
 

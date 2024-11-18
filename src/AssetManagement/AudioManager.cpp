@@ -15,6 +15,7 @@ AudioManager::AudioManager(const int    frequency,
   }
 
   loadAllAudio();
+  setTrackVolume(DEFAULT_TRACK_VOLUME);
 }
 
 AudioManager::~AudioManager() {
@@ -45,13 +46,16 @@ void AudioManager::loadTrack(const AudioTrack track, const std::string &filepath
   }
 }
 
-void AudioManager::loadSample(const AudioSample effect, const std::string &filepath) {
-  m_audioSamples[effect] = Mix_LoadWAV(filepath.c_str());
-  if (!m_audioSamples[effect]) {
+void AudioManager::loadSample(const AudioSample sample, const std::string &filepath) {
+  m_audioSamples[sample] = Mix_LoadWAV(filepath.c_str());
+  if (!m_audioSamples[sample]) {
     SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "Mix_LoadWAV error: %s", Mix_GetError());
     cleanup();
     throw std::runtime_error("Mix_LoadWAV error");
   }
+
+
+  setSampleVolume(sample, DEFAULT_SAMPLE_VOLUME);
 }
 
 void AudioManager::playTrack(const AudioTrack track, const int loops) {
