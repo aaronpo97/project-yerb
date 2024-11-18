@@ -445,7 +445,7 @@ namespace CollisionHelpers::MainScene {
     }
 
     if (tag == EntityTags::Player && otherTag == EntityTags::Enemy) {
-      args.audioSampleManager.queueSample(AudioSample::ENEMY_COLLIDES,
+      args.audioSampleManager.queueSample(AudioSample::ENEMY_COLLISION,
                                           AudioSamplePriority::STANDARD);
       setScore(m_score > 10 ? m_score - 10 : 0);
       otherEntity->destroy();
@@ -480,7 +480,7 @@ namespace CollisionHelpers::MainScene {
                             slownessDebuffs.end());
       effectsToCheck.insert(effectsToCheck.end(), speedBoosts.begin(), speedBoosts.end());
 
-      const AudioSample nextSample = AudioSample::SLOWNESS_DEBUFF_ACQUIRED;
+      const AudioSample nextSample = AudioSample::SLOWNESS_DEBUFF;
       args.audioSampleManager.queueSample(nextSample, AudioSamplePriority::STANDARD);
 
       constexpr float    REMOVAL_RADIUS = 150.0f;
@@ -502,7 +502,7 @@ namespace CollisionHelpers::MainScene {
       entity->cEffects->addEffect(
           {.startTime = startTime, .duration = duration, .type = EffectTypes::Speed});
 
-      const AudioSample nextSample = AudioSample::SPEED_BOOST_ACQUIRED;
+      const AudioSample nextSample = AudioSample::SPEED_BOOST;
       args.audioSampleManager.queueSample(nextSample, AudioSamplePriority::STANDARD);
 
       const EntityVector &slownessDebuffs = m_entities.getEntities(EntityTags::SlownessDebuff);

@@ -15,6 +15,7 @@ AudioManager::AudioManager(const int    frequency,
   }
 
   loadAllAudio();
+  setTrackVolume(DEFAULT_TRACK_VOLUME);
 }
 
 AudioManager::~AudioManager() {
@@ -22,21 +23,21 @@ AudioManager::~AudioManager() {
 }
 
 void AudioManager::loadAllAudio() {
-  loadTrack(AudioTrack::MainMenu, MAIN_MENU_MUSIC_PATH);
-  loadTrack(AudioTrack::Play, PLAY_MUSIC_PATH);
+  loadTrack(AudioTrack::MAIN_MENU, AudioPath::MAIN_MENU);
+  loadTrack(AudioTrack::PLAY, AudioPath::PLAY);
 
-  loadSample(AudioSample::ITEM_ACQUIRED, ITEM_ACQUIRED_SOUND_PATH);
-  loadSample(AudioSample::ENEMY_COLLIDES, ENEMY_COLLIDES_SOUND_PATH);
-  loadSample(AudioSample::SPEED_BOOST_ACQUIRED, SPEED_BOOST_ACQUIRED_SOUND_PATH);
-  loadSample(AudioSample::SLOWNESS_DEBUFF_ACQUIRED, SLOWNESS_DEBUFF_ACQUIRED_SOUND_PATH);
-  loadSample(AudioSample::MENU_MOVE, MENU_MOVE_SOUND_PATH);
-  loadSample(AudioSample::MENU_SELECT, MENU_SELECT_SOUND_PATH);
-  loadSample(AudioSample::SHOOT, SHOOT_SOUND_PATH);
-  loadSample(AudioSample::BULLET_HIT_01, BULLET_HIT_01_SOUND_PATH);
-  loadSample(AudioSample::BULLET_HIT_02, BULLET_HIT_02_SOUND_PATH);
+  loadSample(AudioSample::ITEM_ACQUIRED, AudioPath::ITEM_ACQUIRED);
+  loadSample(AudioSample::ENEMY_COLLISION, AudioPath::ENEMY_COLLISION);
+  loadSample(AudioSample::SPEED_BOOST, AudioPath::SPEED_BOOST);
+  loadSample(AudioSample::SLOWNESS_DEBUFF, AudioPath::SLOWNESS_DEBUFF);
+  loadSample(AudioSample::MENU_MOVE, AudioPath::MENU_MOVE);
+  loadSample(AudioSample::MENU_SELECT, AudioPath::MENU_SELECT);
+  loadSample(AudioSample::SHOOT, AudioPath::SHOOT);
+  loadSample(AudioSample::BULLET_HIT_01, AudioPath::BULLET_HIT_01);
+  loadSample(AudioSample::BULLET_HIT_02, AudioPath::BULLET_HIT_02);
 }
 
-void AudioManager::loadTrack(const AudioTrack track, const std::string &filepath) {
+void AudioManager::loadTrack(const AudioTrack track, const Path &filepath) {
   m_audioTracks[track] = Mix_LoadMUS(filepath.c_str());
   if (!m_audioTracks[track]) {
     SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "Mix_LoadMUS error: %s", Mix_GetError());
@@ -45,13 +46,16 @@ void AudioManager::loadTrack(const AudioTrack track, const std::string &filepath
   }
 }
 
-void AudioManager::loadSample(const AudioSample effect, const std::string &filepath) {
-  m_audioSamples[effect] = Mix_LoadWAV(filepath.c_str());
-  if (!m_audioSamples[effect]) {
+void AudioManager::loadSample(const AudioSample sample, const Path &filepath) {
+  m_audioSamples[sample] = Mix_LoadWAV(filepath.c_str());
+  if (!m_audioSamples[sample]) {
     SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "Mix_LoadWAV error: %s", Mix_GetError());
     cleanup();
     throw std::runtime_error("Mix_LoadWAV error");
   }
+
+
+  setSampleVolume(sample, DEFAULT_SAMPLE_VOLUME);
 }
 
 void AudioManager::playTrack(const AudioTrack track, const int loops) {
@@ -77,7 +81,7 @@ void AudioManager::playSample(const AudioSample sample, const int loops) {
 
 void AudioManager::stopTrack() {
   m_lastAudioTrack    = m_currentAudioTrack;
-  m_currentAudioTrack = AudioTrack::None;
+  m_currentAudioTrack = AudioTrack::NONE;
   Mix_HaltMusic();
 }
 
@@ -135,7 +139,7 @@ bool AudioManager::isTrackPaused() {
 }
 
 void AudioManager::cleanup() {
-  m_currentAudioTrack = AudioTrack::None;
+  m_currentAudioTrack = AudioTrack::NONE;
   m_lastAudioSample   = AudioSample::NONE;
 
   for (auto &[sampleTag, sample] : m_audioSamples) {

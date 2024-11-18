@@ -26,7 +26,6 @@ private:
   AudioManager                           &m_audioManager;
 
   static constexpr Uint64                 MIN_REPLAY_INTERVAL  = 50;
-  static constexpr size_t                 MAX_SOUNDS_PER_FRAME = 4;
   std::unordered_map<AudioSample, Uint64> m_cooldowns;
 
 public:

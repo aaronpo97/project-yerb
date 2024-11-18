@@ -414,8 +414,8 @@ void MainScene::sAudio() {
   AudioManager     &audioManager     = m_gameEngine->getAudioManager();
   AudioSampleQueue &audioSampleQueue = m_gameEngine->getAudioSampleQueue();
 
-  if (audioManager.getCurrentAudioTrack() != AudioTrack::Play) {
-    audioManager.playTrack(AudioTrack::Play, -1);
+  if (audioManager.getCurrentAudioTrack() != AudioTrack::PLAY) {
+    audioManager.playTrack(AudioTrack::PLAY, -1);
   }
 
   audioSampleQueue.update();

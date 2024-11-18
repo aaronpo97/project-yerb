@@ -4,10 +4,10 @@ AudioSampleQueue::AudioSampleQueue(AudioManager &audioManager) :
     m_audioManager(audioManager),
     m_cooldowns{
         {AudioSample::SHOOT, 100},
-        {AudioSample::ENEMY_COLLIDES, 200},
+        {AudioSample::ENEMY_COLLISION, 200},
         {AudioSample::ITEM_ACQUIRED, 150},
-        {AudioSample::SPEED_BOOST_ACQUIRED, 150},
-        {AudioSample::SLOWNESS_DEBUFF_ACQUIRED, 150},
+        {AudioSample::SPEED_BOOST, 150},
+        {AudioSample::SLOWNESS_DEBUFF, 150},
         {AudioSample::BULLET_HIT_01, 100},
         {AudioSample::BULLET_HIT_02, 100},
     } {}
@@ -29,7 +29,8 @@ void AudioSampleQueue::queueSample(const AudioSample         sample,
 
 void AudioSampleQueue::update() {
   const Uint64 currentTime           = SDL_GetTicks64();
-  size_t       soundsPlayedThisFrame = 0;
+  size_t           soundsPlayedThisFrame = 0;
+  constexpr size_t MAX_SOUNDS_PER_FRAME   = AudioManager::MAX_SAMPLES_PER_FRAME;
 
   while (!m_sampleQueue.empty() && soundsPlayedThisFrame < MAX_SOUNDS_PER_FRAME) {
     const auto &[sample, priority, timestamp] = m_sampleQueue.top();
@@ -56,9 +57,9 @@ void AudioSampleQueue::update() {
 
   std::priority_queue<QueuedSample> tempQueue;
   while (!m_sampleQueue.empty()) {
-    const QueuedSample &sound = m_sampleQueue.top();
-    if (sound.priority >= AudioSamplePriority::STANDARD) {
-      tempQueue.push(sound);
+    const QueuedSample &queuedSample = m_sampleQueue.top();
+    if (queuedSample.priority >= AudioSamplePriority::STANDARD) {
+      tempQueue.push(queuedSample);
     }
     m_sampleQueue.pop();
   }

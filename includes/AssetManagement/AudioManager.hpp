@@ -2,30 +2,36 @@
 
 #include <SDL2/SDL.h>
 #include <SDL_mixer.h>
-#include <array>
+#include <filesystem>
 #include <map>
-#include <memory>
-#include <stdexcept>
-#include <string_view>
 
-#define MAIN_MENU_MUSIC_PATH "assets/audio/tracks/main_menu.ogg"
-#define PLAY_MUSIC_PATH "assets/audio/tracks/play.ogg"
-#define ITEM_ACQUIRED_SOUND_PATH "assets/audio/samples/item_acquired.wav"
-#define ENEMY_COLLIDES_SOUND_PATH "assets/audio/samples/enemy_collides.wav"
-#define SPEED_BOOST_ACQUIRED_SOUND_PATH "assets/audio/samples/speed_boost_acquired.wav"
-#define SLOWNESS_DEBUFF_ACQUIRED_SOUND_PATH "assets/audio/samples/slowness_debuff_acquired.wav"
-#define MENU_MOVE_SOUND_PATH "assets/audio/samples/menu_move.wav"
-#define MENU_SELECT_SOUND_PATH "assets/audio/samples/menu_select.wav"
-#define SHOOT_SOUND_PATH "assets/audio/samples/shoot.wav"
-#define BULLET_HIT_01_SOUND_PATH "assets/audio/samples/bullet_hit_01.wav"
-#define BULLET_HIT_02_SOUND_PATH "assets/audio/samples/bullet_hit_02.wav"
+typedef std::filesystem::path Path;
+
+namespace AudioPath {
+  const Path ASSETS  = "assets/audio";
+  const Path TRACKS  = ASSETS / "tracks";
+  const Path SAMPLES = ASSETS / "samples";
+
+  const Path MAIN_MENU = TRACKS / "main_menu.ogg";
+  const Path PLAY      = TRACKS / "play.ogg";
+
+  const Path ITEM_ACQUIRED   = SAMPLES / "item_acquired.wav";
+  const Path SPEED_BOOST     = SAMPLES / "speed_boost_acquired.wav";
+  const Path ENEMY_COLLISION = SAMPLES / "enemy_collides.wav";
+  const Path MENU_MOVE       = SAMPLES / "menu_move.wav";
+  const Path MENU_SELECT     = SAMPLES / "menu_select.wav";
+  const Path SHOOT           = SAMPLES / "shoot.wav";
+  const Path BULLET_HIT_01   = SAMPLES / "bullet_hit_01.wav";
+  const Path BULLET_HIT_02   = SAMPLES / "bullet_hit_02.wav";
+  const Path SLOWNESS_DEBUFF = SAMPLES / "slowness_debuff_acquired.wav";
+} // namespace AudioPath
 
 enum class AudioSample {
   NONE,
   ITEM_ACQUIRED,
-  ENEMY_COLLIDES,
-  SPEED_BOOST_ACQUIRED,
-  SLOWNESS_DEBUFF_ACQUIRED,
+  ENEMY_COLLISION,
+  SPEED_BOOST,
+  SLOWNESS_DEBUFF,
   MENU_MOVE,
   MENU_SELECT,
   SHOOT,
@@ -34,9 +40,9 @@ enum class AudioSample {
 };
 
 enum class AudioTrack {
-  None,
-  MainMenu,
-  Play,
+  NONE,
+  MAIN_MENU,
+  PLAY,
 };
 
 class AudioManager {
@@ -49,8 +55,8 @@ private:
   int    m_channels  = 0;
   int    m_chunksize = 0;
 
-  AudioTrack  m_currentAudioTrack = AudioTrack::None;
-  AudioTrack  m_lastAudioTrack    = AudioTrack::None;
+  AudioTrack  m_currentAudioTrack = AudioTrack::NONE;
+  AudioTrack  m_lastAudioTrack    = AudioTrack::NONE;
   AudioSample m_lastAudioSample   = AudioSample::NONE;
   bool        m_audioTrackPaused  = false;
 
@@ -59,8 +65,8 @@ private:
   int                        m_savedTrackVolume = MIX_MAX_VOLUME;
   std::map<AudioSample, int> m_savedSampleVolumes;
 
-  void loadTrack(AudioTrack track, const std::string &filepath);
-  void loadSample(AudioSample effect, const std::string &filepath);
+  void loadTrack(AudioTrack track, const Path &filepath);
+  void loadSample(AudioSample sample, const Path &filepath);
   void cleanup();
 
 public:
@@ -68,6 +74,10 @@ public:
                         Uint16 format    = MIX_DEFAULT_FORMAT,
                         int    channels  = 2,
                         int    chunksize = 2048);
+
+  static constexpr size_t MAX_SAMPLES_PER_FRAME = 4;
+  static constexpr int    DEFAULT_SAMPLE_VOLUME = MIX_MAX_VOLUME / MAX_SAMPLES_PER_FRAME;
+  static constexpr int    DEFAULT_TRACK_VOLUME  = MIX_MAX_VOLUME * 0.8;
 
   ~AudioManager();
 
