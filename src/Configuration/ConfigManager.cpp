@@ -13,31 +13,39 @@ JsonReturnType ConfigManager::getJsonValue(const json        &jsonValue,
 }
 
 SDL_Color ConfigManager::parseColor(const json &colorJson, const std::string &context) {
-  return SDL_Color{static_cast<Uint8>(getJsonValue<int>(colorJson, "r", context)),
-                   static_cast<Uint8>(getJsonValue<int>(colorJson, "g", context)),
-                   static_cast<Uint8>(getJsonValue<int>(colorJson, "b", context)),
-                   static_cast<Uint8>(getJsonValue<int>(colorJson, "a", context))};
+  const auto red   = getJsonValue<Uint8>(colorJson, "r", context);
+  const auto green = getJsonValue<Uint8>(colorJson, "g", context);
+  const auto blue  = getJsonValue<Uint8>(colorJson, "b", context);
+  const auto alpha = getJsonValue<Uint8>(colorJson, "a", context);
+
+  return {.r = red, .g = green, .b = blue, .a = alpha};
 }
 
 ShapeConfig ConfigManager::parseShapeConfig(const json        &shapeJson,
                                             const std::string &context) {
-  return ShapeConfig{getJsonValue<float>(shapeJson, "height", context),
-                     getJsonValue<float>(shapeJson, "width", context),
-                     parseColor(shapeJson["color"], context + ".color")};
+  const auto      height = getJsonValue<float>(shapeJson, "height", context);
+  const auto      width  = getJsonValue<float>(shapeJson, "width", context);
+  const SDL_Color color  = parseColor(shapeJson["color"], context + ".color");
+
+  return {height, width, color};
 }
 
 void ConfigManager::parseGameConfig() {
-  const auto &config   = m_json["gameConfig"];
-  const auto &sizeJson = config["windowSize"];
+  const auto &gameConfigJson = m_json["gameConfig"];
+  const auto &sizeJson       = gameConfigJson["windowSize"];
 
-  m_gameConfig.windowSize =
-      Vec2(getJsonValue<float>(sizeJson, "width", "gameConfig.windowSize"),
-           getJsonValue<float>(sizeJson, "height", "gameConfig.windowSize"));
+  const auto windowWidth  = getJsonValue<float>(sizeJson, "width", "gameConfig.windowSize");
+  const auto windowHeight = getJsonValue<float>(sizeJson, "height", "gameConfig.windowSize");
+  const auto fontPath     = getJsonValue<fs::path>(gameConfigJson, "fontPath", "gameConfig");
+  const auto windowTitle =
+      getJsonValue<std::string>(gameConfigJson, "windowTitle", "gameConfig");
+  const auto spawnInterval =
+      getJsonValue<Uint64>(gameConfigJson, "spawnInterval", "gameConfig");
 
-  m_gameConfig.windowTitle = getJsonValue<std::string>(config, "windowTitle", "gameConfig");
-  m_gameConfig.fontPath =
-      getJsonValue<std::filesystem::path>(config, "fontPath", "gameConfig");
-  m_gameConfig.spawnInterval = getJsonValue<Uint64>(config, "spawnInterval", "gameConfig");
+  m_gameConfig.windowSize    = Vec2(windowWidth, windowHeight);
+  m_gameConfig.windowTitle   = windowTitle;
+  m_gameConfig.fontPath      = fontPath;
+  m_gameConfig.spawnInterval = spawnInterval;
 
   if (!fs::exists(m_gameConfig.fontPath)) {
     throw ConfigurationError("Font file not found: " + m_gameConfig.fontPath.string());
@@ -47,29 +55,13 @@ void ConfigManager::parseGameConfig() {
 void ConfigManager::parseItemConfig() {
   const auto &config = m_json["itemConfig"];
 
-  m_itemConfig.lifespan = getJsonValue<Uint64>(config, "lifespan", "itemConfig");
-  m_itemConfig.speed    = getJsonValue<float>(config, "speed", "itemConfig");
-  m_itemConfig.spawnPercentage =
-      getJsonValue<unsigned int>(config, "spawnPercentage", "itemConfig");
-  m_itemConfig.shape = parseShapeConfig(config["shape"], "itemConfig.shape");
+  m_itemConfig.lifespan        = getJsonValue<Uint64>(config, "lifespan", "itemConfig");
+  m_itemConfig.speed           = getJsonValue<float>(config, "speed", "itemConfig");
+  m_itemConfig.spawnPercentage = getJsonValue<Uint8>(config, "spawnPercentage", "itemConfig");
+  m_itemConfig.shape           = parseShapeConfig(config["shape"], "itemConfig.shape");
 
   if (m_itemConfig.spawnPercentage > 100) {
     throw ConfigurationError("Item spawn percentage must be between 0 and 100");
-  }
-}
-
-void ConfigManager::parsePlayerConfig() {
-  const auto &config = m_json["playerConfig"];
-
-  m_playerConfig.baseSpeed = getJsonValue<float>(config, "baseSpeed", "playerConfig");
-  m_playerConfig.speedBoostMultiplier =
-      getJsonValue<float>(config, "speedBoostMultiplier", "playerConfig");
-  m_playerConfig.slownessMultiplier =
-      getJsonValue<float>(config, "slownessMultiplier", "playerConfig");
-  m_playerConfig.shape = parseShapeConfig(config["shape"], "playerConfig.shape");
-
-  if (m_playerConfig.speedBoostMultiplier <= 0 || m_playerConfig.slownessMultiplier <= 0) {
-    throw ConfigurationError("Player speed multipliers must be positive");
   }
 }
 
@@ -79,7 +71,7 @@ void ConfigManager::parseEnemyConfig() {
   m_enemyConfig.speed    = getJsonValue<float>(config, "speed", "enemyConfig");
   m_enemyConfig.lifespan = getJsonValue<Uint64>(config, "lifespan", "enemyConfig");
   m_enemyConfig.spawnPercentage =
-      getJsonValue<unsigned int>(config, "spawnPercentage", "enemyConfig");
+      getJsonValue<Uint8>(config, "spawnPercentage", "enemyConfig");
   m_enemyConfig.shape = parseShapeConfig(config["shape"], "enemyConfig.shape");
 
   if (m_enemyConfig.spawnPercentage > 100) {
@@ -87,19 +79,17 @@ void ConfigManager::parseEnemyConfig() {
   }
 }
 
-void ConfigManager::parseSpeedBoostEffectConfig() {
-  const auto &config = m_json["speedBoostEffectConfig"];
+void ConfigManager::parseSpeedEffectConfig() {
+  const auto &config = m_json["speedEffectConfig"];
 
-  m_speedBoostEffectConfig.speed =
-      getJsonValue<float>(config, "speed", "speedBoostEffectConfig");
-  m_speedBoostEffectConfig.lifespan =
-      getJsonValue<Uint64>(config, "lifespan", "speedBoostEffectConfig");
-  m_speedBoostEffectConfig.spawnPercentage =
-      getJsonValue<unsigned int>(config, "spawnPercentage", "speedBoostEffectConfig");
-  m_speedBoostEffectConfig.shape =
-      parseShapeConfig(config["shape"], "speedBoostEffectConfig.shape");
+  m_speedEffectConfig.speed    = getJsonValue<float>(config, "speed", "speedEffectConfig");
+  m_speedEffectConfig.lifespan = getJsonValue<Uint64>(config, "lifespan", "speedEffectConfig");
+  m_speedEffectConfig.shape    = parseShapeConfig(config["shape"], "speedEffectConfig.shape");
 
-  if (m_speedBoostEffectConfig.spawnPercentage > 100) {
+  m_speedEffectConfig.spawnPercentage =
+      getJsonValue<unsigned int>(config, "spawnPercentage", "speedEffectConfig");
+
+  if (m_speedEffectConfig.spawnPercentage > 100) {
     throw ConfigurationError("SpeedBoost spawn percentage must be between 0 and 100");
   }
 }
@@ -128,6 +118,21 @@ void ConfigManager::parseBulletConfig() {
   m_bulletConfig.shape    = parseShapeConfig(config["shape"], "bulletConfig.shape");
 }
 
+void ConfigManager::parsePlayerConfig() {
+  const auto &config = m_json["playerConfig"];
+
+  m_playerConfig.baseSpeed = getJsonValue<float>(config, "baseSpeed", "playerConfig");
+  m_playerConfig.speedBoostMultiplier =
+      getJsonValue<float>(config, "speedBoostMultiplier", "playerConfig");
+  m_playerConfig.slownessMultiplier =
+      getJsonValue<float>(config, "slownessMultiplier", "playerConfig");
+  m_playerConfig.shape = parseShapeConfig(config["shape"], "playerConfig.shape");
+
+  if (m_playerConfig.speedBoostMultiplier <= 0 || m_playerConfig.slownessMultiplier <= 0) {
+    throw ConfigurationError("Player speed multipliers must be positive");
+  }
+}
+
 void ConfigManager::parseConfig() {
   try {
     parseGameConfig();
@@ -135,7 +140,7 @@ void ConfigManager::parseConfig() {
     parseEnemyConfig();
     parseItemConfig();
     parseBulletConfig();
-    parseSpeedBoostEffectConfig();
+    parseSpeedEffectConfig();
     parseSlownessEffectConfig();
   } catch (const json::exception &e) {
     throw ConfigurationError("JSON parsing error: " + std::string(e.what()));
@@ -195,8 +200,8 @@ const BulletConfig &ConfigManager::getBulletConfig() const {
   return m_bulletConfig;
 }
 
-const SpeedBoostEffectConfig &ConfigManager::getSpeedBoostEffectConfig() const {
-  return m_speedBoostEffectConfig;
+const SpeedEffectConfig &ConfigManager::getSpeedEffectConfig() const {
+  return m_speedEffectConfig;
 }
 
 const SlownessEffectConfig &ConfigManager::getSlownessEffectConfig() const {
@@ -243,7 +248,7 @@ void ConfigManager::updateSpeedBoostEffectSpeed(const float speed) {
   if (speed <= 0) {
     throw ConfigurationError("Speed boost effect speed must be positive");
   }
-  m_speedBoostEffectConfig.speed = speed;
+  m_speedEffectConfig.speed = speed;
 }
 
 void ConfigManager::updateSlownessEffectSpeed(const float speed) {

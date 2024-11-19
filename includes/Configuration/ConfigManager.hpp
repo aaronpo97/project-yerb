@@ -16,15 +16,15 @@ public:
 
 class ConfigManager {
 private:
-  GameConfig             m_gameConfig;
-  PlayerConfig           m_playerConfig;
-  EnemyConfig            m_enemyConfig;
-  BulletConfig           m_bulletConfig;
-  ItemConfig             m_itemConfig;
-  SpeedBoostEffectConfig m_speedBoostEffectConfig;
-  SlownessEffectConfig   m_slownessEffectConfig;
-  json                   m_json;
-  std::filesystem::path  m_configPath;
+  GameConfig            m_gameConfig;
+  PlayerConfig          m_playerConfig;
+  EnemyConfig           m_enemyConfig;
+  BulletConfig          m_bulletConfig;
+  ItemConfig            m_itemConfig;
+  SpeedEffectConfig     m_speedEffectConfig;
+  SlownessEffectConfig  m_slownessEffectConfig;
+  json                  m_json;
+  std::filesystem::path m_configPath;
 
   template <typename JsonReturnType>
   static JsonReturnType
@@ -36,7 +36,7 @@ private:
   void               parseItemConfig();
   void               parsePlayerConfig();
   void               parseEnemyConfig();
-  void               parseSpeedBoostEffectConfig();
+  void               parseSpeedEffectConfig();
   void               parseSlownessEffectConfig();
   void               parseBulletConfig();
   void               parseConfig();
@@ -45,13 +45,13 @@ private:
 public:
   explicit ConfigManager(std::filesystem::path configPath = "assets/config.json");
 
-  const GameConfig             &getGameConfig() const;
-  const ItemConfig             &getItemConfig() const;
-  const PlayerConfig           &getPlayerConfig() const;
-  const EnemyConfig            &getEnemyConfig() const;
-  const BulletConfig           &getBulletConfig() const;
-  const SpeedBoostEffectConfig &getSpeedBoostEffectConfig() const;
-  const SlownessEffectConfig   &getSlownessEffectConfig() const;
+  const GameConfig           &getGameConfig() const;
+  const ItemConfig           &getItemConfig() const;
+  const PlayerConfig         &getPlayerConfig() const;
+  const EnemyConfig          &getEnemyConfig() const;
+  const BulletConfig         &getBulletConfig() const;
+  const SpeedEffectConfig    &getSpeedEffectConfig() const;
+  const SlownessEffectConfig &getSlownessEffectConfig() const;
 
   void updatePlayerShape(const ShapeConfig &shape);
   void updatePlayerSpeed(float speed);

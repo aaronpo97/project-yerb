@@ -218,12 +218,11 @@ void MainScene::sCollision() {
 }
 
 void MainScene::sMovement() {
-  const ConfigManager          &configManager        = m_gameEngine->getConfigManager();
-  const PlayerConfig           &playerConfig         = configManager.getPlayerConfig();
-  const EnemyConfig            &enemyConfig          = configManager.getEnemyConfig();
-  const SlownessEffectConfig   &slownessEffectConfig = configManager.getSlownessEffectConfig();
-  const SpeedBoostEffectConfig &speedBoostEffectConfig =
-      configManager.getSpeedBoostEffectConfig();
+  const ConfigManager        &configManager          = m_gameEngine->getConfigManager();
+  const PlayerConfig         &playerConfig           = configManager.getPlayerConfig();
+  const EnemyConfig          &enemyConfig            = configManager.getEnemyConfig();
+  const SlownessEffectConfig &slownessEffectConfig   = configManager.getSlownessEffectConfig();
+  const SpeedEffectConfig    &speedBoostEffectConfig = configManager.getSpeedEffectConfig();
 
   for (const std::shared_ptr<Entity> &entity : m_entities.getEntities()) {
     MovementHelpers::moveSpeedBoosts(entity, speedBoostEffectConfig, m_deltaTime);
@@ -246,11 +245,10 @@ void MainScene::sSpawner() {
   }
   m_lastEnemySpawnTime = ticks;
 
-  const EnemyConfig            &enemyConfig = configManager.getEnemyConfig();
-  const SpeedBoostEffectConfig &speedBoostEffectConfig =
-      configManager.getSpeedBoostEffectConfig();
-  const SlownessEffectConfig &slownessEffectConfig = configManager.getSlownessEffectConfig();
-  const ItemConfig           &itemConfig           = configManager.getItemConfig();
+  const EnemyConfig          &enemyConfig            = configManager.getEnemyConfig();
+  const SpeedEffectConfig    &speedBoostEffectConfig = configManager.getSpeedEffectConfig();
+  const SlownessEffectConfig &slownessEffectConfig   = configManager.getSlownessEffectConfig();
+  const ItemConfig           &itemConfig             = configManager.getItemConfig();
 
   const bool hasSpeedBasedEffect = m_player->cEffects->hasEffect(EffectTypes::Speed) ||
                                    m_player->cEffects->hasEffect(EffectTypes::Slowness);

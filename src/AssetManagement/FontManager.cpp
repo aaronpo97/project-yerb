@@ -1,6 +1,5 @@
 #include "../../includes/AssetManagement/FontManager.hpp"
 
-
 FontManager::FontManager(const Path &fontPath) :
     m_fontPath(fontPath) {
   if (TTF_Init() != 0) {

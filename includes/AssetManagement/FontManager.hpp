@@ -8,14 +8,14 @@ typedef std::filesystem::path Path;
 
 class FontManager {
 private:
-  Path m_fontPath;
-  TTF_Font   *m_font_lg = nullptr;
-  TTF_Font   *m_font_md = nullptr;
-  TTF_Font   *m_font_sm = nullptr;
+  Path      m_fontPath;
+  TTF_Font *m_font_lg = nullptr;
+  TTF_Font *m_font_md = nullptr;
+  TTF_Font *m_font_sm = nullptr;
 
 public:
   explicit FontManager(const Path &fontPath);
-  ~        FontManager();
+  ~FontManager();
 
   void      loadFonts(const Path &fontPath);
   TTF_Font *getFontLg() const;

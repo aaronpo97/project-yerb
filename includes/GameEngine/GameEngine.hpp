@@ -29,7 +29,7 @@ protected:
   static void                           mainLoop(void *arg);
   void                                  cleanup();
   void                                  sUserInput();
-  static std::unique_ptr<ConfigManager> createConfigManager(Path &configPath);
+  static std::unique_ptr<ConfigManager> createConfigManager(const Path &configPath);
   std::unique_ptr<FontManager>          createFontManager();
   static std::unique_ptr<AudioManager>  createAudioManager();
   std::unique_ptr<AudioSampleQueue>     initializeAudioSampleQueue();

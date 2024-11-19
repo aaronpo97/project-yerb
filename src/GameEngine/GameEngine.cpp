@@ -8,16 +8,17 @@
 #endif
 
 GameEngine::GameEngine() {
+  const Path ASSETS_DIR_PATH  = "assets";
+  const Path CONFIG_DIR_PATH  = "config";
+  const Path CONFIG_FILE_PATH = CONFIG_DIR_PATH / "config.json";
 
-  const Path ASSETS_PATH = "./assets";
-
-  if (!std::filesystem::exists(ASSETS_PATH)) {
+  if (!std::filesystem::exists(ASSETS_DIR_PATH)) {
     SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Assets folder not found!");
     cleanup();
     throw std::runtime_error("Assets folder not found!");
   }
-  Path CONFIG_PATH   = ASSETS_PATH / "config.json";
-  m_configManager    = createConfigManager(CONFIG_PATH);
+
+  m_configManager    = createConfigManager(CONFIG_FILE_PATH);
   m_audioManager     = createAudioManager();
   m_audioSampleQueue = initializeAudioSampleQueue();
   m_fontManager      = createFontManager();
@@ -37,7 +38,7 @@ GameEngine::~GameEngine() {
   cleanup();
 }
 
-std::unique_ptr<ConfigManager> GameEngine::createConfigManager(Path &configPath) {
+std::unique_ptr<ConfigManager> GameEngine::createConfigManager(const Path &configPath) {
   return std::make_unique<ConfigManager>(configPath);
 }
 
