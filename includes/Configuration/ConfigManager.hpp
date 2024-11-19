@@ -25,7 +25,7 @@ private:
   SpeedBoostEffectConfig m_speedBoostEffectConfig;
   SlownessEffectConfig   m_slownessEffectConfig;
   json                   m_json;
-  std::string            m_configPath;
+  std::filesystem::path  m_configPath;
 
   template <typename T>
   T getJsonValue(const json &j, const std::string &key, const std::string &context) const {
@@ -58,11 +58,12 @@ private:
              getJsonValue<float>(sizeJson, "height", "gameConfig.windowSize"));
 
     m_gameConfig.windowTitle = getJsonValue<std::string>(config, "windowTitle", "gameConfig");
-    m_gameConfig.fontPath    = getJsonValue<std::string>(config, "fontPath", "gameConfig");
+    m_gameConfig.fontPath =
+        getJsonValue<std::filesystem::path>(config, "fontPath", "gameConfig");
     m_gameConfig.spawnInterval = getJsonValue<Uint64>(config, "spawnInterval", "gameConfig");
 
     if (!fs::exists(m_gameConfig.fontPath)) {
-      throw ConfigurationError("Font file not found: " + m_gameConfig.fontPath);
+      throw ConfigurationError("Font file not found: " + m_gameConfig.fontPath.string());
     }
   }
 
@@ -167,12 +168,12 @@ private:
 
   void loadConfig() {
     if (!fs::exists(m_configPath)) {
-      throw ConfigurationError("Config file not found: " + m_configPath);
+      throw ConfigurationError("Config file not found: " + m_configPath.string());
     }
 
     std::ifstream configFile(m_configPath);
     if (!configFile.is_open()) {
-      throw ConfigurationError("Failed to open config file: " + m_configPath);
+      throw ConfigurationError("Failed to open config file: " + m_configPath.string());
     }
 
     try {
@@ -186,7 +187,7 @@ private:
   }
 
 public:
-  explicit ConfigManager(std::string configPath = "./assets/config.json") :
+  explicit ConfigManager(std::filesystem::path configPath = "./assets/config.json") :
       m_configPath(std::move(configPath)) {
     try {
       loadConfig();

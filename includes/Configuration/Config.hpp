@@ -2,7 +2,7 @@
 
 #include "../Helpers/Vec2.hpp"
 #include <SDL2/SDL.h>
-#include <string>
+#include <filesystem>
 
 class ShapeConfig {
 public:
@@ -11,23 +11,26 @@ public:
   SDL_Color color;
 
   // Constructor
-  ShapeConfig(float h = 0.0f, float w = 0.0f, SDL_Color c = {0, 0, 0, 255}) :
+  explicit ShapeConfig(float h = 0.0f, float w = 0.0f, SDL_Color c = {0, 0, 0, 255}) :
       height(h), width(w), color(c) {}
 };
 
 class GameConfig {
 public:
-  Vec2        windowSize;
-  std::string windowTitle;
-  std::string fontPath;
-  Uint64      spawnInterval;
+  Vec2                  windowSize;
+  std::string           windowTitle;
+  std::filesystem::path fontPath;
+  Uint64                spawnInterval;
 
   // Constructor
-  GameConfig(Vec2        size     = Vec2(800, 600),
-             std::string title    = "Game",
-             std::string font     = "font.ttf",
-             Uint64      interval = 1000) :
-      windowSize(size), windowTitle(title), fontPath(font), spawnInterval(interval) {}
+  explicit GameConfig(const Vec2           &size     = Vec2(800, 600),
+                      std::string           title    = "Game",
+                      std::filesystem::path font     = "font.ttf",
+                      const Uint64          interval = 1000) :
+      windowSize(size),
+      windowTitle(std::move(title)),
+      fontPath(std::move(font)),
+      spawnInterval(interval) {}
 };
 
 class ItemConfig {

@@ -1,6 +1,7 @@
 #include "../../includes/AssetManagement/FontManager.hpp"
 
-FontManager::FontManager(const std::string &fontPath) :
+
+FontManager::FontManager(const Path &fontPath) :
     m_fontPath(fontPath) {
   if (TTF_Init() != 0) {
     SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Failed to initialize SDL_ttf: %s", TTF_GetError());
@@ -11,7 +12,7 @@ FontManager::FontManager(const std::string &fontPath) :
   loadFonts(fontPath);
 }
 
-void FontManager::loadFonts(const std::string &fontPath) {
+void FontManager::loadFonts(const Path &fontPath) {
   constexpr int SMALL_FONT_POINT_SIZE  = 18;
   constexpr int MEDIUM_FONT_POINT_SIZE = 28;
   constexpr int LARGE_FONT_POINT_SIZE  = 48;
