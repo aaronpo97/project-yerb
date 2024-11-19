@@ -12,7 +12,7 @@ namespace MovementHelpers {
                    const EnemyConfig             &enemyConfig,
                    const float                   &deltaTime);
   void moveSpeedBoosts(const std::shared_ptr<Entity> &entity,
-                       const SpeedBoostEffectConfig  &speedBoostEffectConfig,
+                       const SpeedEffectConfig       &speedBoostEffectConfig,
                        const float                   &deltaTime);
   void movePlayer(const std::shared_ptr<Entity> &entity,
                   const PlayerConfig            &playerConfig,

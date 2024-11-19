@@ -31,7 +31,7 @@ namespace MovementHelpers {
   }
 
   void moveSpeedBoosts(const std::shared_ptr<Entity> &entity,
-                       const SpeedBoostEffectConfig  &speedBoostEffectConfig,
+                       const SpeedEffectConfig       &speedBoostEffectConfig,
                        const float                   &deltaTime) {
     if (entity == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Entity is null");

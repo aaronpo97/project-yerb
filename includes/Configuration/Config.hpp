@@ -2,85 +2,63 @@
 
 #include "../Helpers/Vec2.hpp"
 #include <SDL2/SDL.h>
-#include <string>
+#include <filesystem>
 
 class ShapeConfig {
 public:
-  float     height;
-  float     width;
-  SDL_Color color;
+  float     height = 0;
+  float     width  = 0;
+  SDL_Color color  = {.r = 0, .g = 0, .b = 0, .a = 0};
 
-  // Constructor
-  ShapeConfig(float h = 0.0f, float w = 0.0f, SDL_Color c = {0, 0, 0, 255}) :
-      height(h), width(w), color(c) {}
+  ShapeConfig() = default;
+  ShapeConfig(const float height, const float width, const SDL_Color color) :
+      height(height), width(width), color(color) {}
 };
 
-class GameConfig {
-public:
-  Vec2        windowSize;
-  std::string windowTitle;
-  std::string fontPath;
-  Uint64      spawnInterval;
-
-  // Constructor
-  GameConfig(Vec2        size     = Vec2(800, 600),
-             std::string title    = "Game",
-             std::string font     = "font.ttf",
-             Uint64      interval = 1000) :
-      windowSize(size), windowTitle(title), fontPath(font), spawnInterval(interval) {}
+struct GameConfig {
+  Vec2                  windowSize;
+  std::string           windowTitle;
+  std::filesystem::path fontPath;
+  Uint64                spawnInterval = 0;
 };
 
-class ItemConfig {
-public:
-  unsigned int spawnPercentage;
-  Uint64       lifespan;
-  float        speed;
-  ShapeConfig  shape;
-};
-
-class PlayerConfig {
-public:
-  float       baseSpeed;
-  float       speedBoostMultiplier = 1.0f;
-  float       slownessMultiplier   = 1.0f;
+struct PlayerConfig {
+  float       baseSpeed            = 0;
+  float       speedBoostMultiplier = 0;
+  float       slownessMultiplier   = 0;
   ShapeConfig shape;
-
-  // Constructor
-  PlayerConfig(float s = 5.0f, ShapeConfig sh = ShapeConfig()) :
-      baseSpeed(s), shape(sh) {}
 };
 
-class EnemyConfig {
-public:
-  unsigned int spawnPercentage;
-  Uint64       lifespan;
-  float        speed;
-  ShapeConfig  shape;
-
-  // Constructor
-  EnemyConfig(float s = 3.0f, ShapeConfig sh = ShapeConfig()) :
-      speed(s), shape(sh) {}
+struct ItemConfig {
+  Uint8       spawnPercentage = 0;
+  Uint64      lifespan        = 0;
+  float       speed           = 0;
+  ShapeConfig shape;
 };
 
-class SpeedBoostEffectConfig {
-public:
-  unsigned int spawnPercentage;
-  Uint64       lifespan;
-  float        speed;
-  ShapeConfig  shape;
+struct EnemyConfig {
+  Uint8       spawnPercentage = 0;
+  Uint64      lifespan        = 0;
+  float       speed           = 0;
+  ShapeConfig shape;
 };
 
-class SlownessEffectConfig {
-public:
-  unsigned int spawnPercentage;
-  Uint64       lifespan;
-  float        speed;
-  ShapeConfig  shape;
+struct SpeedEffectConfig {
+  Uint8       spawnPercentage = 0;
+  Uint64      lifespan        = 0;
+  float       speed           = 0;
+  ShapeConfig shape;
 };
 
-class BulletConfig {
-public:
-  Uint64      lifespan;
-  float       speed;
+struct SlownessEffectConfig {
+  Uint8       spawnPercentage = 0;
+  Uint64      lifespan        = 0;
+  float       speed           = 0;
+  ShapeConfig shape;
+};
+
+struct BulletConfig {
+  Uint64      lifespan = 0;
+  float       speed    = 0;
   ShapeConfig shape;
 };

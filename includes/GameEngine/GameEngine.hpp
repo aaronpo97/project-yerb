@@ -6,9 +6,11 @@
 #include "../Configuration/ConfigManager.hpp"
 
 #include <SDL2/SDL.h>
+#include <filesystem>
 #include <map>
-#include <memory>
+
 #include <string>
+typedef std::filesystem::path Path;
 class Scene; // Resolve circular dependency with forward declaration
 class GameEngine {
 protected:
@@ -27,7 +29,7 @@ protected:
   static void                           mainLoop(void *arg);
   void                                  cleanup();
   void                                  sUserInput();
-  static std::unique_ptr<ConfigManager> createConfigManager(const std::string &configPath);
+  static std::unique_ptr<ConfigManager> createConfigManager(const Path &configPath);
   std::unique_ptr<FontManager>          createFontManager();
   static std::unique_ptr<AudioManager>  createAudioManager();
   std::unique_ptr<AudioSampleQueue>     initializeAudioSampleQueue();
@@ -37,7 +39,7 @@ protected:
   SDL_Window                           *createWindow();
 
 public:
-  GameEngine();
+   GameEngine();
   ~GameEngine();
 
   bool isRunning() const;

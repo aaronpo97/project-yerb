@@ -157,9 +157,9 @@ namespace SpawnHelpers::MainScene {
     const auto &speedBoost = entityManager.addEntity(EntityTags::SpeedBoost);
     speedBoost->cTransform = std::make_shared<CTransform>(position, velocity, 0);
     speedBoost->cShape =
-        std::make_shared<CShape>(renderer, configManager.getSpeedBoostEffectConfig().shape);
+        std::make_shared<CShape>(renderer, configManager.getSpeedEffectConfig().shape);
     speedBoost->cLifespan =
-        std::make_shared<CLifespan>(configManager.getSpeedBoostEffectConfig().lifespan);
+        std::make_shared<CLifespan>(configManager.getSpeedEffectConfig().lifespan);
 
     bool isValidSpawn = validateSpawnPosition(speedBoost, player, entityManager, windowSize);
     int  spawnAttempt = 1;

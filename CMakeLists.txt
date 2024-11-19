@@ -96,6 +96,7 @@ if(EMSCRIPTEN)
                 "-sUSE_SDL_MIXER=2"
                 "-sALLOW_MEMORY_GROWTH=1"
                 "--preload-file=${CMAKE_SOURCE_DIR}/assets@assets"
+                "--preload-file=${CMAKE_SOURCE_DIR}/config@config"
         )
 
         add_custom_target(copy_templates ALL
@@ -111,6 +112,12 @@ else()
                 "${CMAKE_SOURCE_DIR}/assets"
                 "${CMAKE_BINARY_DIR}/build/assets"
                 COMMENT "Copying assets directory to build directory"
+        )
+        add_custom_target(copy_config ALL
+                COMMAND ${CMAKE_COMMAND} -E copy_directory
+                "${CMAKE_SOURCE_DIR}/config"
+                "${CMAKE_BINARY_DIR}/build/config"
+                COMMENT "Copying config directory to build directory"
         )
 endif()
 
