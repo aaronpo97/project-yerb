@@ -30,7 +30,7 @@ void ScoreScene::onEnd() {
 }
 
 void ScoreScene::sRender() {
-  SDL_Renderer *renderer = m_gameEngine->getRenderer();
+  SDL_Renderer *renderer = m_gameEngine->getVideoManager().getRenderer();
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
   SDL_RenderClear(renderer);
   renderText();
@@ -38,7 +38,7 @@ void ScoreScene::sRender() {
 }
 
 void ScoreScene::renderText() const {
-  SDL_Renderer *renderer = m_gameEngine->getRenderer();
+  SDL_Renderer *renderer = m_gameEngine->getVideoManager().getRenderer();
   TTF_Font     *fontLg   = m_gameEngine->getFontManager().getFontLg();
   TTF_Font     *fontMd   = m_gameEngine->getFontManager().getFontMd();
 

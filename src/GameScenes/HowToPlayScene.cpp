@@ -23,7 +23,7 @@ void HowToPlayScene::onEnd() {
 }
 
 void HowToPlayScene::sRender() {
-  SDL_Renderer *renderer = m_gameEngine->getRenderer();
+  SDL_Renderer *renderer = m_gameEngine->getVideoManager().getRenderer();
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
   SDL_RenderClear(renderer);
   renderText();
@@ -31,7 +31,7 @@ void HowToPlayScene::sRender() {
 }
 
 void HowToPlayScene::renderText() const {
-  SDL_Renderer       *renderer  = m_gameEngine->getRenderer();
+  SDL_Renderer       *renderer  = m_gameEngine->getVideoManager().getRenderer();
   TTF_Font           *fontSm    = m_gameEngine->getFontManager().getFontSm();
   TTF_Font           *fontMd    = m_gameEngine->getFontManager().getFontMd();
   TTF_Font           *fontLg    = m_gameEngine->getFontManager().getFontLg();
