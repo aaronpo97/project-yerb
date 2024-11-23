@@ -1,4 +1,4 @@
-#include "../../includes/AssetManagement/AudioManager.hpp"
+#include "../../includes/SystemManagement/AudioManager.hpp"
 
 AudioManager::AudioManager(const int    frequency,
                            const Uint16 format,
@@ -160,6 +160,7 @@ void AudioManager::cleanup() {
   Mix_CloseAudio();
   Mix_Quit();
 
+  SDL_QuitSubSystem(SDL_INIT_AUDIO);
   SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "AudioManager cleaned up successfully!");
 }
 

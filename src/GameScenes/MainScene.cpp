@@ -15,7 +15,7 @@
 
 MainScene::MainScene(GameEngine *gameEngine) :
     Scene(gameEngine) {
-  SDL_Renderer        *renderer      = gameEngine->getRenderer();
+  SDL_Renderer        *renderer      = m_gameEngine->getVideoManager().getRenderer();
   const ConfigManager &configManager = gameEngine->getConfigManager();
 
   m_entities = EntityManager();
@@ -108,7 +108,7 @@ void MainScene::sDoAction(Action &action) {
     const Vec2 mousePosition = *position;
 
     audioSampleQueue.queueSample(AudioSample::SHOOT, AudioSamplePriority::STANDARD);
-    SpawnHelpers::MainScene::spawnBullets(m_gameEngine->getRenderer(),
+    SpawnHelpers::MainScene::spawnBullets(m_gameEngine->getVideoManager().getRenderer(),
                                           m_gameEngine->getConfigManager(), m_entities,
                                           m_player, mousePosition);
   }
@@ -125,7 +125,7 @@ void MainScene::sDoAction(Action &action) {
 }
 
 void MainScene::renderText() const {
-  SDL_Renderer *renderer = m_gameEngine->getRenderer();
+  SDL_Renderer *renderer = m_gameEngine->getVideoManager().getRenderer();
   TTF_Font     *fontSm   = m_gameEngine->getFontManager().getFontSm();
   TTF_Font     *fontMd   = m_gameEngine->getFontManager().getFontMd();
 
@@ -166,7 +166,7 @@ void MainScene::renderText() const {
 }
 
 void MainScene::sRender() {
-  SDL_Renderer *renderer = m_gameEngine->getRenderer();
+  SDL_Renderer *renderer = m_gameEngine->getVideoManager().getRenderer();
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
   SDL_RenderClear(renderer);
 
@@ -198,13 +198,14 @@ void MainScene::sCollision() {
   const Vec2          &windowSize    = configManager.getGameConfig().windowSize;
 
   AudioSampleQueue &audioSampleManager = m_gameEngine->getAudioSampleQueue();
-  const GameState   gameState          = {.entityManager   = m_entities,
-                                          .randomGenerator = m_randomGenerator,
-                                          .score           = m_score,
-                                          .setScore = [this](const int score) { setScore(score); },
-                                          .decrementLives     = [this]() { decrementLives(); },
-                                          .windowSize         = windowSize,
-                                          .audioSampleManager = audioSampleManager};
+  const GameState   gameState          = {
+                 .entityManager      = m_entities,
+                 .randomGenerator    = m_randomGenerator,
+                 .score              = m_score,
+                 .setScore           = [this](const int score) -> void { setScore(score); },
+                 .decrementLives     = [this]() -> void { decrementLives(); },
+                 .windowSize         = windowSize,
+                 .audioSampleManager = audioSampleManager};
 
   for (auto &entity : m_entities.getEntities()) {
     handleEntityBounds(entity, windowSize);
@@ -236,7 +237,7 @@ void MainScene::sMovement() {
 
 void MainScene::sSpawner() {
   const ConfigManager &configManager  = m_gameEngine->getConfigManager();
-  SDL_Renderer        *renderer       = m_gameEngine->getRenderer();
+  SDL_Renderer        *renderer       = m_gameEngine->getVideoManager().getRenderer();
   const Uint64         ticks          = SDL_GetTicks64();
   const Uint64         SPAWN_INTERVAL = configManager.getGameConfig().spawnInterval;
 

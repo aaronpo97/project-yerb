@@ -6,11 +6,11 @@
 #include <memory>
 #include <random>
 
-#include "../AssetManagement/AudioManager.hpp"
-#include "../AssetManagement/AudioSampleQueue.hpp"
 #include "../EntityManagement/Entity.hpp"
 #include "../EntityManagement/EntityManager.hpp"
 #include "../Helpers/Vec2.hpp"
+#include "../SystemManagement/AudioManager.hpp"
+#include "../AssetManagement/AudioSampleQueue.hpp"
 
 namespace CollisionHelpers {
 

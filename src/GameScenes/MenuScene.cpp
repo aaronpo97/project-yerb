@@ -28,14 +28,16 @@ void MenuScene::onEnd() {
       m_gameEngine->loadScene("Main", std::make_shared<MainScene>(m_gameEngine));
       break;
     case 1:
-    default:
       m_gameEngine->loadScene("HowToPlay", std::make_shared<HowToPlayScene>(m_gameEngine));
+      break;
+    case 2:
+      m_gameEngine->quit();
       break;
   }
 }
 
 void MenuScene::sRender() {
-  SDL_Renderer *renderer = m_gameEngine->getRenderer();
+  SDL_Renderer *renderer = m_gameEngine->getVideoManager().getRenderer();
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
   SDL_RenderClear(renderer);
   renderText();
@@ -43,7 +45,7 @@ void MenuScene::sRender() {
 }
 
 void MenuScene::renderText() const {
-  SDL_Renderer *renderer      = m_gameEngine->getRenderer();
+  SDL_Renderer *renderer      = m_gameEngine->getVideoManager().getRenderer();
   TTF_Font     *fontLg        = m_gameEngine->getFontManager().getFontLg();
   TTF_Font     *fontMd        = m_gameEngine->getFontManager().getFontMd();
   TTF_Font     *fontSm        = m_gameEngine->getFontManager().getFontSm();
@@ -60,15 +62,20 @@ void MenuScene::renderText() const {
   TextHelpers::renderLineOfText(renderer, fontLg, titleText, textColor, titlePos);
 
   const std::string playText  = "Play";
-  const Vec2        playPos   = {100, 200};
+  const Vec2        playPos   = titlePos + Vec2{0, 100};
   const SDL_Color   playColor = m_selectedIndex == 0 ? selectedColor : textColor;
   TextHelpers::renderLineOfText(renderer, fontMd, playText, playColor, playPos);
 
   const std::string instructionsText  = "How to Play";
-  const Vec2        instructionsPos   = {100, 250};
+  const Vec2        instructionsPos   = playPos + Vec2{0, 50};
   const SDL_Color   instructionsColor = m_selectedIndex == 1 ? selectedColor : textColor;
   TextHelpers::renderLineOfText(renderer, fontMd, instructionsText, instructionsColor,
                                 instructionsPos);
+
+  const std::string quitText  = "Quit";
+  const Vec2        quitPos   = instructionsPos + Vec2{0, 50};
+  const SDL_Color   quitColor = m_selectedIndex == 2 ? selectedColor : textColor;
+  TextHelpers::renderLineOfText(renderer, fontMd, quitText, quitColor, quitPos);
 
   const std::string controlsText = "W/S to move up/down, Enter to select";
   // bottom right corner
@@ -92,13 +99,13 @@ void MenuScene::sDoAction(Action &action) {
   // UP takes precedence over DOWN if both are pressed
   if (action.getName() == "UP") {
     audioSampleQueue.queueSample(AudioSample::MENU_MOVE, AudioSamplePriority::BACKGROUND);
-    m_selectedIndex > 0 ? m_selectedIndex -= 1 : m_selectedIndex = 1;
+    m_selectedIndex > 0 ? m_selectedIndex -= 1 : m_selectedIndex = 2;
     return;
   }
 
   if (action.getName() == "DOWN") {
     audioSampleQueue.queueSample(AudioSample::MENU_MOVE, AudioSamplePriority::BACKGROUND);
-    m_selectedIndex < 1 ? m_selectedIndex += 1 : m_selectedIndex = 0;
+    m_selectedIndex < 2 ? m_selectedIndex += 1 : m_selectedIndex = 0;
   }
 }
 
