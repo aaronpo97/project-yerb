@@ -22,6 +22,8 @@ public:
 
   ~VideoManager();
 
+  void updateWindowSize();
+
   SDL_Renderer *getRenderer() const;
   SDL_Window   *getWindow() const;
   void          cleanup();

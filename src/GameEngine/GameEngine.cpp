@@ -190,7 +190,7 @@ void GameEngine::sUserInput() {
       switch (event.window.event) {
         case SDL_WINDOWEVENT_RESIZED:
         case SDL_WINDOWEVENT_SIZE_CHANGED:
-          // TODO: Handle window resize
+          m_videoManager->updateWindowSize();
           break;
         default:
           break;

@@ -72,6 +72,20 @@ SDL_Window *VideoManager::createWindow() {
   return window;
 }
 
+void VideoManager::updateWindowSize() {
+  int currentWindowWidth, currentWindowHeight;
+  int drawableWidth, drawableHeight;
+
+  SDL_GetWindowSize(m_window, &currentWindowWidth, &currentWindowHeight);
+  SDL_GL_GetDrawableSize(m_window, &drawableWidth, &drawableHeight);
+
+  m_currentWindowSize = {static_cast<float>(currentWindowWidth),
+                         static_cast<float>(currentWindowHeight)};
+
+  m_configManager.updateGameWindowSize(
+      {static_cast<float>(currentWindowWidth), static_cast<float>(currentWindowHeight)});
+}
+
 /**
  * @brief Create a renderer
  * @throws std::runtime_error if window is not initialized
