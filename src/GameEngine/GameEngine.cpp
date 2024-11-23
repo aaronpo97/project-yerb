@@ -88,12 +88,12 @@ void GameEngine::cleanup() {
 }
 
 void GameEngine::update() {
-  const std::shared_ptr<Scene> activeScene = m_scenes[m_currentSceneName];
+  const std::shared_ptr<Scene> &activeScene = m_scenes[m_currentSceneName];
   if (activeScene == nullptr) {
     return;
   }
 
-  m_scenes[m_currentSceneName]->update();
+  activeScene->update();
 }
 
 bool GameEngine::isRunning() const {
