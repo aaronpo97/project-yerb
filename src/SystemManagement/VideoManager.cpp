@@ -39,8 +39,13 @@ void VideoManager::initializeVideoSystem() {
 SDL_Window *VideoManager::createWindow() {
   Uint32 windowFlags = 0;
 
-  constexpr Uint32 baseFlags = SDL_WINDOW_SHOWN;
+  constexpr Uint32 baseFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
+  constexpr Uint32 macFlags  = SDL_WINDOW_FULLSCREEN_DESKTOP;
   windowFlags |= baseFlags;
+
+#ifdef __APPLE__
+  windowFlags |= macFlags;
+#endif
 
   const auto &[windowSize, windowTitle, fontPath, spawnInterval] =
       m_configManager.getGameConfig();
