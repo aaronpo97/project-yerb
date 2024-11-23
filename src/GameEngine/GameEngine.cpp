@@ -1,7 +1,7 @@
 #include "../../includes/GameEngine/GameEngine.hpp"
-#include "../../includes/AssetManagement/VideoManager.hpp"
 #include "../../includes/GameScenes/MainScene.hpp"
 #include "../../includes/GameScenes/MenuScene.hpp"
+#include "../../includes/SystemManagement/VideoManager.hpp"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>

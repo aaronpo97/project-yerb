@@ -1,4 +1,4 @@
-#include "../../includes/AssetManagement/VideoManager.hpp"
+#include "../../includes/SystemManagement/VideoManager.hpp"
 #include "../../includes/Configuration/ConfigManager.hpp"
 #include <SDL2/SDL.h>
 #include <algorithm>

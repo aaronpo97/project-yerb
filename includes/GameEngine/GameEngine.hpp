@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../AssetManagement/AudioManager.hpp"
 #include "../AssetManagement/AudioSampleQueue.hpp"
 #include "../AssetManagement/FontManager.hpp"
-#include "../AssetManagement/VideoManager.hpp"
 #include "../Configuration/ConfigManager.hpp"
+#include "../SystemManagement/AudioManager.hpp"
+#include "../SystemManagement/VideoManager.hpp"
 
 #include <SDL2/SDL.h>
 #include <filesystem>
