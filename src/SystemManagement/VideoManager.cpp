@@ -1,8 +1,11 @@
 #include "../../includes/SystemManagement/VideoManager.hpp"
 #include "../../includes/Configuration/ConfigManager.hpp"
 #include <SDL2/SDL.h>
-#include <algorithm>
 #include <stdexcept>
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 typedef std::filesystem::path Path;
 
@@ -39,8 +42,13 @@ void VideoManager::initializeVideoSystem() {
 SDL_Window *VideoManager::createWindow() {
   Uint32 windowFlags = 0;
 
-  constexpr Uint32 baseFlags = SDL_WINDOW_SHOWN;
+  constexpr Uint32 baseFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
+  constexpr Uint32 macFlags  = SDL_WINDOW_FULLSCREEN_DESKTOP;
   windowFlags |= baseFlags;
+
+#ifdef __APPLE__
+  windowFlags |= macFlags;
+#endif
 
   const auto &[windowSize, windowTitle, fontPath, spawnInterval] =
       m_configManager.getGameConfig();
@@ -65,6 +73,20 @@ SDL_Window *VideoManager::createWindow() {
 
   SDL_LogInfo(SDL_LOG_CATEGORY_VIDEO, "Window created successfully!");
   return window;
+}
+
+void VideoManager::updateWindowSize() {
+  int currentWindowWidth, currentWindowHeight;
+  int drawableWidth, drawableHeight;
+
+  SDL_GetWindowSize(m_window, &currentWindowWidth, &currentWindowHeight);
+  SDL_GL_GetDrawableSize(m_window, &drawableWidth, &drawableHeight);
+
+  m_currentWindowSize = {static_cast<float>(currentWindowWidth),
+                         static_cast<float>(currentWindowHeight)};
+
+  m_configManager.updateGameWindowSize(
+      {static_cast<float>(currentWindowWidth), static_cast<float>(currentWindowHeight)});
 }
 
 /**
@@ -132,6 +154,12 @@ void VideoManager::cleanup() {
   SDL_QuitSubSystem(SDL_INIT_VIDEO);
   SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "VideoManager cleaned up successfully!");
 }
+
+#ifdef __EMSCRIPTEN__
+bool VideoManager::isWebCanvasEnabled() {
+  return emscripten_run_script_int("getComputedStyle(Module.canvas).display !== 'none'");
+}
+#endif
 
 VideoManager::~VideoManager() {
   cleanup();

@@ -114,14 +114,6 @@ void GameEngine::quit() {
   SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "Quitting game engine...");
 #ifdef __EMSCRIPTEN__
   emscripten_cancel_main_loop();
-  EM_ASM({
-    FS.syncfs(function(err) {
-      if (err) {
-        console.error(err);
-      }
-      window.close();
-    });
-  });
 #else
   m_isRunning = false;
 #endif
@@ -190,7 +182,7 @@ void GameEngine::sUserInput() {
       switch (event.window.event) {
         case SDL_WINDOWEVENT_RESIZED:
         case SDL_WINDOWEVENT_SIZE_CHANGED:
-          // TODO: Handle window resize
+          m_videoManager->updateWindowSize();
           break;
         default:
           break;
@@ -245,7 +237,15 @@ void GameEngine::sUserInput() {
 }
 
 void GameEngine::mainLoop(void *arg) {
+
   auto *gameEngine = static_cast<GameEngine *>(arg);
+#ifdef __EMSCRIPTEN__
+  const bool isWebCanvasEnabled = VideoManager::isWebCanvasEnabled();
+  if (!isWebCanvasEnabled) {
+    gameEngine->quit();
+    return;
+  }
+#endif
   gameEngine->sUserInput();
   gameEngine->update();
 }

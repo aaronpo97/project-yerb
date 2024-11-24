@@ -78,6 +78,9 @@ file(GLOB_RECURSE SRC_FILES "${SRC_DIR}/*.cpp")
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 
 if(EMSCRIPTEN)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s DISABLE_EXCEPTION_CATCHING=0")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+    
         set_target_properties(${PROJECT_NAME} PROPERTIES
                 CMAKE_EXECUTABLE_SUFFIX ".js"
         )
