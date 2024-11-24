@@ -1,21 +1,33 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Yerb's Game</title>
-  <meta
-    name="description"
-    content="A game made with SDL2 and compiled for the web using Emscripten"
-  />
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-<main>
-  <canvas id="canvas"></canvas>
-</main>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Yerb's Game</title>
+    <meta
+      name="description"
+      content="A game made with SDL2 and compiled for the web using Emscripten."
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <canvas id="canvas"></canvas>
+      <div id="mobile-warning">
+        <p id="warning-message">
+          This game is not compatible with mobile devices. Please use a desktop computer.
+        </p>
 
-<script src="./script.js"></script>
-<script src="./SDL_GAME.js"></script>
-</body>
+        <p id="github-message">
+          If you are interested, you may follow the development of this game on my
+          <a href="https://github.com/aaronpo97/project-yerb">GitHub</a>.
+        </p>
+
+        <p id="credits">&copy 2024 Aaron Po</p>
+      </div>
+    </main>
+
+    <script src="./script.js"></script>
+    <script src="./SDL_GAME.js"></script>
+  </body>
 </html>

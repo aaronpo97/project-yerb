@@ -1,8 +1,11 @@
 #include "../../includes/SystemManagement/VideoManager.hpp"
 #include "../../includes/Configuration/ConfigManager.hpp"
 #include <SDL2/SDL.h>
-#include <algorithm>
 #include <stdexcept>
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 typedef std::filesystem::path Path;
 
@@ -151,6 +154,12 @@ void VideoManager::cleanup() {
   SDL_QuitSubSystem(SDL_INIT_VIDEO);
   SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "VideoManager cleaned up successfully!");
 }
+
+#ifdef __EMSCRIPTEN__
+bool VideoManager::isWebCanvasEnabled() {
+  return emscripten_run_script_int("getComputedStyle(Module.canvas).display !== 'none'");
+}
+#endif
 
 VideoManager::~VideoManager() {
   cleanup();
