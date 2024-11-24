@@ -72,10 +72,12 @@ void MenuScene::renderText() const {
   TextHelpers::renderLineOfText(renderer, fontMd, instructionsText, instructionsColor,
                                 instructionsPos);
 
+#ifndef __EMSCRIPTEN__
   const std::string quitText  = "Quit";
   const Vec2        quitPos   = instructionsPos + Vec2{0, 50};
   const SDL_Color   quitColor = m_selectedIndex == 2 ? selectedColor : textColor;
   TextHelpers::renderLineOfText(renderer, fontMd, quitText, quitColor, quitPos);
+#endif
 
   const std::string controlsText = "W/S to move up/down, Enter to select";
   // bottom right corner
@@ -85,6 +87,14 @@ void MenuScene::renderText() const {
 }
 
 void MenuScene::sDoAction(Action &action) {
+
+// Emscripten build does not have the quit option (option 3)
+#ifdef __EMSCRIPTEN__
+  constexpr int MAX_MENU_ITEMS = 2;
+#else
+  constexpr int MAX_MENU_ITEMS = 3;
+#endif
+
   AudioSampleQueue &audioSampleQueue = m_gameEngine->getAudioSampleQueue();
   if (action.getState() == ActionState::END) {
     return;
@@ -99,13 +109,13 @@ void MenuScene::sDoAction(Action &action) {
   // UP takes precedence over DOWN if both are pressed
   if (action.getName() == "UP") {
     audioSampleQueue.queueSample(AudioSample::MENU_MOVE, AudioSamplePriority::BACKGROUND);
-    m_selectedIndex > 0 ? m_selectedIndex -= 1 : m_selectedIndex = 2;
+    m_selectedIndex > 0 ? m_selectedIndex -= 1 : m_selectedIndex = MAX_MENU_ITEMS - 1;
     return;
   }
 
   if (action.getName() == "DOWN") {
     audioSampleQueue.queueSample(AudioSample::MENU_MOVE, AudioSamplePriority::BACKGROUND);
-    m_selectedIndex < 2 ? m_selectedIndex += 1 : m_selectedIndex = 0;
+    m_selectedIndex < MAX_MENU_ITEMS - 1 ? m_selectedIndex += 1 : m_selectedIndex = 0;
   }
 }
 
