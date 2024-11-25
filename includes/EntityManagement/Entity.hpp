@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 
-enum EntityTags { Player, Wall, SpeedBoost, SlownessDebuff, Enemy, Default, Bullet, Item };
+enum EntityTags { Player, Wall, SpeedBoost, SlownessDebuff, Enemy, Bullet, Item, Default };
 
 class Entity {
 private:
@@ -18,11 +18,12 @@ private:
 
 public:
   // component pointers
-  std::shared_ptr<CTransform> cTransform;
-  std::shared_ptr<CShape>     cShape;
-  std::shared_ptr<CInput>     cInput;
-  std::shared_ptr<CLifespan>  cLifespan;
-  std::shared_ptr<CEffects>   cEffects;
+  std::shared_ptr<CTransform>     cTransform;
+  std::shared_ptr<CShape>         cShape;
+  std::shared_ptr<CInput>         cInput;
+  std::shared_ptr<CLifespan>      cLifespan;
+  std::shared_ptr<CEffects>       cEffects;
+  std::shared_ptr<CBounceTracker> cBounceTracker;
 
   // private member access functions
   bool       isActive() const;

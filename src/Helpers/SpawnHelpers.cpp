@@ -328,8 +328,9 @@ namespace SpawnHelpers::MainScene {
     bulletPos.y = playerCenter.y + direction.y * spawnOffset -
                   static_cast<float>(bullet->cShape->rect.h) / 2;
 
-    bullet->cTransform = std::make_shared<CTransform>(bulletPos, bulletVelocity, 0);
-    bullet->cLifespan  = std::make_shared<CLifespan>(lifespan);
+    bullet->cTransform     = std::make_shared<CTransform>(bulletPos, bulletVelocity, 0);
+    bullet->cLifespan      = std::make_shared<CLifespan>(lifespan);
+    bullet->cBounceTracker = std::make_shared<CBounceTracker>();
 
     for (const std::shared_ptr<Entity> &wall : walls) {
       if (CollisionHelpers::calculateCollisionBetweenEntities(bullet, wall)) {

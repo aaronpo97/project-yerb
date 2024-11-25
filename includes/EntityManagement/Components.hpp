@@ -111,3 +111,18 @@ public:
     effects.clear();
   }
 };
+
+class CBounceTracker {
+  int m_bounces = 0;
+
+public:
+  CBounceTracker() = default;
+
+  void addBounce() {
+    m_bounces++;
+  }
+
+  int getBounces() const {
+    return m_bounces;
+  }
+};
