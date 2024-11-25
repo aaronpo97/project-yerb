@@ -15,6 +15,8 @@ public:
 
   CTransform(const Vec2 &position, const Vec2 &velocity, const float angle) :
       topLeftCornerPos(position), velocity(velocity), angle(angle) {}
+
+  CTransform() = default;
 };
 
 class CShape {
@@ -77,7 +79,7 @@ class CEffects {
   std::vector<Effect> effects;
 
 public:
-  CEffects() {}
+       CEffects() {}
   void addEffect(const Effect &effect) {
     // do not add the effect if it already exists
     for (const auto &existingEffect : effects) {

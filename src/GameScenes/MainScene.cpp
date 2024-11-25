@@ -220,6 +220,7 @@ void MainScene::sCollision() {
 
 void MainScene::sMovement() {
   const ConfigManager        &configManager          = m_gameEngine->getConfigManager();
+  const GameConfig           &gameConfig             = configManager.getGameConfig();
   const PlayerConfig         &playerConfig           = configManager.getPlayerConfig();
   const EnemyConfig          &enemyConfig            = configManager.getEnemyConfig();
   const SlownessEffectConfig &slownessEffectConfig   = configManager.getSlownessEffectConfig();
@@ -409,7 +410,6 @@ void MainScene::onEnd() {
 }
 
 void MainScene::sAudio() {
-
   AudioManager     &audioManager     = m_gameEngine->getAudioManager();
   AudioSampleQueue &audioSampleQueue = m_gameEngine->getAudioSampleQueue();
 

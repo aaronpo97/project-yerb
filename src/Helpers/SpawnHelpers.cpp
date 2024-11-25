@@ -226,25 +226,74 @@ namespace SpawnHelpers::MainScene {
 
     constexpr SDL_Color wallColor  = {.r = 176, .g = 196, .b = 222, .a = 255};
     const float         wallHeight = gameConfig.windowSize.y * 0.6f;
-    const float         wallWidth  = gameConfig.windowSize.x * 0.02f;
+    const float         wallWidth  = gameConfig.windowSize.x * 0.025f;
 
     const auto wallConfig = ShapeConfig(wallHeight, wallWidth, wallColor);
 
-    auto wallVelocity     = Vec2(0, 0);
-    auto wallLeftPosition = Vec2(400, 0);
-    auto wallRightPosition =
-        Vec2(gameConfig.windowSize.x * 0.7f, gameConfig.windowSize.y - wallHeight);
+    constexpr size_t WALL_COUNT = 8;
 
-    const std::shared_ptr<Entity> wallLeft  = entityManager.addEntity(EntityTags::Wall);
-    const std::shared_ptr<Entity> wallRight = entityManager.addEntity(EntityTags::Wall);
+    const float innerWidth  = gameConfig.windowSize.x * 0.6f;
+    const float innerHeight = gameConfig.windowSize.y * 0.6f;
+    const float innerStartX = (gameConfig.windowSize.x - innerWidth) / 2;
+    const float innerStartY = (gameConfig.windowSize.y - innerHeight) / 2;
 
-    wallLeft->cShape     = std::make_shared<CShape>(renderer, wallConfig);
-    wallLeft->cTransform = std::make_shared<CTransform>(wallLeftPosition, wallVelocity, 0);
+    const float outerWidth  = gameConfig.windowSize.x;
+    const float outerHeight = gameConfig.windowSize.y;
+    const float outerStartX = (gameConfig.windowSize.x - outerWidth) / 2;
+    const float outerStartY = (gameConfig.windowSize.y - outerHeight) / 2;
 
-    wallRight->cShape     = std::make_shared<CShape>(renderer, wallConfig);
-    wallRight->cTransform = std::make_shared<CTransform>(wallRightPosition, wallVelocity, 0);
+    // Gap sizes proportional to respective rectangles
+    const float innerGapSize = innerWidth * 0.15f;
+    const float outerGapSize = outerWidth * 0.18f;
+
+    for (int i = 0; i < WALL_COUNT; i++) {
+      const std::shared_ptr<Entity> wall           = entityManager.addEntity(EntityTags::Wall);
+      std::shared_ptr<CShape>      &shapeComponent = wall->cShape;
+      std::shared_ptr<CTransform>  &transformComponent = wall->cTransform;
+
+      shapeComponent     = std::make_shared<CShape>(renderer, wallConfig);
+      transformComponent = std::make_shared<CTransform>();
+
+      Vec2 &topLeftCornerPos = transformComponent->topLeftCornerPos;
+
+      const bool isOuterWall  = i >= 4;
+      const bool isHorizontal = (i % 2 == 0);
+
+      if (isOuterWall) {
+        // Handle outer rectangle walls (indices 4-7)
+        if (isHorizontal) {
+          shapeComponent->rect.h = wallWidth;
+          shapeComponent->rect.w = outerWidth - (2 * outerGapSize);
+
+          topLeftCornerPos.x = outerStartX + outerGapSize;
+          topLeftCornerPos.y = (i == 4) ? outerStartY : outerStartY + outerHeight - wallWidth;
+        } else {
+          shapeComponent->rect.h = outerHeight - (2 * outerGapSize);
+          shapeComponent->rect.w = wallWidth;
+
+          topLeftCornerPos.x = (i == 5) ? outerStartX : outerStartX + outerWidth - wallWidth;
+          topLeftCornerPos.y = outerStartY + outerGapSize;
+        }
+      } else {
+        // Handle inner rectangle walls (indices 0-3)
+        if (isHorizontal) {
+          shapeComponent->rect.h = wallWidth;
+          shapeComponent->rect.w = innerWidth - (2 * innerGapSize);
+
+          topLeftCornerPos.x = innerStartX + innerGapSize;
+          topLeftCornerPos.y = (i == 0) ? innerStartY : innerStartY + innerHeight - wallWidth;
+        } else {
+          shapeComponent->rect.h = innerHeight - (2 * innerGapSize);
+          shapeComponent->rect.w = wallWidth;
+
+          topLeftCornerPos.x = (i == 1) ? innerStartX : innerStartX + innerWidth - wallWidth;
+          topLeftCornerPos.y = innerStartY + innerGapSize;
+        }
+      }
+    }
+
+    entityManager.update();
   }
-
   void spawnBullets(SDL_Renderer                  *renderer,
                     const ConfigManager           &configManager,
                     EntityManager                 &entityManager,
