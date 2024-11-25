@@ -19,14 +19,15 @@ protected:
 
 public:
   explicit Scene(GameEngine *gameEngine) :
-      m_gameEngine(gameEngine) {};
+      m_gameEngine(gameEngine){};
 
-  virtual ~Scene()                       = default;
+  virtual ~    Scene()                   = default;
   virtual void update()                  = 0;
   virtual void onEnd()                   = 0;
   virtual void sRender()                 = 0;
   virtual void sDoAction(Action &action) = 0;
   virtual void sAudio()                  = 0;
+  virtual void scaleScene()              = 0;
 
   void registerAction(const int inputKey, const std::string &actionName) {
     m_actionMap[inputKey] = actionName;

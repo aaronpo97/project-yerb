@@ -354,6 +354,9 @@ void MainScene::sLifespan() {
                            static_cast<float>(entity->cLifespan->lifespan));
 
     const bool entityExpired = elapsedTime > entity->cLifespan->lifespan;
+    if (!entityExpired && entity->tag() == EntityTags::Enemy) {
+      continue;
+    }
     if (!entityExpired) {
       constexpr float MAX_COLOR_VALUE = 255.0f;
       const Uint8     alpha           = static_cast<Uint8>(std::max(
@@ -363,10 +366,6 @@ void MainScene::sLifespan() {
       color            = {.r = color.r, .g = color.g, .b = color.b, .a = alpha};
 
       continue;
-    }
-
-    if (tag == EntityTags::Enemy) {
-      setScore(m_score - 1);
     }
 
     entity->destroy();
@@ -418,4 +417,16 @@ void MainScene::sAudio() {
   }
 
   audioSampleQueue.update();
+}
+
+void MainScene::scaleScene() {
+  const auto walls = m_entities.getEntities(EntityTags::Wall);
+  for (const auto &wall : walls) {
+    wall->destroy();
+  }
+
+  m_entities.update();
+
+  SpawnHelpers::MainScene::spawnWalls(m_gameEngine->getVideoManager().getRenderer(),
+                                      m_gameEngine->getConfigManager(), m_entities);
 }
