@@ -256,42 +256,42 @@ namespace SpawnHelpers::MainScene {
 
       Vec2 &topLeftCornerPos = transformComponent->topLeftCornerPos;
 
-      const bool isOuterWall  = i >= 4;
-      const bool isHorizontal = (i % 2 == 0);
+      const bool isOuterWall       = i >= 4;
+      const bool isHorizontal      = (i % 2 == 0);
+      const bool isOuterHorizontal = isOuterWall && isHorizontal;
+      const bool isOuterVertical   = isOuterWall && !isHorizontal;
+      const bool isInnerHorizontal = !isOuterWall && isHorizontal;
+      const bool isInnerVertical   = !isOuterWall && !isHorizontal;
 
-      if (isOuterWall) {
-        // Handle outer rectangle walls (indices 4-7)
-        if (isHorizontal) {
-          shapeComponent->rect.h = wallWidth;
-          shapeComponent->rect.w = outerWidth - (2 * outerGapSize);
+      if (isOuterHorizontal) {
+        shapeComponent->rect.h = static_cast<int>(wallWidth);
+        shapeComponent->rect.w = static_cast<int>(outerWidth - (2 * outerGapSize));
 
-          topLeftCornerPos.x = outerStartX + outerGapSize;
-          topLeftCornerPos.y = (i == 4) ? outerStartY : outerStartY + outerHeight - wallWidth;
-        } else {
-          shapeComponent->rect.h = outerHeight - (2 * outerGapSize);
-          shapeComponent->rect.w = wallWidth;
+        topLeftCornerPos.x = outerStartX + outerGapSize;
+        topLeftCornerPos.y = (i == 4) ? outerStartY : outerStartY + outerHeight - wallWidth;
+      }
+      if (isOuterVertical) {
+        shapeComponent->rect.h = static_cast<int>(outerHeight - (2 * outerGapSize));
+        shapeComponent->rect.w = static_cast<int>(wallWidth);
 
-          topLeftCornerPos.x = (i == 5) ? outerStartX : outerStartX + outerWidth - wallWidth;
-          topLeftCornerPos.y = outerStartY + outerGapSize;
-        }
-      } else {
-        // Handle inner rectangle walls (indices 0-3)
-        if (isHorizontal) {
-          shapeComponent->rect.h = wallWidth;
-          shapeComponent->rect.w = innerWidth - (2 * innerGapSize);
+        topLeftCornerPos.x = (i == 5) ? outerStartX : outerStartX + outerWidth - wallWidth;
+        topLeftCornerPos.y = outerStartY + outerGapSize;
+      }
+      if (isInnerHorizontal) {
+        shapeComponent->rect.h = static_cast<int>(wallWidth);
+        shapeComponent->rect.w = static_cast<int>(innerWidth - (2 * innerGapSize));
 
-          topLeftCornerPos.x = innerStartX + innerGapSize;
-          topLeftCornerPos.y = (i == 0) ? innerStartY : innerStartY + innerHeight - wallWidth;
-        } else {
-          shapeComponent->rect.h = innerHeight - (2 * innerGapSize);
-          shapeComponent->rect.w = wallWidth;
+        topLeftCornerPos.x = innerStartX + innerGapSize;
+        topLeftCornerPos.y = (i == 0) ? innerStartY : innerStartY + innerHeight - wallWidth;
+      }
+      if (isInnerVertical) {
+        shapeComponent->rect.h = static_cast<int>(innerHeight - (2 * innerGapSize));
+        shapeComponent->rect.w = static_cast<int>(wallWidth);
 
-          topLeftCornerPos.x = (i == 1) ? innerStartX : innerStartX + innerWidth - wallWidth;
-          topLeftCornerPos.y = innerStartY + innerGapSize;
-        }
+        topLeftCornerPos.x = (i == 1) ? innerStartX : innerStartX + innerWidth - wallWidth;
+        topLeftCornerPos.y = innerStartY + innerGapSize;
       }
     }
-
     entityManager.update();
   }
   void spawnBullets(SDL_Renderer                  *renderer,
