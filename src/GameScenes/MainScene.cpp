@@ -98,24 +98,29 @@ void MainScene::sDoAction(Action &action) {
     return;
   }
   if (action.getName() == "SHOOT") {
-    const std::optional<Vec2> position = action.getPos();
+    const auto currentTime = SDL_GetTicks64();
+    const auto spawnBullet = currentTime - m_lastBulletSpawnTime > m_bulletSpawnCooldown;
+    if (!spawnBullet) {
+      return;
+    }
 
+    const std::optional<Vec2> position = action.getPos();
     if (!position.has_value()) {
       SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "A mouse event was called without a position.");
       return;
     }
-
     const Vec2 mousePosition = *position;
 
     audioSampleQueue.queueSample(AudioSample::SHOOT, AudioSamplePriority::STANDARD);
     SpawnHelpers::MainScene::spawnBullets(m_gameEngine->getVideoManager().getRenderer(),
                                           m_gameEngine->getConfigManager(), m_entities,
                                           m_player, mousePosition);
-  }
+    m_lastBulletSpawnTime = currentTime;
 
-  if (action.getName() == "PAUSE") {
-    audioSampleQueue.queueSample(AudioSample::MENU_SELECT, AudioSamplePriority::CRITICAL);
-    m_paused = !m_paused;
+    if (action.getName() == "PAUSE") {
+      audioSampleQueue.queueSample(AudioSample::MENU_SELECT, AudioSamplePriority::CRITICAL);
+      m_paused = !m_paused;
+    }
   }
 
   if (action.getName() == "GO_BACK") {
@@ -242,10 +247,10 @@ void MainScene::sSpawner() {
   const Uint64         ticks          = SDL_GetTicks64();
   const Uint64         SPAWN_INTERVAL = configManager.getGameConfig().spawnInterval;
 
-  if (ticks - m_lastEnemySpawnTime < SPAWN_INTERVAL) {
+  if (ticks - m_lastNonPlayerEntitySpawnTime < SPAWN_INTERVAL) {
     return;
   }
-  m_lastEnemySpawnTime = ticks;
+  m_lastNonPlayerEntitySpawnTime = ticks;
 
   const EnemyConfig          &enemyConfig            = configManager.getEnemyConfig();
   const SpeedEffectConfig    &speedBoostEffectConfig = configManager.getSpeedEffectConfig();
