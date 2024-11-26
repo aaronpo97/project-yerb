@@ -25,7 +25,7 @@ private:
 public:
   explicit MainScene(GameEngine *gameEngine);
 
-  void scaleScene() override;
+  void onSceneWindowResize() override;
 
   void update() override;
   void onEnd() override;

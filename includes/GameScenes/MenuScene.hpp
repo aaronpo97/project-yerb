@@ -19,5 +19,5 @@ public:
   void     sRender() override;
   void     sDoAction(Action &action) override;
   void     sAudio() override;
-  void     scaleScene() override{};
+  void     onSceneWindowResize() override{};
 };

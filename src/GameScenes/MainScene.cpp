@@ -419,7 +419,7 @@ void MainScene::sAudio() {
   audioSampleQueue.update();
 }
 
-void MainScene::scaleScene() {
+void MainScene::onSceneWindowResize() {
   const auto walls = m_entities.getEntities(EntityTags::Wall);
   for (const auto &wall : walls) {
     wall->destroy();
