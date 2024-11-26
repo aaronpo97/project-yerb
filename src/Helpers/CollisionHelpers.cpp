@@ -175,22 +175,9 @@ namespace CollisionHelpers::MainScene::Enforce {
     const std::shared_ptr<CShape> &cShape             = entity->cShape;
     Vec2                          &leftCornerPosition = entity->cTransform->topLeftCornerPos;
     Vec2                          &velocity           = entity->cTransform->velocity;
-    // Bounce the entity off the boundaries
-    if (collides[TOP]) {
-      leftCornerPosition.y = 0;
-      velocity.y           = -velocity.y;
-    }
-    if (collides[BOTTOM]) {
-      leftCornerPosition.y = window_size.y - static_cast<float>(cShape->rect.h);
-      velocity.y           = -velocity.y;
-    }
-    if (collides[LEFT]) {
-      leftCornerPosition.x = 0;
-      velocity.x           = -velocity.x;
-    }
-    if (collides[RIGHT]) {
-      leftCornerPosition.x = window_size.x - static_cast<float>(cShape->rect.w);
-      velocity.x           = -velocity.x;
+
+    if (collides.any()) {
+      entity->destroy();
     }
   }
 
@@ -241,6 +228,12 @@ namespace CollisionHelpers::MainScene::Enforce {
       entity->cTransform->topLeftCornerPos.x += overlap.x;
       entity->cTransform->velocity.x = -entity->cTransform->velocity.x;
     }
+
+    if (entity->cBounceTracker == nullptr) {
+      return;
+    }
+
+    entity->cBounceTracker->addBounce();
   }
 
   void enforceEntityEntityCollision(const std::shared_ptr<Entity> &entityA,
@@ -427,7 +420,12 @@ namespace CollisionHelpers::MainScene {
       AudioSample nextSample = AudioSample::BULLET_HIT_02;
       args.audioSampleManager.queueSample(nextSample, AudioSamplePriority::STANDARD);
 
-      setScore(m_score + 5);
+      if (entity->cBounceTracker == nullptr) {
+        entity->destroy();
+        return;
+      }
+      const int bounces = entity->cBounceTracker->getBounces();
+      setScore(5 * (bounces + 1) + m_score);
       otherEntity->destroy();
       entity->destroy();
     }
@@ -442,6 +440,12 @@ namespace CollisionHelpers::MainScene {
          otherTag == EntityTags::Item)) {
       otherEntity->destroy();
       entity->destroy();
+
+      if (m_score > 15) {
+        const auto updatedScore =
+            otherTag == EntityTags::SlownessDebuff ? m_score + 15 : m_score - 15;
+        setScore(updatedScore);
+      }
     }
 
     if (tag == EntityTags::Player && otherTag == EntityTags::Enemy) {
@@ -531,7 +535,7 @@ namespace CollisionHelpers::MainScene {
     if (tag == EntityTags::Player && otherTag == EntityTags::Item) {
       args.audioSampleManager.queueSample(AudioSample::ITEM_ACQUIRED,
                                           AudioSamplePriority::STANDARD);
-      setScore(m_score + 60);
+      setScore(m_score + 90);
       otherEntity->destroy();
     }
 

@@ -3,6 +3,7 @@
 constexpr float BASE_MOVEMENT_MULTIPLIER = 50.0f;
 
 namespace MovementHelpers {
+
   void moveEnemies(const std::shared_ptr<Entity> &entity,
                    const EnemyConfig             &enemyConfig,
                    const float                   &deltaTime) {

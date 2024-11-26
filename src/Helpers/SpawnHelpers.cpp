@@ -226,25 +226,74 @@ namespace SpawnHelpers::MainScene {
 
     constexpr SDL_Color wallColor  = {.r = 176, .g = 196, .b = 222, .a = 255};
     const float         wallHeight = gameConfig.windowSize.y * 0.6f;
-    const float         wallWidth  = gameConfig.windowSize.x * 0.02f;
+    const float         wallWidth  = gameConfig.windowSize.x * 0.025f;
 
     const auto wallConfig = ShapeConfig(wallHeight, wallWidth, wallColor);
 
-    auto wallVelocity     = Vec2(0, 0);
-    auto wallLeftPosition = Vec2(400, 0);
-    auto wallRightPosition =
-        Vec2(gameConfig.windowSize.x * 0.7f, gameConfig.windowSize.y - wallHeight);
+    constexpr size_t WALL_COUNT = 8;
 
-    const std::shared_ptr<Entity> wallLeft  = entityManager.addEntity(EntityTags::Wall);
-    const std::shared_ptr<Entity> wallRight = entityManager.addEntity(EntityTags::Wall);
+    const float innerWidth  = gameConfig.windowSize.x * 0.6f;
+    const float innerHeight = gameConfig.windowSize.y * 0.6f;
+    const float innerStartX = (gameConfig.windowSize.x - innerWidth) / 2;
+    const float innerStartY = (gameConfig.windowSize.y - innerHeight) / 2;
 
-    wallLeft->cShape     = std::make_shared<CShape>(renderer, wallConfig);
-    wallLeft->cTransform = std::make_shared<CTransform>(wallLeftPosition, wallVelocity, 0);
+    const float outerWidth  = gameConfig.windowSize.x;
+    const float outerHeight = gameConfig.windowSize.y;
+    const float outerStartX = (gameConfig.windowSize.x - outerWidth) / 2;
+    const float outerStartY = (gameConfig.windowSize.y - outerHeight) / 2;
 
-    wallRight->cShape     = std::make_shared<CShape>(renderer, wallConfig);
-    wallRight->cTransform = std::make_shared<CTransform>(wallRightPosition, wallVelocity, 0);
+    // Gap sizes proportional to respective rectangles
+    const float innerGapSize = innerWidth * 0.15f;
+    const float outerGapSize = outerWidth * 0.18f;
+
+    for (int i = 0; i < WALL_COUNT; i++) {
+      const std::shared_ptr<Entity> wall           = entityManager.addEntity(EntityTags::Wall);
+      std::shared_ptr<CShape>      &shapeComponent = wall->cShape;
+      std::shared_ptr<CTransform>  &transformComponent = wall->cTransform;
+
+      shapeComponent     = std::make_shared<CShape>(renderer, wallConfig);
+      transformComponent = std::make_shared<CTransform>();
+
+      Vec2 &topLeftCornerPos = transformComponent->topLeftCornerPos;
+
+      const bool isOuterWall       = i >= 4;
+      const bool isHorizontal      = (i % 2 == 0);
+      const bool isOuterHorizontal = isOuterWall && isHorizontal;
+      const bool isOuterVertical   = isOuterWall && !isHorizontal;
+      const bool isInnerHorizontal = !isOuterWall && isHorizontal;
+      const bool isInnerVertical   = !isOuterWall && !isHorizontal;
+
+      if (isOuterHorizontal) {
+        shapeComponent->rect.h = static_cast<int>(wallWidth);
+        shapeComponent->rect.w = static_cast<int>(outerWidth - (2 * outerGapSize));
+
+        topLeftCornerPos.x = outerStartX + outerGapSize;
+        topLeftCornerPos.y = (i == 4) ? outerStartY : outerStartY + outerHeight - wallWidth;
+      }
+      if (isOuterVertical) {
+        shapeComponent->rect.h = static_cast<int>(outerHeight - (2 * outerGapSize));
+        shapeComponent->rect.w = static_cast<int>(wallWidth);
+
+        topLeftCornerPos.x = (i == 5) ? outerStartX : outerStartX + outerWidth - wallWidth;
+        topLeftCornerPos.y = outerStartY + outerGapSize;
+      }
+      if (isInnerHorizontal) {
+        shapeComponent->rect.h = static_cast<int>(wallWidth);
+        shapeComponent->rect.w = static_cast<int>(innerWidth - (2 * innerGapSize));
+
+        topLeftCornerPos.x = innerStartX + innerGapSize;
+        topLeftCornerPos.y = (i == 0) ? innerStartY : innerStartY + innerHeight - wallWidth;
+      }
+      if (isInnerVertical) {
+        shapeComponent->rect.h = static_cast<int>(innerHeight - (2 * innerGapSize));
+        shapeComponent->rect.w = static_cast<int>(wallWidth);
+
+        topLeftCornerPos.x = (i == 1) ? innerStartX : innerStartX + innerWidth - wallWidth;
+        topLeftCornerPos.y = innerStartY + innerGapSize;
+      }
+    }
+    entityManager.update();
   }
-
   void spawnBullets(SDL_Renderer                  *renderer,
                     const ConfigManager           &configManager,
                     EntityManager                 &entityManager,
@@ -279,8 +328,9 @@ namespace SpawnHelpers::MainScene {
     bulletPos.y = playerCenter.y + direction.y * spawnOffset -
                   static_cast<float>(bullet->cShape->rect.h) / 2;
 
-    bullet->cTransform = std::make_shared<CTransform>(bulletPos, bulletVelocity, 0);
-    bullet->cLifespan  = std::make_shared<CLifespan>(lifespan);
+    bullet->cTransform     = std::make_shared<CTransform>(bulletPos, bulletVelocity, 0);
+    bullet->cLifespan      = std::make_shared<CLifespan>(lifespan);
+    bullet->cBounceTracker = std::make_shared<CBounceTracker>();
 
     for (const std::shared_ptr<Entity> &wall : walls) {
       if (CollisionHelpers::calculateCollisionBetweenEntities(bullet, wall)) {

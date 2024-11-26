@@ -1,5 +1,7 @@
 #include "../../includes/SystemManagement/AudioManager.hpp"
 
+#include <iostream>
+
 AudioManager::AudioManager(const int    frequency,
                            const Uint16 format,
                            const int    channels,
@@ -54,7 +56,9 @@ void AudioManager::loadSample(const AudioSample sample, const Path &filepath) {
     throw std::runtime_error("Mix_LoadWAV error");
   }
 
-  setSampleVolume(sample, DEFAULT_SAMPLE_VOLUME);
+  std::cout << DEFAULT_SAMPLE_VOLUME << std::endl;
+  setSampleVolume(sample, sample == AudioSample::BULLET_HIT_01 ? DEFAULT_SAMPLE_VOLUME / 2
+                                                               : DEFAULT_SAMPLE_VOLUME);
 }
 
 void AudioManager::playTrack(const AudioTrack track, const int loops) {
