@@ -18,6 +18,9 @@ void Entity::destroy() {
 }
 
 Vec2 Entity::getCenterPos() const {
+  const std::shared_ptr<CTransform> &cTransform = getComponent<CTransform>();
+  const std::shared_ptr<CShape>     &cShape     = getComponent<CShape>();
+
   if (cTransform == nullptr || cShape == nullptr) {
     SDL_LogError(
         SDL_LOG_CATEGORY_ERROR,

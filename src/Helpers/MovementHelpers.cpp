@@ -18,7 +18,7 @@ namespace MovementHelpers {
       return;
     }
 
-    const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
+    const std::shared_ptr<CTransform> &entityCTransform = entity->getComponent<CTransform>();
     if (entityCTransform == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                    "Entity with ID %zu lacks a transform component.", entity->id());
@@ -44,7 +44,7 @@ namespace MovementHelpers {
       return;
     }
 
-    const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
+    const std::shared_ptr<CTransform> &entityCTransform = entity->getComponent<CTransform>();
     if (entityCTransform == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                    "Entity with ID %zu lacks a transform component.", entity->id());
@@ -70,14 +70,14 @@ namespace MovementHelpers {
       return;
     }
 
-    const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
+    const std::shared_ptr<CTransform> &entityCTransform = entity->getComponent<CTransform>();
     if (entityCTransform == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                    "Entity with ID %zu lacks a transform component.", entity->id());
       return;
     }
 
-    const std::shared_ptr<CInput> &entityCInput = entity->cInput;
+    const std::shared_ptr<CInput> &entityCInput = entity->getComponent<CInput>();
     if (entityCInput == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                    "Entity with ID %zu lacks an input component.", entity->id());
@@ -104,12 +104,14 @@ namespace MovementHelpers {
 
     velocity.normalize();
 
+    const std::shared_ptr<CEffects> &entityEffects = entity->getComponent<CEffects>();
+
     float effectMultiplier = 1;
-    if (entity->cEffects->hasEffect(EffectTypes::Speed)) {
+    if (entityEffects->hasEffect(EffectTypes::Speed)) {
       effectMultiplier = playerConfig.speedBoostMultiplier;
     }
 
-    if (entity->cEffects->hasEffect(EffectTypes::Slowness)) {
+    if (entityEffects->hasEffect(EffectTypes::Slowness)) {
       effectMultiplier = playerConfig.slownessMultiplier;
     }
 
@@ -132,8 +134,8 @@ namespace MovementHelpers {
       return;
     }
 
-    const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
-    const std::shared_ptr<CShape>     &entityCShape     = entity->cShape;
+    const std::shared_ptr<CTransform> &entityCTransform = entity->getComponent<CTransform>();
+    const std::shared_ptr<CShape>     &entityCShape     = entity->getComponent<CShape>();
 
     if (entityCTransform == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
@@ -166,7 +168,7 @@ namespace MovementHelpers {
       return;
     }
 
-    const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
+    const std::shared_ptr<CTransform> &entityCTransform = entity->getComponent<CTransform>();
     if (entityCTransform == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                    "Entity with ID %zu lacks a transform component.", entity->id());
@@ -191,7 +193,7 @@ namespace MovementHelpers {
       return;
     }
 
-    const std::shared_ptr<CTransform> &entityCTransform = entity->cTransform;
+    const std::shared_ptr<CTransform> &entityCTransform = entity->getComponent<CTransform>();
 
     if (entityCTransform == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,

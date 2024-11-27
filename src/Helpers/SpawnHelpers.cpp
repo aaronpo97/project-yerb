@@ -64,7 +64,6 @@ namespace SpawnHelpers {
     bool isCollidingWithOtherEntities =
         std::ranges::any_of(entityManager.getEntities(), collisionCheck);
 
-    // Assuming CollisionHelpers and entityManager are correctly defined
     if (isCollidingWithOtherEntities) {
       return false;
     }
@@ -82,24 +81,22 @@ namespace SpawnHelpers::MainScene {
 
     std::shared_ptr<Entity> player = entityManager.addEntity(EntityTags::Player);
 
-    std::shared_ptr<CTransform> &playerCTransform = player->cTransform;
-    std::shared_ptr<CShape>     &playerCShape     = player->cShape;
-    std::shared_ptr<CInput>     &playerCInput     = player->cInput;
-    std::shared_ptr<CEffects>   &playerCEffects   = player->cEffects;
+    const Vec2 &windowSize     = gameConfig.windowSize;
+    const auto  playerHeight   = static_cast<float>(playerConfig.shape.height);
+    const auto  playerWidth    = static_cast<float>(playerConfig.shape.width);
+    const Vec2  centerPosition = windowSize / 2 - Vec2(playerWidth / 2, playerHeight / 2);
+    const Vec2 &playerPosition = centerPosition;
+    const Vec2  playerVelocity = {0, 0};
 
-    // set the player's initial position to the center of the screen
-    const Vec2 &windowSize = gameConfig.windowSize;
+    const auto cShape     = std::make_shared<CShape>(renderer, playerConfig.shape);
+    const auto cTransform = std::make_shared<CTransform>(playerPosition, playerVelocity, 0);
+    const auto cInput     = std::make_shared<CInput>();
+    const auto cEffects   = std::make_shared<CEffects>();
 
-    playerCShape = std::make_shared<CShape>(renderer, playerConfig.shape);
-
-    const auto playerHeight = static_cast<float>(playerCShape->rect.h);
-    const auto playerWidth  = static_cast<float>(playerCShape->rect.w);
-
-    const Vec2 playerPosition = windowSize / 2 - Vec2(playerWidth / 2, playerHeight / 2);
-    const Vec2 playerVelocity = {0, 0};
-    playerCTransform = std::make_shared<CTransform>(playerPosition, playerVelocity, 0);
-    playerCInput     = std::make_shared<CInput>();
-    playerCEffects   = std::make_shared<CEffects>();
+    player->setComponent(cTransform);
+    player->setComponent(cShape);
+    player->setComponent(cInput);
+    player->setComponent(cEffects);
 
     entityManager.update();
 
@@ -119,18 +116,21 @@ namespace SpawnHelpers::MainScene {
     const auto    velocity           = createValidVelocity(randomGenerator);
     const auto    position           = createRandomPosition(randomGenerator, windowSize);
 
-    const auto &enemy = entityManager.addEntity(EntityTags::Enemy);
-    enemy->cTransform = std::make_shared<CTransform>(position, velocity, 0);
-    enemy->cShape     = std::make_shared<CShape>(renderer, enemyConfig.shape);
-    enemy->cLifespan  = std::make_shared<CLifespan>(enemyConfig.lifespan);
+    const auto &enemy      = entityManager.addEntity(EntityTags::Enemy);
+    const auto  cTransform = std::make_shared<CTransform>(position, velocity, 0);
+    const auto  cShape     = std::make_shared<CShape>(renderer, enemyConfig.shape);
+    const auto  cLifespan  = std::make_shared<CLifespan>(enemyConfig.lifespan);
+
+    enemy->setComponent<CTransform>(cTransform);
+    enemy->setComponent<CShape>(cShape);
+    enemy->setComponent<CLifespan>(cLifespan);
 
     bool isValidSpawn = validateSpawnPosition(enemy, player, entityManager, windowSize);
     int  spawnAttempt = 1;
 
     while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
-      const auto newPosition              = createRandomPosition(randomGenerator, windowSize);
-      enemy->cTransform->topLeftCornerPos = newPosition;
-
+      const auto newPosition = createRandomPosition(randomGenerator, windowSize);
+      enemy->getComponent<CTransform>()->topLeftCornerPos = newPosition;
       isValidSpawn = validateSpawnPosition(enemy, player, entityManager, windowSize);
       spawnAttempt += 1;
     }
@@ -147,27 +147,29 @@ namespace SpawnHelpers::MainScene {
                              std::mt19937                  &randomGenerator,
                              EntityManager                 &entityManager,
                              const std::shared_ptr<Entity> &player) {
-    const GameConfig &gameConfig = configManager.getGameConfig();
-    const Vec2       &windowSize = gameConfig.windowSize;
+    const GameConfig        &gameConfig        = configManager.getGameConfig();
+    const SpeedEffectConfig &speedEffectConfig = configManager.getSpeedEffectConfig();
+    const Vec2              &windowSize        = gameConfig.windowSize;
 
     constexpr int MAX_SPAWN_ATTEMPTS = 10;
-    const auto    velocity           = createValidVelocity(randomGenerator);
-    const auto    position           = createRandomPosition(randomGenerator, windowSize);
+    const Vec2    velocity           = createValidVelocity(randomGenerator);
+    const Vec2    position           = createRandomPosition(randomGenerator, windowSize);
+
+    const auto cTransform = std::make_shared<CTransform>(position, velocity, 0);
+    const auto cShape     = std::make_shared<CShape>(renderer, speedEffectConfig.shape);
+    const auto cLifespan  = std::make_shared<CLifespan>(speedEffectConfig.lifespan);
 
     const auto &speedBoost = entityManager.addEntity(EntityTags::SpeedBoost);
-    speedBoost->cTransform = std::make_shared<CTransform>(position, velocity, 0);
-    speedBoost->cShape =
-        std::make_shared<CShape>(renderer, configManager.getSpeedEffectConfig().shape);
-    speedBoost->cLifespan =
-        std::make_shared<CLifespan>(configManager.getSpeedEffectConfig().lifespan);
+    speedBoost->setComponent<CTransform>(cTransform);
+    speedBoost->setComponent<CShape>(cShape);
+    speedBoost->setComponent<CLifespan>(cLifespan);
 
     bool isValidSpawn = validateSpawnPosition(speedBoost, player, entityManager, windowSize);
     int  spawnAttempt = 1;
 
     while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
       const auto newPosition = createRandomPosition(randomGenerator, windowSize);
-      speedBoost->cTransform->topLeftCornerPos = newPosition;
-
+      speedBoost->getComponent<CTransform>()->topLeftCornerPos = newPosition;
       isValidSpawn = validateSpawnPosition(speedBoost, player, entityManager, windowSize);
       spawnAttempt += 1;
     }
@@ -184,19 +186,25 @@ namespace SpawnHelpers::MainScene {
                            std::mt19937                  &randomGenerator,
                            EntityManager                 &entityManager,
                            const std::shared_ptr<Entity> &player) {
-    const GameConfig &gameConfig = configManager.getGameConfig();
-    const Vec2       &windowSize = gameConfig.windowSize;
+    const auto &[windowSize, windowTitle, fontPath, spawnInterval] =
+        configManager.getGameConfig();
+
+    const SlownessEffectConfig &slownessEffectConfig = configManager.getSlownessEffectConfig();
 
     constexpr int MAX_SPAWN_ATTEMPTS = 10;
     const auto    velocity           = createValidVelocity(randomGenerator);
     const auto    position           = createRandomPosition(randomGenerator, windowSize);
 
-    const auto &slownessEntity = entityManager.addEntity(EntityTags::SlownessDebuff);
-    slownessEntity->cTransform = std::make_shared<CTransform>(position, velocity, 0);
-    slownessEntity->cShape =
-        std::make_shared<CShape>(renderer, configManager.getSlownessEffectConfig().shape);
-    slownessEntity->cLifespan =
-        std::make_shared<CLifespan>(configManager.getSlownessEffectConfig().lifespan);
+    const auto cTransform = std::make_shared<CTransform>(position, velocity, 0);
+    const auto cShape     = std::make_shared<CShape>(renderer, slownessEffectConfig.shape);
+    const auto cLifespan  = std::make_shared<CLifespan>(slownessEffectConfig.lifespan);
+
+    const std::shared_ptr<Entity> &slownessEntity =
+        entityManager.addEntity(EntityTags::SlownessDebuff);
+
+    slownessEntity->setComponent<CTransform>(cTransform);
+    slownessEntity->setComponent<CShape>(cShape);
+    slownessEntity->setComponent<CLifespan>(cLifespan);
 
     bool isValidSpawn =
         validateSpawnPosition(slownessEntity, player, entityManager, windowSize);
@@ -204,14 +212,12 @@ namespace SpawnHelpers::MainScene {
 
     while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
       const auto newPosition = createRandomPosition(randomGenerator, windowSize);
-      slownessEntity->cTransform->topLeftCornerPos = newPosition;
-
+      slownessEntity->getComponent<CTransform>()->topLeftCornerPos = newPosition;
       isValidSpawn = validateSpawnPosition(slownessEntity, player, entityManager, windowSize);
       spawnAttempt += 1;
     }
 
     if (!isValidSpawn) {
-      std::cout << "Slowness entity could not be spawned" << std::endl;
       slownessEntity->destroy();
     }
 
@@ -247,12 +253,10 @@ namespace SpawnHelpers::MainScene {
     const float outerGapSize = outerWidth * 0.18f;
 
     for (int i = 0; i < WALL_COUNT; i++) {
-      const std::shared_ptr<Entity> wall           = entityManager.addEntity(EntityTags::Wall);
-      std::shared_ptr<CShape>      &shapeComponent = wall->cShape;
-      std::shared_ptr<CTransform>  &transformComponent = wall->cTransform;
+      const std::shared_ptr<Entity> wall = entityManager.addEntity(EntityTags::Wall);
 
-      shapeComponent     = std::make_shared<CShape>(renderer, wallConfig);
-      transformComponent = std::make_shared<CTransform>();
+      const auto shapeComponent     = std::make_shared<CShape>(renderer, wallConfig);
+      const auto transformComponent = std::make_shared<CTransform>();
 
       Vec2 &topLeftCornerPos = transformComponent->topLeftCornerPos;
 
@@ -291,7 +295,11 @@ namespace SpawnHelpers::MainScene {
         topLeftCornerPos.x = (i == 1) ? innerStartX : innerStartX + innerWidth - wallWidth;
         topLeftCornerPos.y = innerStartY + innerGapSize;
       }
+
+      wall->setComponent(shapeComponent);
+      wall->setComponent(transformComponent);
     }
+
     entityManager.update();
   }
   void spawnBullets(SDL_Renderer                  *renderer,
@@ -315,22 +323,28 @@ namespace SpawnHelpers::MainScene {
     Vec2                          bulletVelocity = direction * bulletSpeed;
     const std::shared_ptr<Entity> bullet         = entityManager.addEntity(EntityTags::Bullet);
 
-    bullet->cShape = std::make_shared<CShape>(
+    const auto cShape = std::make_shared<CShape>(
         renderer, ShapeConfig(shape.height, shape.width, shape.color));
 
-    const int  playerHalfWidth = player->cShape->rect.w / 2;
-    const int  bulletHalfWidth = bullet->cShape->rect.w / 2;
+    bullet->setComponent<CShape>(cShape);
+
+    const int  playerHalfWidth = player->getComponent<CShape>()->rect.w / 2;
+    const int  bulletHalfWidth = bullet->getComponent<CShape>()->rect.w / 2;
     const auto spawnOffset     = static_cast<float>(bulletHalfWidth + playerHalfWidth);
     Vec2       bulletPos;
     // Set bullet position slightly offset from player center in the direction of travel
     bulletPos.x = playerCenter.x + direction.x * spawnOffset -
-                  static_cast<float>(bullet->cShape->rect.w) / 2;
+                  static_cast<float>(bullet->getComponent<CShape>()->rect.w) / 2;
     bulletPos.y = playerCenter.y + direction.y * spawnOffset -
-                  static_cast<float>(bullet->cShape->rect.h) / 2;
+                  static_cast<float>(bullet->getComponent<CShape>()->rect.h) / 2;
 
-    bullet->cTransform     = std::make_shared<CTransform>(bulletPos, bulletVelocity, 0);
-    bullet->cLifespan      = std::make_shared<CLifespan>(lifespan);
-    bullet->cBounceTracker = std::make_shared<CBounceTracker>();
+    const auto cTransform     = std::make_shared<CTransform>(bulletPos, bulletVelocity, 0);
+    const auto cLifespan      = std::make_shared<CLifespan>(lifespan);
+    const auto cBounceTracker = std::make_shared<CBounceTracker>();
+
+    bullet->setComponent<CTransform>(cTransform);
+    bullet->setComponent<CLifespan>(cLifespan);
+    bullet->setComponent<CBounceTracker>(cBounceTracker);
 
     for (const std::shared_ptr<Entity> &wall : walls) {
       if (CollisionHelpers::calculateCollisionBetweenEntities(bullet, wall)) {
@@ -355,17 +369,21 @@ namespace SpawnHelpers::MainScene {
     const auto    position           = createRandomPosition(randomGenerator, windowSize);
     const auto    velocity           = Vec2(0, 0);
 
-    const auto &item = entityManager.addEntity(EntityTags::Item);
-    item->cTransform = std::make_shared<CTransform>(position, velocity, 0);
-    item->cShape     = std::make_shared<CShape>(renderer, shape);
-    item->cLifespan  = std::make_shared<CLifespan>(lifespan);
+    const auto &item       = entityManager.addEntity(EntityTags::Item);
+    auto        cTransform = std::make_shared<CTransform>(position, velocity, 0);
+    auto        cShape     = std::make_shared<CShape>(renderer, shape);
+    auto        cLifespan  = std::make_shared<CLifespan>(lifespan);
+
+    item->setComponent<CTransform>(cTransform);
+    item->setComponent<CShape>(cShape);
+    item->setComponent<CLifespan>(cLifespan);
 
     bool isValidSpawn = validateSpawnPosition(item, player, entityManager, windowSize);
     int  spawnAttempt = 1;
 
     while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
-      const auto newPosition             = createRandomPosition(randomGenerator, windowSize);
-      item->cTransform->topLeftCornerPos = newPosition;
+      const auto newPosition = createRandomPosition(randomGenerator, windowSize);
+      item->getComponent<CTransform>()->topLeftCornerPos = newPosition;
 
       isValidSpawn = validateSpawnPosition(item, player, entityManager, windowSize);
       spawnAttempt += 1;
