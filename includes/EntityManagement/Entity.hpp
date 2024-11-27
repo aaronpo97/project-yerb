@@ -36,6 +36,7 @@ public:
   template <typename T> std::shared_ptr<T> getComponent() const;
   template <typename T> void               setComponent(std::shared_ptr<T> component);
   template <typename T> void               removeComponent();
+  template <typename T> bool               hasComponent() const;
 };
 
 template <typename T> std::shared_ptr<T> Entity::getComponent() const {
@@ -48,4 +49,7 @@ template <typename T> void Entity::setComponent(std::shared_ptr<T> component) {
 }
 template <typename T> void Entity::removeComponent() {
   std::get<std::shared_ptr<T>>(m_components) = nullptr;
+}
+template <typename T> bool Entity::hasComponent() const {
+  return std::get<std::shared_ptr<T>>(m_components) != nullptr;
 }
