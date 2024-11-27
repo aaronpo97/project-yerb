@@ -56,7 +56,6 @@ void AudioManager::loadSample(const AudioSample sample, const Path &filepath) {
     throw std::runtime_error("Mix_LoadWAV error");
   }
 
-  std::cout << DEFAULT_SAMPLE_VOLUME << std::endl;
   setSampleVolume(sample, sample == AudioSample::BULLET_HIT_01 ? DEFAULT_SAMPLE_VOLUME / 2
                                                                : DEFAULT_SAMPLE_VOLUME);
 }
