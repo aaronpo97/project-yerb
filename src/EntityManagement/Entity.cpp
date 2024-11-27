@@ -1,6 +1,9 @@
 #include "../../includes/EntityManagement/Entity.hpp"
 #include <iostream>
 
+Entity::Entity(const size_t id, const EntityTags tag) :
+    m_id(id), m_tag(tag) {}
+
 bool Entity::isActive() const {
   return m_active;
 }

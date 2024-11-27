@@ -23,8 +23,7 @@ private:
 
   EntityComponents m_components;
 
-  Entity(const size_t id, const EntityTags tag) :
-      m_id(id), m_tag(tag) {}
+  Entity(size_t id, EntityTags tag);
 
 public:
   // private member access functions
@@ -34,14 +33,19 @@ public:
   void       destroy();
   Vec2       getCenterPos() const;
 
-  template <typename T> std::shared_ptr<T> getComponent() const {
-    auto component = std::get<std::shared_ptr<T>>(m_components);
-    return component;
-  }
-  template <typename T> void setComponent(std::shared_ptr<T> component) {
-    std::get<std::shared_ptr<T>>(m_components) = component;
-  }
-  template <typename T> void removeComponent() {
-    std::get<std::shared_ptr<T>>(m_components) = nullptr;
-  }
+  template <typename T> std::shared_ptr<T> getComponent() const;
+  template <typename T> void               setComponent(std::shared_ptr<T> component);
+  template <typename T> void               removeComponent();
 };
+
+template <typename T> std::shared_ptr<T> Entity::getComponent() const {
+  auto component = std::get<std::shared_ptr<T>>(m_components);
+  return component;
+}
+
+template <typename T> void Entity::setComponent(std::shared_ptr<T> component) {
+  std::get<std::shared_ptr<T>>(m_components) = component;
+}
+template <typename T> void Entity::removeComponent() {
+  std::get<std::shared_ptr<T>>(m_components) = nullptr;
+}
