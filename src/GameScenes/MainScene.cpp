@@ -61,23 +61,25 @@ void MainScene::update() {
 }
 
 void MainScene::sDoAction(Action &action) {
-  const ActionState &actionState      = action.getState();
-  AudioSampleQueue  &audioSampleQueue = m_gameEngine->getAudioSampleQueue();
-
   if (m_player == nullptr) {
     SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Player entity is null, cannot process action.");
     return;
   }
 
-  if (m_player->cInput == nullptr) {
+  const ActionState &actionState      = action.getState();
+  AudioSampleQueue  &audioSampleQueue = m_gameEngine->getAudioSampleQueue();
+
+  const auto &cInput = m_player->getComponent<CInput>();
+
+  if (cInput == nullptr) {
     SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Player entity lacks an input component.");
     return;
   }
 
-  bool &forward  = m_player->cInput->forward;
-  bool &backward = m_player->cInput->backward;
-  bool &left     = m_player->cInput->left;
-  bool &right    = m_player->cInput->right;
+  bool &forward  = cInput->forward;
+  bool &backward = cInput->backward;
+  bool &left     = cInput->left;
+  bool &right    = cInput->right;
 
   const bool actionStateStart = actionState == ActionState::START;
 
@@ -154,7 +156,9 @@ void MainScene::renderText() const {
 
   TextHelpers::renderLineOfText(renderer, fontMd, timeText, timeColor, timePos);
 
-  if (m_player->cEffects->hasEffect(EffectTypes::Speed)) {
+  const auto cEffects = m_player->getComponent<CEffects>();
+
+  if (cEffects->hasEffect(EffectTypes::Speed)) {
     constexpr SDL_Color speedBoostColor = {0, 255, 0, 255};
     const std::string   speedBoostText  = "Speed Boost Active!";
     const Vec2          speedBoostPos   = {10, 120};
@@ -162,7 +166,7 @@ void MainScene::renderText() const {
                                   speedBoostPos);
   }
 
-  if (m_player->cEffects->hasEffect(EffectTypes::Slowness)) {
+  if (cEffects->hasEffect(EffectTypes::Slowness)) {
     constexpr SDL_Color slownessColor = {255, 0, 0, 255};
     const std::string   slownessText  = "Slowness Active!";
     const Vec2          slownessPos   = {10, 120};
@@ -176,17 +180,21 @@ void MainScene::sRender() {
   SDL_RenderClear(renderer);
 
   for (const auto &entity : m_entities.getEntities()) {
-    if (entity->cShape == nullptr) {
+
+    const auto &cShape     = entity->getComponent<CShape>();
+    const auto &cTransform = entity->getComponent<CTransform>();
+
+    if (cShape == nullptr) {
       continue;
     }
 
-    SDL_Rect   &rect = entity->cShape->rect;
-    const Vec2 &pos  = entity->cTransform->topLeftCornerPos;
+    SDL_Rect   &rect = cShape->rect;
+    const Vec2 &pos  = cTransform->topLeftCornerPos;
 
     rect.x = static_cast<int>(pos.x);
     rect.y = static_cast<int>(pos.y);
 
-    const auto &[r, g, b, a] = entity->cShape->color;
+    const auto &[r, g, b, a] = cShape->color;
     SDL_SetRenderDrawColor(renderer, r, g, b, a);
     SDL_RenderFillRect(renderer, &rect);
   }
@@ -257,8 +265,9 @@ void MainScene::sSpawner() {
   const SlownessEffectConfig &slownessEffectConfig   = configManager.getSlownessEffectConfig();
   const ItemConfig           &itemConfig             = configManager.getItemConfig();
 
-  const bool hasSpeedBasedEffect = m_player->cEffects->hasEffect(EffectTypes::Speed) ||
-                                   m_player->cEffects->hasEffect(EffectTypes::Slowness);
+  const auto &cEffects = m_player->getComponent<CEffects>();
+  const bool  hasSpeedBasedEffect =
+      cEffects->hasEffect(EffectTypes::Speed) || cEffects->hasEffect(EffectTypes::Slowness);
 
   std::uniform_int_distribution<unsigned int> distribution(0, 100);
 
@@ -302,7 +311,9 @@ void MainScene::sSpawner() {
 }
 
 void MainScene::sEffects() const {
-  const std::vector<Effect> effects = m_player->cEffects->getEffects();
+
+  const auto               &cEffects = m_player->getComponent<CEffects>();
+  const std::vector<Effect> effects  = cEffects->getEffects();
   if (effects.empty()) {
     return;
   }
@@ -314,7 +325,7 @@ void MainScene::sEffects() const {
       return;
     }
 
-    m_player->cEffects->removeEffect(type);
+    cEffects->removeEffect(type);
   }
 }
 
@@ -344,21 +355,31 @@ void MainScene::sLifespan() {
     if (tag == EntityTags::Wall) {
       continue;
     }
-    if (entity->cLifespan == nullptr) {
+
+    const auto &cLifespan = entity->getComponent<CLifespan>();
+
+    const auto &cShape = entity->getComponent<CShape>();
+    if (cLifespan == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_ERROR,
                    "Entity with ID %zu and tag %d lacks a lifespan component.", entity->id(),
                    tag);
       continue;
     }
 
-    const Uint64 currentTime = SDL_GetTicks();
-    const Uint64 elapsedTime = currentTime - entity->cLifespan->birthTime;
-    // Calculate the lifespan percentage, ensuring it's clamped between 0 and 1
-    const float lifespanPercentage =
-        std::min(1.0f, static_cast<float>(elapsedTime) /
-                           static_cast<float>(entity->cLifespan->lifespan));
+    if (cShape == nullptr) {
+      SDL_LogError(SDL_LOG_CATEGORY_ERROR,
+                   "Entity with ID %zu and tag %d lacks a shape component.", entity->id(),
+                   tag);
+      continue;
+    }
 
-    const bool entityExpired = elapsedTime > entity->cLifespan->lifespan;
+    const Uint64 currentTime = SDL_GetTicks();
+    const Uint64 elapsedTime = currentTime - cLifespan->birthTime;
+    // Calculate the lifespan percentage, ensuring it's clamped between 0 and 1
+    const float lifespanPercentage = std::min(
+        1.0f, static_cast<float>(elapsedTime) / static_cast<float>(cLifespan->lifespan));
+
+    const bool entityExpired = elapsedTime > cLifespan->lifespan;
     if (!entityExpired && entity->tag() == EntityTags::Enemy) {
       continue;
     }
@@ -367,7 +388,7 @@ void MainScene::sLifespan() {
       const Uint8     alpha           = static_cast<Uint8>(std::max(
           0.0f, std::min(MAX_COLOR_VALUE, MAX_COLOR_VALUE * (1.0f - lifespanPercentage))));
 
-      SDL_Color &color = entity->cShape->color;
+      SDL_Color &color = cShape->color;
       color            = {.r = color.r, .g = color.g, .b = color.b, .a = alpha};
 
       continue;

@@ -6,11 +6,11 @@
 #include <memory>
 #include <random>
 
+#include "../AssetManagement/AudioSampleQueue.hpp"
 #include "../EntityManagement/Entity.hpp"
 #include "../EntityManagement/EntityManager.hpp"
 #include "../Helpers/Vec2.hpp"
 #include "../SystemManagement/AudioManager.hpp"
-#include "../AssetManagement/AudioSampleQueue.hpp"
 
 namespace CollisionHelpers {
 
@@ -55,8 +55,7 @@ namespace CollisionHelpers::MainScene::Enforce {
                            const Vec2                    &window_size);
 
   void enforceNonPlayerBounds(const std::shared_ptr<Entity> &entity,
-                              const std::bitset<4>          &collides,
-                              const Vec2                    &window_size);
+                              const std::bitset<4>          &collides);
 
   void enforceCollisionWithWall(const std::shared_ptr<Entity> &entity,
                                 const std::shared_ptr<Entity> &wall);
@@ -64,6 +63,4 @@ namespace CollisionHelpers::MainScene::Enforce {
   void enforceEntityEntityCollision(const std::shared_ptr<Entity> &entityA,
                                     const std::shared_ptr<Entity> &entityB);
 
-  void enforceBulletCollision(const std::shared_ptr<Entity> &bullet,
-                              const bool                     bulletCollides);
 } // namespace CollisionHelpers::MainScene::Enforce

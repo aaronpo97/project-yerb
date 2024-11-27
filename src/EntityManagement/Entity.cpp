@@ -1,6 +1,9 @@
 #include "../../includes/EntityManagement/Entity.hpp"
 #include <iostream>
 
+Entity::Entity(const size_t id, const EntityTags tag) :
+    m_id(id), m_tag(tag) {}
+
 bool Entity::isActive() const {
   return m_active;
 }
@@ -18,6 +21,9 @@ void Entity::destroy() {
 }
 
 Vec2 Entity::getCenterPos() const {
+  const std::shared_ptr<CTransform> &cTransform = getComponent<CTransform>();
+  const std::shared_ptr<CShape>     &cShape     = getComponent<CShape>();
+
   if (cTransform == nullptr || cShape == nullptr) {
     SDL_LogError(
         SDL_LOG_CATEGORY_ERROR,

@@ -8,31 +8,29 @@
 enum Boundaries : Uint8 { TOP, BOTTOM, LEFT, RIGHT };
 enum RelativePosition : Uint8 { ABOVE, BELOW, LEFT_OF, RIGHT_OF };
 
-inline bool hasNullComponentPointers(const std::shared_ptr<Entity> &entity) {
-  const bool cTransformIsNullPtr = !entity->cTransform;
-  return cTransformIsNullPtr;
-}
-
 namespace CollisionHelpers {
   std::bitset<4> detectOutOfBounds(const std::shared_ptr<Entity> &entity,
                                    const Vec2                    &window_size) {
-    if (hasNullComponentPointers(entity)) {
+
+    const std::shared_ptr<CTransform> &cTransform = entity->getComponent<CTransform>();
+    const std::shared_ptr<CShape>     &cShape     = entity->getComponent<CShape>();
+
+    if (!cTransform || !cShape) {
       SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
-                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
+                   "Entity with ID %zu and tag %u lacks a transform or shape component.",
                    entity->id(), entity->tag());
-      return std::bitset<4>({});
+
+      return {};
     }
 
-    const std::shared_ptr<CShape> &entityCShape = entity->cShape;
+    const Vec2 &topLeftCorner = cTransform->topLeftCornerPos;
+    const auto  rectHeight    = static_cast<float>(cShape->rect.h);
+    const auto  rectWidth     = static_cast<float>(cShape->rect.w);
 
-    const Vec2 &topLeftCornerPos = entity->cTransform->topLeftCornerPos;
-
-    const bool collidesWithTop = topLeftCornerPos.y <= 0;
-    const bool collidesWithBottom =
-        topLeftCornerPos.y + static_cast<float>(entityCShape->rect.h) >= window_size.y;
-    const bool collidesWithLeft = topLeftCornerPos.x <= 0;
-    const bool collidesWithRight =
-        topLeftCornerPos.x + static_cast<float>(entityCShape->rect.w) >= window_size.x;
+    const bool collidesWithTop    = topLeftCorner.y <= 0;
+    const bool collidesWithBottom = topLeftCorner.y + rectHeight >= window_size.y;
+    const bool collidesWithLeft   = topLeftCorner.x <= 0;
+    const bool collidesWithRight  = topLeftCorner.x + rectWidth >= window_size.x;
 
     std::bitset<4> collidesWithBoundary;
     collidesWithBoundary[TOP]    = collidesWithTop;
@@ -46,25 +44,28 @@ namespace CollisionHelpers {
   Vec2 calculateOverlap(const std::shared_ptr<Entity> &entityA,
                         const std::shared_ptr<Entity> &entityB) {
 
-    if (hasNullComponentPointers(entityA)) {
+    const auto &cShapeA = entityA->getComponent<CShape>();
+    const auto &cShapeB = entityB->getComponent<CShape>();
+
+    if (!cShapeA) {
       SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
-                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
-                   entityA->id(), entityA->tag());
+                   "Entity with ID %zu and tag %u lacks a collision component.", entityA->id(),
+                   entityA->tag());
       return {0, 0};
     }
 
-    if (hasNullComponentPointers(entityB)) {
+    if (!cShapeB) {
       SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
-                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
-                   entityB->id(), entityB->tag());
+                   "Entity with ID %zu and tag %u lacks a collision component.", entityB->id(),
+                   entityB->tag());
       return {0, 0};
     }
 
-    const float halfWidthA  = static_cast<float>(entityA->cShape->rect.w) / 2.0f;
-    const float halfHeightA = static_cast<float>(entityA->cShape->rect.h) / 2.0f;
+    const float halfWidthA  = static_cast<float>(cShapeA->rect.w) / 2.0f;
+    const float halfHeightA = static_cast<float>(cShapeA->rect.h) / 2.0f;
 
-    const float halfWidthB  = static_cast<float>(entityB->cShape->rect.w) / 2.0f;
-    const float halfHeightB = static_cast<float>(entityB->cShape->rect.h) / 2.0f;
+    const float halfWidthB  = static_cast<float>(cShapeB->rect.w) / 2.0f;
+    const float halfHeightB = static_cast<float>(cShapeB->rect.h) / 2.0f;
 
     const auto halfSizeA = Vec2(halfWidthA, halfHeightA);
     const auto halfSizeB = Vec2(halfWidthB, halfHeightB);
@@ -81,44 +82,16 @@ namespace CollisionHelpers {
 
     return overlap;
   }
+
   bool calculateCollisionBetweenEntities(const std::shared_ptr<Entity> &entityA,
                                          const std::shared_ptr<Entity> &entityB) {
-    if (hasNullComponentPointers(entityA)) {
-      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
-                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
-                   entityA->id(), entityA->tag());
-      return false;
-    }
-
-    if (hasNullComponentPointers(entityB)) {
-      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
-                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
-                   entityB->id(), entityB->tag());
-      return false;
-    }
-
-    const Vec2 overlap = calculateOverlap(entityA, entityB);
-
+    const Vec2 overlap           = calculateOverlap(entityA, entityB);
     const bool collisionDetected = overlap.x > 0 && overlap.y > 0;
-
     return collisionDetected;
   }
+
   std::bitset<4> getPositionRelativeToEntity(const std::shared_ptr<Entity> &entityA,
                                              const std::shared_ptr<Entity> &entityB) {
-    if (hasNullComponentPointers(entityA)) {
-      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
-                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
-                   entityA->id(), entityA->tag());
-      return std::bitset<4>({});
-    }
-
-    if (hasNullComponentPointers(entityB)) {
-      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
-                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
-                   entityB->id(), entityB->tag());
-      return std::bitset<4>({});
-    }
-
     const Vec2 &centerA = entityA->getCenterPos();
     const Vec2 &centerB = entityB->getCenterPos();
 
@@ -137,14 +110,17 @@ namespace CollisionHelpers::MainScene::Enforce {
   void enforcePlayerBounds(const std::shared_ptr<Entity> &entity,
                            const std::bitset<4>          &collides,
                            const Vec2                    &window_size) {
-    if (hasNullComponentPointers(entity)) {
+
+    const std::shared_ptr<CShape>     &cShape     = entity->getComponent<CShape>();
+    const std::shared_ptr<CTransform> &cTransform = entity->getComponent<CTransform>();
+
+    if (!cShape || !cTransform) {
       SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
-                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
+                   "Entity with ID %zu and tag %u lacks a transform or shape component.",
                    entity->id(), entity->tag());
-      return;
-    }
-    const std::shared_ptr<CShape> &cShape             = entity->cShape;
-    Vec2                          &leftCornerPosition = entity->cTransform->topLeftCornerPos;
+    };
+
+    Vec2 &leftCornerPosition = cTransform->topLeftCornerPos;
 
     if (collides[TOP]) {
       leftCornerPosition.y = 0;
@@ -161,20 +137,10 @@ namespace CollisionHelpers::MainScene::Enforce {
   }
 
   void enforceNonPlayerBounds(const std::shared_ptr<Entity> &entity,
-                              const std::bitset<4>          &collides,
-                              const Vec2                    &window_size) {
-
-    if (hasNullComponentPointers(entity)) {
-      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
-                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
-                   entity->id(), entity->tag());
-    }
+                              const std::bitset<4>          &collides) {
     if (entity->tag() == EntityTags::Player) {
       return;
     }
-    const std::shared_ptr<CShape> &cShape             = entity->cShape;
-    Vec2                          &leftCornerPosition = entity->cTransform->topLeftCornerPos;
-    Vec2                          &velocity           = entity->cTransform->velocity;
 
     if (collides.any()) {
       entity->destroy();
@@ -184,19 +150,8 @@ namespace CollisionHelpers::MainScene::Enforce {
   void enforceCollisionWithWall(const std::shared_ptr<Entity> &entity,
                                 const std::shared_ptr<Entity> &wall) {
 
-    if (hasNullComponentPointers(entity)) {
-      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
-                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
-                   entity->id(), entity->tag());
-      return;
-    }
-
-    if (hasNullComponentPointers(wall)) {
-      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
-                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
-                   wall->id(), wall->tag());
-      return;
-    }
+    const auto &cTransform     = entity->getComponent<CTransform>();
+    const auto &cBounceTracker = entity->getComponent<CBounceTracker>();
 
     const Vec2 &overlap = calculateOverlap(entity, wall);
 
@@ -210,49 +165,34 @@ namespace CollisionHelpers::MainScene::Enforce {
     const bool playerRightOfWall = positionRelativeToWall[RIGHT_OF];
 
     if (mustResolveCollisionVertically && playerAboveWall) {
-      entity->cTransform->topLeftCornerPos.y -= overlap.y;
-      entity->cTransform->velocity.y = -entity->cTransform->velocity.y;
+      cTransform->topLeftCornerPos.y -= overlap.y;
+      cTransform->velocity.y = -cTransform->velocity.y;
     }
 
     if (mustResolveCollisionVertically && playerBelowWall) {
-      entity->cTransform->topLeftCornerPos.y += overlap.y;
-      entity->cTransform->velocity.y = -entity->cTransform->velocity.y;
+      cTransform->topLeftCornerPos.y += overlap.y;
+      cTransform->velocity.y = -cTransform->velocity.y;
     }
 
     if (mustResolveCollisionHorizontally && playerLeftOfWall) {
-      entity->cTransform->topLeftCornerPos.x -= overlap.x;
-      entity->cTransform->velocity.x = -entity->cTransform->velocity.x;
+      cTransform->topLeftCornerPos.x -= overlap.x;
+      cTransform->velocity.x = -cTransform->velocity.x;
     }
 
     if (mustResolveCollisionHorizontally && playerRightOfWall) {
-      entity->cTransform->topLeftCornerPos.x += overlap.x;
-      entity->cTransform->velocity.x = -entity->cTransform->velocity.x;
+      cTransform->topLeftCornerPos.x += overlap.x;
+      cTransform->velocity.x = -cTransform->velocity.x;
     }
 
-    if (entity->cBounceTracker == nullptr) {
-      return;
+    if (cBounceTracker) {
+      cBounceTracker->addBounce();
     }
-
-    entity->cBounceTracker->addBounce();
   }
 
   void enforceEntityEntityCollision(const std::shared_ptr<Entity> &entityA,
                                     const std::shared_ptr<Entity> &entityB) {
-    if (hasNullComponentPointers(entityA)) {
-      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
-                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
-                   entityA->id(), entityA->tag());
-
-      return;
-    }
-
-    if (hasNullComponentPointers(entityB)) {
-      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
-                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
-                   entityB->id(), entityB->tag());
-
-      return;
-    }
+    const auto &cTransformA = entityA->getComponent<CTransform>();
+    const auto &cTransformB = entityB->getComponent<CTransform>();
 
     const Vec2 &overlap = calculateOverlap(entityA, entityB);
 
@@ -274,60 +214,44 @@ namespace CollisionHelpers::MainScene::Enforce {
     const bool entityBRightOfEntityA = entityBRelativePosition[RIGHT_OF];
 
     if (mustResolveCollisionVertically && entityAAboveEntityB) {
-      entityA->cTransform->topLeftCornerPos.y -= overlap.y;
-      entityA->cTransform->velocity.y = -entityA->cTransform->velocity.y;
+      cTransformA->topLeftCornerPos.y -= overlap.y;
+      cTransformA->velocity.y = -cTransformA->velocity.y;
     }
 
     if (mustResolveCollisionVertically && entityABelowEntityB) {
-      entityA->cTransform->topLeftCornerPos.y += overlap.y;
-      entityA->cTransform->velocity.y = -entityA->cTransform->velocity.y;
+      cTransformA->topLeftCornerPos.y += overlap.y;
+      cTransformA->velocity.y = -cTransformA->velocity.y;
     }
 
     if (mustResolveCollisionHorizontally && entityALeftOfEntityB) {
-      entityA->cTransform->topLeftCornerPos.x -= overlap.x;
-      entityA->cTransform->velocity.x = -entityA->cTransform->velocity.x;
+      cTransformA->topLeftCornerPos.x -= overlap.x;
+      cTransformA->velocity.x = -cTransformA->velocity.x;
     }
 
     if (mustResolveCollisionHorizontally && entityARightOfEntityB) {
-      entityA->cTransform->topLeftCornerPos.x += overlap.x;
-      entityA->cTransform->velocity.x = -entityA->cTransform->velocity.x;
+      cTransformA->topLeftCornerPos.x += overlap.x;
+      cTransformA->velocity.x = -cTransformA->velocity.x;
     }
 
     if (mustResolveCollisionVertically && entityBAboveEntityA) {
-      entityB->cTransform->topLeftCornerPos.y -= overlap.y;
-      entityB->cTransform->velocity.y = -entityB->cTransform->velocity.y;
+      cTransformB->topLeftCornerPos.y -= overlap.y;
+      cTransformB->velocity.y = -cTransformB->velocity.y;
     }
 
     if (mustResolveCollisionVertically && entityBBelowEntityA) {
-      entityB->cTransform->topLeftCornerPos.y += overlap.y;
-      entityB->cTransform->velocity.y = -entityB->cTransform->velocity.y;
+      cTransformB->topLeftCornerPos.y += overlap.y;
+      cTransformB->velocity.y = -cTransformB->velocity.y;
     }
 
     if (mustResolveCollisionHorizontally && entityBLeftOfEntityA) {
-      entityB->cTransform->topLeftCornerPos.x -= overlap.x;
-      entityB->cTransform->velocity.x = -entityB->cTransform->velocity.x;
+      cTransformB->topLeftCornerPos.x -= overlap.x;
+      cTransformB->velocity.x = -cTransformB->velocity.x;
     }
 
     if (mustResolveCollisionHorizontally && entityBRightOfEntityA) {
-      entityB->cTransform->topLeftCornerPos.x += overlap.x;
-      entityB->cTransform->velocity.x = -entityB->cTransform->velocity.x;
+      cTransformB->topLeftCornerPos.x += overlap.x;
+      cTransformB->velocity.x = -cTransformB->velocity.x;
     }
-  }
-
-  void enforceBulletCollision(const std::shared_ptr<Entity> &bullet,
-                              const bool                     bulletCollides) {
-    if (hasNullComponentPointers(bullet)) {
-      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
-                   "Entity with ID %zu and tag %u lacks a transform or collision component.",
-                   bullet->id(), bullet->tag());
-      return;
-    }
-
-    if (!bulletCollides) {
-      return;
-    }
-
-    bullet->destroy();
   }
 
 } // namespace CollisionHelpers::MainScene::Enforce
@@ -337,7 +261,7 @@ namespace CollisionHelpers::MainScene {
     const auto tag = entity->tag();
     if (tag == EntityTags::SpeedBoost) {
       const std::bitset<4> speedBoostCollides = detectOutOfBounds(entity, windowSize);
-      Enforce::enforceNonPlayerBounds(entity, speedBoostCollides, windowSize);
+      Enforce::enforceNonPlayerBounds(entity, speedBoostCollides);
     }
 
     if (tag == EntityTags::Player) {
@@ -347,21 +271,21 @@ namespace CollisionHelpers::MainScene {
 
     if (tag == EntityTags::Enemy) {
       const std::bitset<4> enemyCollides = detectOutOfBounds(entity, windowSize);
-      Enforce::enforceNonPlayerBounds(entity, enemyCollides, windowSize);
+      Enforce::enforceNonPlayerBounds(entity, enemyCollides);
     }
 
     if (tag == EntityTags::SlownessDebuff) {
       const std::bitset<4> slownessCollides = detectOutOfBounds(entity, windowSize);
-      Enforce::enforceNonPlayerBounds(entity, slownessCollides, windowSize);
+      Enforce::enforceNonPlayerBounds(entity, slownessCollides);
     }
 
     if (tag == EntityTags::Bullet) {
       const std::bitset<4> bulletCollides = detectOutOfBounds(entity, windowSize);
-      Enforce::enforceBulletCollision(entity, bulletCollides.any());
+      Enforce::enforceNonPlayerBounds(entity, bulletCollides);
     }
     if (tag == EntityTags::Item) {
       const std::bitset<4> itemCollides = detectOutOfBounds(entity, windowSize);
-      Enforce::enforceNonPlayerBounds(entity, itemCollides, windowSize);
+      Enforce::enforceNonPlayerBounds(entity, itemCollides);
     }
   }
 
@@ -420,11 +344,13 @@ namespace CollisionHelpers::MainScene {
       AudioSample nextSample = AudioSample::BULLET_HIT_02;
       args.audioSampleManager.queueSample(nextSample, AudioSamplePriority::STANDARD);
 
-      if (entity->cBounceTracker == nullptr) {
+      const auto &cBounceTracker = entity->getComponent<CBounceTracker>();
+
+      if (!cBounceTracker) {
         entity->destroy();
         return;
       }
-      const int bounces = entity->cBounceTracker->getBounces();
+      const int bounces = cBounceTracker->getBounces();
       setScore(5 * (bounces + 1) + m_score);
       otherEntity->destroy();
       entity->destroy();
@@ -455,8 +381,8 @@ namespace CollisionHelpers::MainScene {
       otherEntity->destroy();
       decrementLives();
 
-      const std::shared_ptr<CTransform> &cTransform = entity->cTransform;
-      const std::shared_ptr<CEffects>   &cEffects   = entity->cEffects;
+      const std::shared_ptr<CTransform> &cTransform = entity->getComponent<CTransform>();
+      const std::shared_ptr<CEffects>   &cEffects   = entity->getComponent<CEffects>();
       cTransform->topLeftCornerPos                  = {windowSize.x / 2, windowSize.y / 2};
 
       constexpr float    REMOVAL_RADIUS   = 150.0f;
@@ -473,7 +399,9 @@ namespace CollisionHelpers::MainScene {
     if (tag == EntityTags::Player && otherTag == EntityTags::SlownessDebuff) {
       const Uint64 startTime = SDL_GetTicks64();
       const Uint64 duration  = randomSlownessDuration(m_randomGenerator);
-      entity->cEffects->addEffect(
+
+      const auto &cEffects = entity->getComponent<CEffects>();
+      cEffects->addEffect(
           {.startTime = startTime, .duration = duration, .type = EffectTypes::Slowness});
 
       EntityVector        effectsToCheck;
@@ -503,7 +431,9 @@ namespace CollisionHelpers::MainScene {
     if (tag == EntityTags::Player && otherTag == EntityTags::SpeedBoost) {
       const Uint64 startTime = SDL_GetTicks64();
       const Uint64 duration  = randomSpeedBoostDuration(m_randomGenerator);
-      entity->cEffects->addEffect(
+      const auto  &cEffects  = entity->getComponent<CEffects>();
+
+      cEffects->addEffect(
           {.startTime = startTime, .duration = duration, .type = EffectTypes::Speed});
 
       const AudioSample nextSample = AudioSample::SPEED_BOOST;
@@ -523,7 +453,8 @@ namespace CollisionHelpers::MainScene {
       // set the lifespan of the speed boost to 10% of previous value
       for (const auto &speedBoost : speedBoosts) {
         constexpr float MULTIPLIER = 0.1f;
-        Uint64         &lifespan   = speedBoost->cLifespan->lifespan;
+        const auto     &cLifespan  = speedBoost->getComponent<CLifespan>();
+        Uint64         &lifespan   = cLifespan->lifespan;
 
         lifespan = static_cast<Uint64>(std::round(static_cast<float>(lifespan) * MULTIPLIER));
       }

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <SDL2/SDL.h>
-#include <iostream>
 #include <vector>
 
 #include "../Configuration/Config.hpp"
@@ -9,26 +8,24 @@
 
 class CTransform {
 public:
-  Vec2  topLeftCornerPos = {0, 0};
-  Vec2  velocity         = {0, 0};
-  float angle            = 0;
+  Vec2 topLeftCornerPos = {0, 0};
+  Vec2 velocity         = {0, 0};
 
-  CTransform(const Vec2 &position, const Vec2 &velocity, const float angle) :
-      topLeftCornerPos(position), velocity(velocity), angle(angle) {}
+  CTransform(const Vec2 &position, const Vec2 &velocity) :
+      topLeftCornerPos(position), velocity(velocity) {}
 
   CTransform() = default;
 };
 
 class CShape {
-private:
   SDL_Renderer *renderer;
 
 public:
   SDL_Rect  rect;
   SDL_Color color;
 
-  CShape(SDL_Renderer *renderer, ShapeConfig config) :
-      renderer(renderer) {
+  CShape(SDL_Renderer *renderer, const ShapeConfig &config) :
+      renderer(renderer), rect(), color() {
 
     if (renderer == nullptr) {
       SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
@@ -36,12 +33,11 @@ public:
       throw std::runtime_error("CShape entity initialization failed: Renderer is null.");
     }
 
-    rect.h = config.height;
-    rect.w = config.width;
+    rect.h = static_cast<int>(config.height);
+    rect.w = static_cast<int>(config.width);
+    color  = config.color;
 
-    color = {config.color.r, config.color.g, config.color.b, config.color.a};
     SDL_SetRenderDrawColor(renderer, config.color.r, config.color.g, config.color.b, 255);
-
     SDL_RenderFillRect(renderer, &rect);
   }
 };
@@ -53,17 +49,17 @@ public:
   bool left     = false;
   bool right    = false;
 
-  CInput() {}
+  CInput() = default;
 };
 
 class CLifespan {
 public:
   Uint64 birthTime;
-  Uint64 lifespan;
+  Uint64 lifespan = 0;
 
   CLifespan() :
-      birthTime(SDL_GetTicks64()), lifespan(0) {}
-  CLifespan(Uint64 lifespan) :
+      birthTime(SDL_GetTicks64()) {}
+  explicit CLifespan(const Uint64 lifespan) :
       birthTime(SDL_GetTicks64()), lifespan(lifespan) {}
 };
 
@@ -79,11 +75,11 @@ class CEffects {
   std::vector<Effect> effects;
 
 public:
-       CEffects() {}
+  CEffects() = default;
+
   void addEffect(const Effect &effect) {
-    // do not add the effect if it already exists
-    for (const auto &existingEffect : effects) {
-      if (existingEffect.type == effect.type) {
+    for (const auto &[startTime, duration, type] : effects) {
+      if (type == effect.type) {
         return;
       }
     }
@@ -96,13 +92,12 @@ public:
   }
 
   void removeEffect(const EffectTypes type) {
-    effects.erase(std::remove_if(effects.begin(), effects.end(),
-                                 [type](const Effect &effect) { return effect.type == type; }),
-                  effects.end());
+    std::erase_if(effects,
+                  [type](const Effect &effect) -> bool { return effect.type == type; });
   }
 
-  const bool hasEffect(const EffectTypes type) const {
-    return std::find_if(effects.begin(), effects.end(), [type](const Effect &effect) {
+  bool hasEffect(const EffectTypes type) const {
+    return std::ranges::find_if(effects, [type](const Effect &effect) -> bool {
              return effect.type == type;
            }) != effects.end();
   }
