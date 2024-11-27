@@ -79,20 +79,20 @@ namespace SpawnHelpers::MainScene {
     const PlayerConfig &playerConfig = configManager.getPlayerConfig();
     const GameConfig   &gameConfig   = configManager.getGameConfig();
 
-    std::shared_ptr<Entity> player = entityManager.addEntity(EntityTags::Player);
-
     const Vec2 &windowSize     = gameConfig.windowSize;
     const auto  playerHeight   = static_cast<float>(playerConfig.shape.height);
     const auto  playerWidth    = static_cast<float>(playerConfig.shape.width);
     const Vec2  centerPosition = windowSize / 2 - Vec2(playerWidth / 2, playerHeight / 2);
+
     const Vec2 &playerPosition = centerPosition;
     const Vec2  playerVelocity = {0, 0};
 
     const auto cShape     = std::make_shared<CShape>(renderer, playerConfig.shape);
-    const auto cTransform = std::make_shared<CTransform>(playerPosition, playerVelocity, 0);
+    const auto cTransform = std::make_shared<CTransform>(playerPosition, playerVelocity);
     const auto cInput     = std::make_shared<CInput>();
     const auto cEffects   = std::make_shared<CEffects>();
 
+    std::shared_ptr<Entity> player = entityManager.addEntity(EntityTags::Player);
     player->setComponent(cTransform);
     player->setComponent(cShape);
     player->setComponent(cInput);
@@ -117,7 +117,7 @@ namespace SpawnHelpers::MainScene {
     const Vec2 velocity = createValidVelocity(randomGenerator);
     const Vec2 position = createRandomPosition(randomGenerator, windowSize);
 
-    const auto cTransform = std::make_shared<CTransform>(position, velocity, 0);
+    const auto cTransform = std::make_shared<CTransform>(position, velocity);
     const auto cShape     = std::make_shared<CShape>(renderer, enemyConfig.shape);
     const auto cLifespan  = std::make_shared<CLifespan>(enemyConfig.lifespan);
 
@@ -157,7 +157,7 @@ namespace SpawnHelpers::MainScene {
     const Vec2 velocity = createValidVelocity(randomGenerator);
     const Vec2 position = createRandomPosition(randomGenerator, windowSize);
 
-    const auto cTransform = std::make_shared<CTransform>(position, velocity, 0);
+    const auto cTransform = std::make_shared<CTransform>(position, velocity);
     const auto cShape     = std::make_shared<CShape>(renderer, speedEffectConfig.shape);
     const auto cLifespan  = std::make_shared<CLifespan>(speedEffectConfig.lifespan);
 
@@ -198,7 +198,7 @@ namespace SpawnHelpers::MainScene {
     const auto velocity = createValidVelocity(randomGenerator);
     const auto position = createRandomPosition(randomGenerator, windowSize);
 
-    const auto cTransform = std::make_shared<CTransform>(position, velocity, 0);
+    const auto cTransform = std::make_shared<CTransform>(position, velocity);
     const auto cShape     = std::make_shared<CShape>(renderer, slownessEffectConfig.shape);
     const auto cLifespan  = std::make_shared<CLifespan>(slownessEffectConfig.lifespan);
 
@@ -337,7 +337,7 @@ namespace SpawnHelpers::MainScene {
     bulletPos.x = playerCenter.x + direction.x * spawnOffset - bulletHalfWidth;
     bulletPos.y = playerCenter.y + direction.y * spawnOffset - bulletHalfHeight;
 
-    const auto cTransform     = std::make_shared<CTransform>(bulletPos, bulletVelocity, 0);
+    const auto cTransform     = std::make_shared<CTransform>(bulletPos, bulletVelocity);
     const auto cLifespan      = std::make_shared<CLifespan>(lifespan);
     const auto cBounceTracker = std::make_shared<CBounceTracker>();
     const auto cShape         = std::make_shared<CShape>(
@@ -371,7 +371,7 @@ namespace SpawnHelpers::MainScene {
 
     const auto position   = createRandomPosition(randomGenerator, windowSize);
     const auto velocity   = Vec2(0, 0);
-    const auto cTransform = std::make_shared<CTransform>(position, velocity, 0);
+    const auto cTransform = std::make_shared<CTransform>(position, velocity);
     const auto cShape     = std::make_shared<CShape>(renderer, shape);
     const auto cLifespan  = std::make_shared<CLifespan>(lifespan);
 
