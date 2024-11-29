@@ -27,12 +27,15 @@ protected:
   void update();
 
   static void                           mainLoop(void *arg);
-  void                                  cleanup();
+  static void                           cleanup();
+
   void                                  sUserInput();
+
   static std::unique_ptr<ConfigManager> createConfigManager(const Path &configPath);
+  static std::unique_ptr<AudioManager>  createAudioManager();
+  
   std::unique_ptr<VideoManager>         createVideoManager();
   std::unique_ptr<FontManager>          createFontManager();
-  static std::unique_ptr<AudioManager>  createAudioManager();
   std::unique_ptr<AudioSampleQueue>     initializeAudioSampleQueue();
 
 public:
