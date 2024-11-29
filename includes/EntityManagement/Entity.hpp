@@ -40,8 +40,7 @@ public:
   template <typename ComponentType> bool hasComponent() const;
 };
 
-template <typename ComponentType>
-std::shared_ptr<ComponentType> Entity::getComponent() const {
+template <typename ComponentType> std::shared_ptr<ComponentType> Entity::getComponent() const {
   auto component = std::get<std::shared_ptr<ComponentType>>(m_components);
   return component;
 }

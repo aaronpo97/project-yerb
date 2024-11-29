@@ -19,9 +19,9 @@ protected:
 
 public:
   explicit Scene(GameEngine *gameEngine) :
-      m_gameEngine(gameEngine){};
+      m_gameEngine(gameEngine) {};
 
-  virtual ~    Scene()                   = default;
+  virtual ~Scene()                       = default;
   virtual void update()                  = 0;
   virtual void onEnd()                   = 0;
   virtual void sRender()                 = 0;

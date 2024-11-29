@@ -26,21 +26,21 @@ protected:
 
   void update();
 
-  static void                           mainLoop(void *arg);
-  static void                           cleanup();
+  static void mainLoop(void *arg);
+  static void cleanup();
 
-  void                                  sUserInput();
+  void sUserInput();
 
   static std::unique_ptr<ConfigManager> createConfigManager(const Path &configPath);
   static std::unique_ptr<AudioManager>  createAudioManager();
-  
-  std::unique_ptr<VideoManager>         createVideoManager();
-  std::unique_ptr<FontManager>          createFontManager();
-  std::unique_ptr<AudioSampleQueue>     initializeAudioSampleQueue();
+
+  std::unique_ptr<VideoManager>     createVideoManager();
+  std::unique_ptr<FontManager>      createFontManager();
+  std::unique_ptr<AudioSampleQueue> initializeAudioSampleQueue();
 
 public:
-       GameEngine();
-  ~    GameEngine();
+  GameEngine();
+  ~GameEngine();
   void quit();
   bool isRunning() const;
   void loadScene(const std::string &sceneName, const std::shared_ptr<Scene> &scene);

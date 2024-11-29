@@ -14,10 +14,10 @@ private:
 
 public:
   explicit MenuScene(GameEngine *gameEngine);
-  void     update() override;
-  void     onEnd() override;
-  void     sRender() override;
-  void     sDoAction(Action &action) override;
-  void     sAudio() override;
-  void     onSceneWindowResize() override{};
+  void update() override;
+  void onEnd() override;
+  void sRender() override;
+  void sDoAction(Action &action) override;
+  void sAudio() override;
+  void onSceneWindowResize() override {};
 };
