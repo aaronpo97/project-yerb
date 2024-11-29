@@ -33,23 +33,27 @@ public:
   void       destroy();
   Vec2       getCenterPos() const;
 
-  template <typename T> std::shared_ptr<T> getComponent() const;
-  template <typename T> void               setComponent(std::shared_ptr<T> component);
-  template <typename T> void               removeComponent();
-  template <typename T> bool               hasComponent() const;
+  template <typename ComponentType> std::shared_ptr<ComponentType> getComponent() const;
+  template <typename ComponentType>
+  void setComponent(std::shared_ptr<ComponentType> component);
+  template <typename ComponentType> void removeComponent();
+  template <typename ComponentType> bool hasComponent() const;
 };
 
-template <typename T> std::shared_ptr<T> Entity::getComponent() const {
-  auto component = std::get<std::shared_ptr<T>>(m_components);
+template <typename ComponentType> std::shared_ptr<ComponentType> Entity::getComponent() const {
+  auto component = std::get<std::shared_ptr<ComponentType>>(m_components);
   return component;
 }
 
-template <typename T> void Entity::setComponent(std::shared_ptr<T> component) {
-  std::get<std::shared_ptr<T>>(m_components) = component;
+template <typename ComponentType>
+void Entity::setComponent(std::shared_ptr<ComponentType> component) {
+  std::get<std::shared_ptr<ComponentType>>(m_components) = component;
 }
-template <typename T> void Entity::removeComponent() {
-  std::get<std::shared_ptr<T>>(m_components) = nullptr;
+
+template <typename ComponentType> void Entity::removeComponent() {
+  std::get<std::shared_ptr<ComponentType>>(m_components) = nullptr;
 }
-template <typename T> bool Entity::hasComponent() const {
-  return std::get<std::shared_ptr<T>>(m_components) != nullptr;
+
+template <typename ComponentType> bool Entity::hasComponent() const {
+  return std::get<std::shared_ptr<ComponentType>>(m_components) != nullptr;
 }
