@@ -180,7 +180,6 @@ void MainScene::sRender() {
   SDL_RenderClear(renderer);
 
   for (const auto &entity : m_entities.getEntities()) {
-
     const auto &cShape     = entity->getComponent<CShape>();
     const auto &cTransform = entity->getComponent<CTransform>();
 
@@ -193,6 +192,23 @@ void MainScene::sRender() {
 
     rect.x = static_cast<int>(pos.x);
     rect.y = static_cast<int>(pos.y);
+
+    auto imageManager = m_gameEngine->getImageManager();
+
+    SDL_Surface *surface = ImageManager::getImage(ImageName::EXAMPLE);
+    if (surface == nullptr) {
+      SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to load image.");
+
+      continue;
+    }
+
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    if (texture != nullptr) {
+      SDL_FreeSurface(surface);
+      SDL_RenderCopy(renderer, texture, nullptr, &rect);
+      SDL_DestroyTexture(texture);
+      continue;
+    }
 
     const auto &[r, g, b, a] = cShape->color;
     SDL_SetRenderDrawColor(renderer, r, g, b, a);

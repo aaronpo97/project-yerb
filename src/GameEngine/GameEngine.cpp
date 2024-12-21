@@ -172,6 +172,14 @@ VideoManager &GameEngine::getVideoManager() const {
   return *m_videoManager;
 }
 
+ImageManager &GameEngine::getImageManager() const {
+  if (!m_imageManager) {
+    SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "ImageManager not initialized");
+    throw std::runtime_error("ImageManager not initialized");
+  }
+  return *m_imageManager;
+}
+
 void GameEngine::sUserInput() {
   SDL_Event                    event;
   const std::shared_ptr<Scene> activeScene = m_scenes[m_currentSceneName];

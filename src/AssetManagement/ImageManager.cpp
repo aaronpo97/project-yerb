@@ -2,33 +2,28 @@
 #include <SDL2/SDL.h>
 #include <SDL_image.h>
 #include <filesystem>
+#include <iostream>
 
-void ImageManager::loadImage(const std::filesystem::path &path, const ImageName name) {
-  SDL_Surface *img = IMG_Load(path.c_str());
-  m_images[name]   = img;
+SDL_Surface *ImageManager::loadImage(const ImageName name) {
+  const std::filesystem::path &path = imagePaths.at(name);
+  SDL_Surface                 *img  = IMG_Load(path.c_str());
+
+  if (img == nullptr) {
+    std::cout << "Unable to load image! SDL_image Error:\n" << path.c_str() << IMG_GetError();
+    return nullptr;
+  }
+
+  return img;
 }
 
 ImageManager::ImageManager() {
   if (IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG) == -1) {
-    printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
-    // Handle error
+    std::cout << "SDL_image could not initialize! SDL_image Error: %s\n" << IMG_GetError();
   }
 
   SDL_Log("ImageManager created");
-  loadImage("assets/images/stuff.jpg", ImageName::EXAMPLE);
 }
-ImageManager::~ImageManager() {
-  for (auto &[name, image] : m_images) {
-    if (image == nullptr) {
-      return;
-    }
-    SDL_FreeSurface(image);
-    image = nullptr;
-  }
-}
+
 SDL_Surface *ImageManager::getImage(const ImageName name) {
-  if (!m_images.contains(name)) {
-    return nullptr;
-  }
-  return m_images[name];
+  return loadImage(name);
 }

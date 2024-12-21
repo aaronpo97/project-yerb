@@ -1,14 +1,17 @@
 #pragma once
 #include <SDL2/SDL.h>
+#include <filesystem>
 #include <unordered_map>
-enum class ImageName { DEFAULT, EXAMPLE };
-class ImageManager {
 
-  std::unordered_map<ImageName, SDL_Surface *> m_images = {{ImageName::DEFAULT, nullptr}};
-  void loadImage(const std::filesystem::path &path, const ImageName name);
+enum class ImageName { DEFAULT, EXAMPLE };
+const std::unordered_map<ImageName, std::filesystem::path> imagePaths = {
+    {ImageName::DEFAULT, "assets/images/default.jpg"},
+    {ImageName::EXAMPLE, "assets/images/example.jpg"}};
+class ImageManager {
 
 public:
   explicit ImageManager();
-  ~ImageManager();
-  SDL_Surface *getImage(ImageName name);
+
+  static SDL_Surface *loadImage(ImageName name);
+  static SDL_Surface *getImage(ImageName name);
 };
