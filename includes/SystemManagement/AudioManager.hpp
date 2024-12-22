@@ -4,6 +4,7 @@
 #include <SDL_mixer.h>
 #include <filesystem>
 #include <map>
+#include <unordered_map>
 
 typedef std::filesystem::path Path;
 

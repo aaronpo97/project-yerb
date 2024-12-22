@@ -1,4 +1,5 @@
 dist-macos
+dist
 dist-web
 .vscode/
 .DS_Store

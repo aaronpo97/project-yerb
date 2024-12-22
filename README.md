@@ -5,7 +5,7 @@ Project Yerb is a custom game/game engine designed with an _Entity-Component-Sys
 
 ## Features
 
-- **Cross-platform** - Current CMake configuration supports compilation for both macOS, and for the Web using Emscripten
+- **Cross-platform** - Current CMake configuration supports compilation for macOS, Linux (Fedora) and for the Web using Emscripten
   and WebAssembly.
 - **Modular ECS architecture** - Scalable with independent systems for input handling, rendering, and more.
 - **JSON-based configuration** - Uses the [nlohmann/json](https://github.com/nlohmann/json) library for loading game
@@ -42,16 +42,32 @@ cd dist-web/build
 emrun --no_browser --port 3333 .
 ```
 
-### macOS
+### macOS/Linux
 
-To build for macOS, run the following commands:
+To build for macOS or Linux, run the following commands:
 
 ```bash
-mkdir dist-macos
-cd dist-macos
+mkdir dist
+cd dist
 cmake ..
 make 2>&1 | tee build.log
 ```
+
+#### Running application
+
+Run the following commands:
+
+```
+cd build
+./SDL_GAME
+```
+
+I am currently having an issue with audio in Fedora Linux. If this happens, you will unfortunately have to disable audio while running the appliation. To do this, you may run:
+
+```bash
+SDL_AUDIODRIVER=dummy SDL_DEBUG=1 ./SDL_GAME
+```
+
 
 ## Usage
 
