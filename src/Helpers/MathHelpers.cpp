@@ -15,7 +15,7 @@ namespace MathHelpers {
    * @brief Pythagorean theorem, returns actual value.
    */
   float pythagoras(const float a, const float b) {
-    const float c = sqrt(a * a + b * b);
+    const float c = std::sqrt(a * a + b * b);
     return c;
   }
   /**

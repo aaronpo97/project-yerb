@@ -217,8 +217,9 @@ void MainScene::sCollision() {
                  .score              = m_score,
                  .setScore           = [this](const int score) -> void { setScore(score); },
                  .decrementLives     = [this]() -> void { decrementLives(); },
+                 .audioSampleManager = audioSampleManager,
                  .windowSize         = windowSize,
-                 .audioSampleManager = audioSampleManager};
+                 };
 
   for (auto &entity : m_entities.getEntities()) {
     handleEntityBounds(entity, windowSize);
