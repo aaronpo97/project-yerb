@@ -195,20 +195,20 @@ void MainScene::sRender() {
 
     auto imageManager = m_gameEngine->getImageManager();
 
-    SDL_Surface *surface = ImageManager::getImage(ImageName::EXAMPLE);
-    if (surface == nullptr) {
-      SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to load image.");
+    // SDL_Surface *surface = ImageManager::getImage(ImageName::EXAMPLE);
+    // if (surface == nullptr) {
+    //   SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to load image.");
 
-      continue;
-    }
+    //   continue;
+    // }
 
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-    if (texture != nullptr) {
-      SDL_FreeSurface(surface);
-      SDL_RenderCopy(renderer, texture, nullptr, &rect);
-      SDL_DestroyTexture(texture);
-      continue;
-    }
+    // SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    // if (texture != nullptr) {
+    //   SDL_FreeSurface(surface);
+    //   SDL_RenderCopy(renderer, texture, nullptr, &rect);
+    //   SDL_DestroyTexture(texture);
+    //   continue;
+    // }
 
     const auto &[r, g, b, a] = cShape->color;
     SDL_SetRenderDrawColor(renderer, r, g, b, a);
@@ -235,7 +235,7 @@ void MainScene::sCollision() {
                  .decrementLives     = [this]() -> void { decrementLives(); },
                  .audioSampleManager = audioSampleManager,
                  .windowSize         = windowSize,
-                 };
+  };
 
   for (auto &entity : m_entities.getEntities()) {
     handleEntityBounds(entity, windowSize);
