@@ -195,20 +195,21 @@ void MainScene::sRender() {
 
     auto imageManager = m_gameEngine->getImageManager();
 
-    // SDL_Surface *surface = ImageManager::getImage(ImageName::EXAMPLE);
-    // if (surface == nullptr) {
-    //   SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to load image.");
-
-    //   continue;
-    // }
-
-    // SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-    // if (texture != nullptr) {
-    //   SDL_FreeSurface(surface);
-    //   SDL_RenderCopy(renderer, texture, nullptr, &rect);
-    //   SDL_DestroyTexture(texture);
-    //   continue;
-    // }
+    /**
+     * @todo Use textures for each entity instead of relying on a color stored in the CShape
+     * component.
+     *
+     * Example implementation:
+     *
+     * // Assuming SDL_Surface *surface is properly initialized
+     * SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+     * if (texture != nullptr) {
+     *     SDL_FreeSurface(surface);
+     *     SDL_RenderCopy(renderer, texture, nullptr, &rect);
+     *     SDL_DestroyTexture(texture);
+     *     continue;
+     * }
+     */
 
     const auto &[r, g, b, a] = cShape->color;
     SDL_SetRenderDrawColor(renderer, r, g, b, a);
