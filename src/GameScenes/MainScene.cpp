@@ -180,7 +180,6 @@ void MainScene::sRender() {
   SDL_RenderClear(renderer);
 
   for (const auto &entity : m_entities.getEntities()) {
-
     const auto &cShape     = entity->getComponent<CShape>();
     const auto &cTransform = entity->getComponent<CTransform>();
 
@@ -193,6 +192,24 @@ void MainScene::sRender() {
 
     rect.x = static_cast<int>(pos.x);
     rect.y = static_cast<int>(pos.y);
+
+    auto imageManager = m_gameEngine->getImageManager();
+
+    /**
+     * @todo Use textures for each entity instead of relying on a color stored in the CShape
+     * component.
+     *
+     * Example implementation:
+     *
+     * // Assuming SDL_Surface *surface is properly initialized
+     * SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+     * if (texture != nullptr) {
+     *     SDL_FreeSurface(surface);
+     *     SDL_RenderCopy(renderer, texture, nullptr, &rect);
+     *     SDL_DestroyTexture(texture);
+     *     continue;
+     * }
+     */
 
     const auto &[r, g, b, a] = cShape->color;
     SDL_SetRenderDrawColor(renderer, r, g, b, a);
@@ -219,7 +236,7 @@ void MainScene::sCollision() {
                  .decrementLives     = [this]() -> void { decrementLives(); },
                  .audioSampleManager = audioSampleManager,
                  .windowSize         = windowSize,
-                 };
+  };
 
   for (auto &entity : m_entities.getEntities()) {
     handleEntityBounds(entity, windowSize);

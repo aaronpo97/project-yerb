@@ -23,6 +23,7 @@ GameEngine::GameEngine() {
   m_audioSampleQueue = initializeAudioSampleQueue();
   m_fontManager      = createFontManager();
   m_videoManager     = createVideoManager();
+  m_imageManager     = createImageManager();
 
   m_isRunning = true;
 
@@ -39,7 +40,11 @@ std::unique_ptr<ConfigManager> GameEngine::createConfigManager(const Path &confi
   return std::make_unique<ConfigManager>(configPath);
 }
 
-std::unique_ptr<VideoManager> GameEngine::createVideoManager() {
+std::unique_ptr<ImageManager> GameEngine::createImageManager() {
+  return std::make_unique<ImageManager>();
+}
+
+std::unique_ptr<VideoManager> GameEngine::createVideoManager() const {
   if (m_configManager == nullptr) {
     SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "ConfigManager not initialized");
     cleanup();
@@ -165,6 +170,14 @@ VideoManager &GameEngine::getVideoManager() const {
     throw std::runtime_error("VideoManager not initialized");
   }
   return *m_videoManager;
+}
+
+ImageManager &GameEngine::getImageManager() const {
+  if (!m_imageManager) {
+    SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "ImageManager not initialized");
+    throw std::runtime_error("ImageManager not initialized");
+  }
+  return *m_imageManager;
 }
 
 void GameEngine::sUserInput() {
