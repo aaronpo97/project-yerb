@@ -204,7 +204,6 @@ void MainScene::sRender() {
      * // Assuming SDL_Surface *surface is properly initialized
      * SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
      * if (texture != nullptr) {
-     *     SDL_FreeSurface(surface);
      *     SDL_RenderCopy(renderer, texture, nullptr, &rect);
      *     SDL_DestroyTexture(texture);
      *     continue;

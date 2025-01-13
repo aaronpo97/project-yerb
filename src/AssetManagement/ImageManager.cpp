@@ -13,7 +13,7 @@ SDL_Surface *ImageManager::loadImage(const ImageName name) {
     return nullptr;
   }
 
-  return img;
+  m_images[name] = img;
 }
 
 ImageManager::ImageManager() {
@@ -24,6 +24,15 @@ ImageManager::ImageManager() {
   SDL_Log("ImageManager created");
 }
 
+ImageManager::~ImageManager() {
+  for (auto &[name, image] : m_images) {
+    SDL_FreeSurface(image);
+    SDL_Log("%s surface freed", name);
+  }
+}
+
 SDL_Surface *ImageManager::getImage(const ImageName name) {
-  return loadImage(name);
+  if (m_images.find(name) == m_images.end()) {
+    return loadImage(name);
+  }
 }
