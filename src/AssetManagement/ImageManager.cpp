@@ -29,7 +29,7 @@ ImageManager::ImageManager() {
 
 ImageManager::~ImageManager() {
   // @TODO handle memory management
-  std::cout << "ImageManager destroyed" << std::endl;
+  // std::cout << "ImageManager destroyed" << std::endl;
   // for (auto &[name, image] : m_images) {
   //   SDL_FreeSurface(image);
   //   SDL_Log("%s surface freed", name);
