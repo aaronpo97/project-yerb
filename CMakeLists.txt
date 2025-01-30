@@ -53,8 +53,8 @@ if (NOT EMSCRIPTEN)
             GIT_TAG release-2.8.2
     )
     FetchContent_MakeAvailable(SDL_image)
-
-    set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
+#
+#    set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
 
 endif ()
 
@@ -130,6 +130,9 @@ else ()
             "${CMAKE_BINARY_DIR}/build/config"
             COMMENT "Copying config directory to build directory"
     )
+
+    add_dependencies(${PROJECT_NAME} copy_assets copy_config)
+
 endif ()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)

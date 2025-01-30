@@ -19,7 +19,10 @@ MainScene::MainScene(GameEngine *gameEngine) :
   const ConfigManager &configManager = gameEngine->getConfigManager();
 
   m_entities = EntityManager();
-  m_player   = SpawnHelpers::MainScene::spawnPlayer(renderer, configManager, m_entities);
+  m_player   = SpawnHelpers::MainScene::spawnPlayer(renderer, configManager, m_entities,
+                                                    m_gameEngine->getImageManager());
+
+  std::cout << "spawned the player" << std::endl;
 
   SpawnHelpers::MainScene::spawnWalls(renderer, configManager, m_entities);
 
@@ -195,24 +198,42 @@ void MainScene::sRender() {
 
     auto imageManager = m_gameEngine->getImageManager();
 
-    /**
-     * @todo Use textures for each entity instead of relying on a color stored in the CShape
-     * component.
-     *
-     * Example implementation:
-     *
-     * // Assuming SDL_Surface *surface is properly initialized
-     * SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-     * if (texture != nullptr) {
-     *     SDL_RenderCopy(renderer, texture, nullptr, &rect);
-     *     SDL_DestroyTexture(texture);
-     *     continue;
-     * }
-     */
+    // /**
+    //  * @todo Use textures for each entity instead of relying on a color stored in the CShape
+    //  * component.
+    //  *
+    //  * Example implementation:
+    //  *
+    //  * // Assuming SDL_Surface *surface is properly initialized
+    //  * SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    //  * if (texture != nullptr) {
+    //  *     SDL_RenderCopy(renderer, texture, nullptr, &rect);
+    //  *     SDL_DestroyTexture(texture);
+    //  *     continue;
+    //  * }
+    //  */
 
-    const auto &[r, g, b, a] = cShape->color;
-    SDL_SetRenderDrawColor(renderer, r, g, b, a);
-    SDL_RenderFillRect(renderer, &rect);
+    // const auto &[r, g, b, a] = cShape->color;
+    // SDL_SetRenderDrawColor(renderer, r, g, b, a);
+    // SDL_RenderFillRect(renderer, &rect);
+
+    if (entity->hasComponent<CSprite>()) {
+      const auto  &cSprite = entity->getComponent<CSprite>();
+      SDL_Surface *surface = cSprite->imageSurface;
+      if (surface == nullptr) {
+        continue;
+      }
+      if (SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+          texture != nullptr) {
+        SDL_RenderCopy(renderer, texture, nullptr, &rect);
+        SDL_DestroyTexture(texture);
+      }
+    } else {
+
+      SDL_SetRenderDrawColor(renderer, cShape->color.r, cShape->color.g, cShape->color.b,
+                             cShape->color.a);
+      SDL_RenderFillRect(renderer, &rect);
+    }
   }
 
   renderText();
@@ -222,7 +243,6 @@ void MainScene::sRender() {
 
 void MainScene::sCollision() {
   using namespace CollisionHelpers::MainScene;
-
   const ConfigManager &configManager = m_gameEngine->getConfigManager();
   const Vec2          &windowSize    = configManager.getGameConfig().windowSize;
 

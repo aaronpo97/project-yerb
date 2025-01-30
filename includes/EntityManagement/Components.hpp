@@ -123,6 +123,7 @@ public:
 };
 
 class CSprite {
+public:
   SDL_Surface *imageSurface;
   CSprite(SDL_Surface *imageSurface) :
       imageSurface(imageSurface) {}

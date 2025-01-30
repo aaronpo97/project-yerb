@@ -11,7 +11,8 @@ typedef std::tuple<std::shared_ptr<CTransform>,
                    std::shared_ptr<CInput>,
                    std::shared_ptr<CLifespan>,
                    std::shared_ptr<CEffects>,
-                   std::shared_ptr<CBounceTracker>>
+                   std::shared_ptr<CBounceTracker>,
+                   std::shared_ptr<CSprite>>
     EntityComponents;
 
 class Entity {
@@ -55,5 +56,6 @@ template <typename ComponentType> void Entity::removeComponent() {
 }
 
 template <typename ComponentType> bool Entity::hasComponent() const {
-  return std::get<std::shared_ptr<ComponentType>>(m_components) != nullptr;
+  auto hasComponent = std::get<std::shared_ptr<ComponentType>>(m_components) != nullptr;
+  return hasComponent;
 }

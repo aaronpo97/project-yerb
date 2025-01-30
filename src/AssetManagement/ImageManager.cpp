@@ -3,14 +3,14 @@
 #include <SDL_image.h>
 #include <filesystem>
 #include <iostream>
+#include <ranges>
 
-SDL_Surface *ImageManager::loadImage(const ImageName name) {
+void ImageManager::loadImage(const ImageName name) {
   const std::filesystem::path &path = imagePaths.at(name);
   SDL_Surface                 *img  = IMG_Load(path.c_str());
 
   if (img == nullptr) {
     std::cout << "Unable to load image! SDL_image Error:\n" << path.c_str() << IMG_GetError();
-    return nullptr;
   }
 
   m_images[name] = img;
@@ -21,18 +21,27 @@ ImageManager::ImageManager() {
     std::cout << "SDL_image could not initialize! SDL_image Error: %s\n" << IMG_GetError();
   }
 
+  for (const auto &name : imagePaths | std::views::keys) {
+    loadImage(name);
+  }
   SDL_Log("ImageManager created");
 }
 
 ImageManager::~ImageManager() {
-  for (auto &[name, image] : m_images) {
-    SDL_FreeSurface(image);
-    SDL_Log("%s surface freed", name);
-  }
+  // @TODO handle memory management
+  std::cout << "ImageManager destroyed" << std::endl;
+  // for (auto &[name, image] : m_images) {
+  //   SDL_FreeSurface(image);
+  //   SDL_Log("%s surface freed", name);
+  // }
 }
 
 SDL_Surface *ImageManager::getImage(const ImageName name) {
-  if (m_images.find(name) == m_images.end()) {
-    return loadImage(name);
+  if (std::ranges::find_if(imagePaths, [&](const auto &pair) { return pair.first == name; }) ==
+      imagePaths.end()) {
+    std::cout << "Image not found in ImageManager\n";
+    return nullptr;
   }
+
+  return m_images[name];
 }
