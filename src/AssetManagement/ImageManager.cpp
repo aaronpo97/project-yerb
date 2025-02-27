@@ -28,10 +28,10 @@ ImageManager::ImageManager() {
 }
 
 ImageManager::~ImageManager() {
-  std::cout << "ImageManager destroyed" << std::endl;
+  std::cout << "ImageManager destroyed\n";
   for (auto &[name, image] : m_images) {
     SDL_FreeSurface(image);
-    SDL_Log("%s surface freed", name);
+    SDL_Log("Surface %d freed", name);
   }
 }
 
