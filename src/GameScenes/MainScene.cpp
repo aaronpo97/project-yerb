@@ -196,27 +196,6 @@ void MainScene::sRender() {
     rect.x = static_cast<int>(pos.x);
     rect.y = static_cast<int>(pos.y);
 
-    auto imageManager = m_gameEngine->getImageManager();
-
-    // /**
-    //  * @todo Use textures for each entity instead of relying on a color stored in the CShape
-    //  * component.
-    //  *
-    //  * Example implementation:
-    //  *
-    //  * // Assuming SDL_Surface *surface is properly initialized
-    //  * SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-    //  * if (texture != nullptr) {
-    //  *     SDL_RenderCopy(renderer, texture, nullptr, &rect);
-    //  *     SDL_DestroyTexture(texture);
-    //  *     continue;
-    //  * }
-    //  */
-
-    // const auto &[r, g, b, a] = cShape->color;
-    // SDL_SetRenderDrawColor(renderer, r, g, b, a);
-    // SDL_RenderFillRect(renderer, &rect);
-
     if (entity->hasComponent<CSprite>()) {
       const auto  &cSprite = entity->getComponent<CSprite>();
       SDL_Surface *surface = cSprite->imageSurface;
@@ -229,7 +208,6 @@ void MainScene::sRender() {
         SDL_DestroyTexture(texture);
       }
     } else {
-
       SDL_SetRenderDrawColor(renderer, cShape->color.r, cShape->color.g, cShape->color.b,
                              cShape->color.a);
       SDL_RenderFillRect(renderer, &rect);
