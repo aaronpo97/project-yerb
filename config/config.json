@@ -9,7 +9,7 @@
     "baseSpeed": 9.0,
     "speedBoostMultiplier": 2.0,
     "slownessMultiplier": 0.5,
-    "shape": { "height": 45, "width": 45, "color": { "r": 65, "g": 105, "b": 225, "a": 255 } }
+    "shape": { "height": 100, "width": 100, "color": { "r": 65, "g": 105, "b": 225, "a": 255 } }
   },
   "itemConfig": {
     "spawnPercentage": 20,
