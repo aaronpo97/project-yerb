@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../includes/AssetManagement/ImageManager.hpp"
 #include "../Configuration/ConfigManager.hpp"
 #include "../EntityManagement/Entity.hpp"
 #include "../EntityManagement/EntityManager.hpp"
@@ -21,7 +22,8 @@ namespace SpawnHelpers {
 namespace SpawnHelpers::MainScene {
   std::shared_ptr<Entity> spawnPlayer(SDL_Renderer        *renderer,
                                       const ConfigManager &configManager,
-                                      EntityManager       &entityManager);
+                                      EntityManager       &entityManager,
+                                      ImageManager        &imageManager);
 
   void spawnEnemy(SDL_Renderer                  *renderer,
                   const ConfigManager           &configManager,

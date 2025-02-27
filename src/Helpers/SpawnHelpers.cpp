@@ -74,7 +74,8 @@ namespace SpawnHelpers {
 namespace SpawnHelpers::MainScene {
   std::shared_ptr<Entity> spawnPlayer(SDL_Renderer        *renderer,
                                       const ConfigManager &configManager,
-                                      EntityManager       &entityManager) {
+                                      EntityManager       &entityManager,
+                                      ImageManager        &imageManager) {
 
     const PlayerConfig &playerConfig = configManager.getPlayerConfig();
     const GameConfig   &gameConfig   = configManager.getGameConfig();
@@ -91,12 +92,14 @@ namespace SpawnHelpers::MainScene {
     const auto cTransform = std::make_shared<CTransform>(playerPosition, playerVelocity);
     const auto cInput     = std::make_shared<CInput>();
     const auto cEffects   = std::make_shared<CEffects>();
+    const auto cSprite = std::make_shared<CSprite>(imageManager.getImage(ImageName::EXAMPLE));
 
     std::shared_ptr<Entity> player = entityManager.addEntity(EntityTags::Player);
     player->setComponent(cTransform);
     player->setComponent(cShape);
     player->setComponent(cInput);
     player->setComponent(cEffects);
+    player->setComponent(cSprite);
 
     entityManager.update();
 

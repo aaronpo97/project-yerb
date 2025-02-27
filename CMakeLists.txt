@@ -103,6 +103,8 @@ if (EMSCRIPTEN)
     target_link_options(${PROJECT_NAME} PRIVATE
             "-sUSE_SDL=2"
             "-sUSE_SDL_IMAGE=2"
+            "-sUSE_LIBPNG=1"
+            "-sSDL2_IMAGE_FORMATS=['png']"
             "-sUSE_SDL_TTF=2"
             "-sUSE_SDL_MIXER=2"
             "-sALLOW_MEMORY_GROWTH=1"
@@ -130,6 +132,9 @@ else ()
             "${CMAKE_BINARY_DIR}/build/config"
             COMMENT "Copying config directory to build directory"
     )
+
+    add_dependencies(${PROJECT_NAME} copy_assets copy_config)
+
 endif ()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)

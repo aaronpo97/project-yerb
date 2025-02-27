@@ -121,3 +121,10 @@ public:
     return m_bounces;
   }
 };
+
+class CSprite {
+public:
+  SDL_Surface *imageSurface;
+  CSprite(SDL_Surface *imageSurface) :
+      imageSurface(imageSurface) {}
+};
