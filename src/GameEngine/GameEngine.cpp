@@ -216,6 +216,12 @@ void GameEngine::run() {
 #endif
 }
 
+/**
+ * Quits the game engine by either stopping the main loop or canceling
+ * the emscripten main loop.
+ *
+ * Called when the game engine is to be stopped.
+ */
 void GameEngine::quit() {
   SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "Quitting game engine...");
 #ifdef __EMSCRIPTEN__
@@ -225,6 +231,12 @@ void GameEngine::quit() {
 #endif
 }
 
+/**
+ * Loads a scene into the game engine.
+ *
+ * @param sceneName The name of the scene to load
+ * @param scene A shared pointer to the scene object to load
+ */
 void GameEngine::loadScene(const std::string &sceneName, const std::shared_ptr<Scene> &scene) {
   m_scenes[sceneName] = scene;
 
@@ -232,6 +244,12 @@ void GameEngine::loadScene(const std::string &sceneName, const std::shared_ptr<S
   m_currentSceneName = sceneName;
 }
 
+/**
+ * Retrieves the ConfigManager instance associated with the game engine.
+ *
+ * @throws std::runtime_error if ConfigManager is not initialized.
+ * @returns A reference to the initialized ConfigManager object.
+ */
 ConfigManager &GameEngine::getConfigManager() const {
   if (!m_configManager) {
     SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "ConfigManager not initialized");
@@ -241,6 +259,12 @@ ConfigManager &GameEngine::getConfigManager() const {
   return *m_configManager;
 }
 
+/**
+ * Retrieves the FontManager instance associated with the game engine.
+ *
+ * @throws std::runtime_error if FontManager is not initialized.
+ * @returns A reference to the initialized FontManager object.
+ */
 FontManager &GameEngine::getFontManager() const {
   if (!m_fontManager) {
     SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "FontManager not initialized");
@@ -249,6 +273,12 @@ FontManager &GameEngine::getFontManager() const {
   return *m_fontManager;
 }
 
+/**
+ * Retrieves the AudioManager instance associated with the game engine.
+ *
+ * @throws std::runtime_error if AudioManager is not initialized.
+ * @returns A reference to the initialized AudioManager object.
+ */
 AudioManager &GameEngine::getAudioManager() const {
   if (!m_audioManager) {
     SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "AudioManager not initialized");
@@ -257,6 +287,12 @@ AudioManager &GameEngine::getAudioManager() const {
   return *m_audioManager;
 }
 
+/**
+ * Retrieves the AudioSampleQueue instance associated with the game engine.
+ *
+ * @throws std::runtime_error if AudioSampleQueue is not initialized.
+ * @returns A reference to the initialized AudioSampleQueue object.
+ */
 AudioSampleQueue &GameEngine::getAudioSampleQueue() const {
   if (!m_audioSampleQueue) {
     SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "AudioSampleManager not initialized");
@@ -265,6 +301,12 @@ AudioSampleQueue &GameEngine::getAudioSampleQueue() const {
   return *m_audioSampleQueue;
 }
 
+/**
+ * Retrieves the VideoManager instance associated with the game engine.
+ *
+ * @throws std::runtime_error if VideoManager is not initialized.
+ * @returns A reference to the initialized VideoManager object.
+ */
 VideoManager &GameEngine::getVideoManager() const {
   if (!m_videoManager) {
     SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "VideoManager not initialized");
@@ -273,6 +315,12 @@ VideoManager &GameEngine::getVideoManager() const {
   return *m_videoManager;
 }
 
+/**
+ * Retrieves the ImageManager instance associated with the game engine.
+ *
+ * @throws std::runtime_error if ImageManager is not initialized.
+ * @returns A reference to the initialized ImageManager object.
+ */
 ImageManager &GameEngine::getImageManager() const {
   if (!m_imageManager) {
     SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "ImageManager not initialized");
@@ -363,8 +411,14 @@ void GameEngine::sUserInput() {
   }
 }
 
+/**
+ * The main loop function that is called by the game engine.
+ *
+ * This function is responsible for calling the user input system and updating the game engine.
+ *
+ * @param arg A pointer to the GameEngine object
+ */
 void GameEngine::mainLoop(void *arg) {
-
   auto *gameEngine = static_cast<GameEngine *>(arg);
 #ifdef __EMSCRIPTEN__
   const bool isWebCanvasEnabled = VideoManager::isWebCanvasEnabled();
