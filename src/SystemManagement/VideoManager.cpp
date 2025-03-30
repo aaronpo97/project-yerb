@@ -67,8 +67,9 @@ SDL_Window *VideoManager::createWindow() {
   windowFlags |= macFlags;
 #endif
 
-  const auto &[windowSize, windowTitle, fontPath, spawnInterval] =
-      m_configManager.getGameConfig();
+  const GameConfig  &gameConfig  = m_configManager.getGameConfig();
+  const std::string &windowTitle = gameConfig.windowTitle;
+  const Vec2        &windowSize  = gameConfig.windowSize;
 
   SDL_Window *window = SDL_CreateWindow(windowTitle.c_str(), SDL_WINDOWPOS_CENTERED,
                                         SDL_WINDOWPOS_CENTERED, static_cast<int>(windowSize.x),
