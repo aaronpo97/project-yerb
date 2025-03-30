@@ -9,13 +9,6 @@
 
 typedef std::filesystem::path Path;
 
-/**
- * Constructor method for the VideoManager.
- *
- * This initializes the VideoManager object by initializing SDL_VIDEO and by creating an
- * SDL_Window and SDL_Renderer.
- * @param configManager The ConfigManager object associated with the GameEngine class.
- */
 VideoManager::VideoManager(ConfigManager &configManager) :
     m_configManager(configManager) {
   initializeVideoSystem();
@@ -25,19 +18,6 @@ VideoManager::VideoManager(ConfigManager &configManager) :
   setupRenderer();
 }
 
-/**
- * @brief Initializes the SDL video subsystem.
- *
- * This function sets up the SDL video system by calling SDL_Init with the
- * SDL_INIT_VIDEO flag.
- *
- * If the initialization fails, it logs an error message and throws a
- * std::runtime_error exception.
- *
- * On successful initialization, it logs a success message.
- *
- * @throws std::runtime_error If the SDL video subsystem fails to initialize.
- */
 void VideoManager::initializeVideoSystem() {
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "SDL video system is not ready: %s", SDL_GetError());
@@ -46,16 +26,6 @@ void VideoManager::initializeVideoSystem() {
   SDL_LogInfo(SDL_LOG_CATEGORY_VIDEO, "SDL video system initialized successfully!");
 }
 
-/**
- * @brief Creates an SDL window with specified configurations.
- *
- * Initializes and creates an SDL window using configuration parameters from ConfigManager.
- * Sets various window flags based on the platform and configuration, and handles errors if
- * window creation fails. Calculates the display scale factor for High-DPI (Retina) displays.
- *
- * @return SDL_Window* Pointer to the created SDL window.
- * @throws std::runtime_error If the window could not be created.
- */
 SDL_Window *VideoManager::createWindow() {
   Uint32 windowFlags = 0;
 
@@ -93,13 +63,6 @@ SDL_Window *VideoManager::createWindow() {
   return window;
 }
 
-/**
- * @brief Updates the current window size.
- *
- * This function retrieves the current window size and updates the
- * m_currentWindowSize member variable. It also updates the game window
- * size in the ConfigManager.
- */
 void VideoManager::updateWindowSize() {
   int currentWindowWidth, currentWindowHeight;
   int drawableWidth, drawableHeight;
@@ -114,11 +77,6 @@ void VideoManager::updateWindowSize() {
       {static_cast<float>(currentWindowWidth), static_cast<float>(currentWindowHeight)});
 }
 
-/**
- * @brief Create a renderer
- * @throws std::runtime_error if window is not initialized
- * @throws std::runtime_error if renderer could not be created
- */
 SDL_Renderer *VideoManager::createRenderer() const {
   if (m_window == nullptr) {
     SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "Window is not initialized");
@@ -134,10 +92,6 @@ SDL_Renderer *VideoManager::createRenderer() const {
   return renderer;
 }
 
-/**
- * @brief Set up the renderer with a background color and blend mode.
- * @throws std::runtime_error if renderer is not initialized
- */
 void VideoManager::setupRenderer() const {
   if (m_renderer == nullptr) {
     SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "Renderer is not initialized");
@@ -164,11 +118,6 @@ SDL_Window *VideoManager::getWindow() const {
   return m_window;
 }
 
-/**
- * @brief Cleans up the SDL resources.
- *
- * This function destroys the SDL renderer and window, and quits the SDL video subsystem.
- */
 void VideoManager::cleanup() {
   if (m_renderer != nullptr) {
     SDL_DestroyRenderer(m_renderer);
@@ -192,11 +141,6 @@ bool VideoManager::isWebCanvasEnabled() {
 }
 #endif
 
-/**
- * Destructor method for the VideoManager.
- *
- * Call cleanup() to free resources.
- */
 VideoManager::~VideoManager() {
   cleanup();
 }
