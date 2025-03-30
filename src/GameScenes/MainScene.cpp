@@ -20,7 +20,7 @@ MainScene::MainScene(GameEngine *gameEngine) :
 
   m_entities = EntityManager();
   m_player   = SpawnHelpers::MainScene::spawnPlayer(renderer, configManager, m_entities,
-                                                    m_gameEngine->getImageManager());
+                                                    m_gameEngine->getSurfaceManager());
 
   std::cout << "spawned the player" << std::endl;
 

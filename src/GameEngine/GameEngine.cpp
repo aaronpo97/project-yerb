@@ -47,7 +47,7 @@ GameEngine::GameEngine() {
   m_audioSampleQueue = initializeAudioSampleQueue();
   m_fontManager      = createFontManager();
   m_videoManager     = createVideoManager();
-  m_imageManager     = createImageManager();
+  m_surfaceManager   = createSurfaceManager();
 
   /**
    * Set the game engine to running state.
@@ -88,8 +88,8 @@ std::unique_ptr<ConfigManager> GameEngine::createConfigManager(const Path &confi
  *
  * @returns std::unique_ptr<ImageManager> The ImageManager object initialized
  */
-std::unique_ptr<ImageManager> GameEngine::createImageManager() {
-  return std::make_unique<ImageManager>();
+std::unique_ptr<SurfaceManager> GameEngine::createSurfaceManager() {
+  return std::make_unique<SurfaceManager>();
 }
 
 /**
@@ -321,12 +321,12 @@ VideoManager &GameEngine::getVideoManager() const {
  * @throws std::runtime_error if ImageManager is not initialized.
  * @returns A reference to the initialized ImageManager object.
  */
-ImageManager &GameEngine::getImageManager() const {
-  if (!m_imageManager) {
+SurfaceManager &GameEngine::getSurfaceManager() const {
+  if (!m_surfaceManager) {
     SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "ImageManager not initialized");
     throw std::runtime_error("ImageManager not initialized");
   }
-  return *m_imageManager;
+  return *m_surfaceManager;
 }
 
 /**
