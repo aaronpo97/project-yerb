@@ -9,11 +9,15 @@
 
 typedef std::filesystem::path Path;
 
+/**
+ * Constructor method for the VideoManager.
+ *
+ * This initializes the VideoManager object by initializing SDL_VIDEO and by creating an
+ * SDL_Window and SDL_Renderer.
+ * @param configManager The ConfigManager object associated with the GameEngine class.
+ */
 VideoManager::VideoManager(ConfigManager &configManager) :
     m_configManager(configManager) {
-  const auto &[windowSize, windowTitle, fontPath, spawnInterval] =
-      m_configManager.getGameConfig();
-
   initializeVideoSystem();
   m_window   = createWindow();
   m_renderer = createRenderer();
@@ -21,6 +25,19 @@ VideoManager::VideoManager(ConfigManager &configManager) :
   setupRenderer();
 }
 
+/**
+ * @brief Initializes the SDL video subsystem.
+ *
+ * This function sets up the SDL video system by calling SDL_Init with the
+ * SDL_INIT_VIDEO flag.
+ *
+ * If the initialization fails, it logs an error message and throws a
+ * std::runtime_error exception.
+ *
+ * On successful initialization, it logs a success message.
+ *
+ * @throws std::runtime_error If the SDL video subsystem fails to initialize.
+ */
 void VideoManager::initializeVideoSystem() {
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "SDL video system is not ready: %s", SDL_GetError());
@@ -75,6 +92,13 @@ SDL_Window *VideoManager::createWindow() {
   return window;
 }
 
+/**
+ * @brief Updates the current window size.
+ *
+ * This function retrieves the current window size and updates the
+ * m_currentWindowSize member variable. It also updates the game window
+ * size in the ConfigManager.
+ */
 void VideoManager::updateWindowSize() {
   int currentWindowWidth, currentWindowHeight;
   int drawableWidth, drawableHeight;
@@ -130,6 +154,7 @@ void VideoManager::setupRenderer() const {
 Vec2 VideoManager::getWindowSize() const {
   return m_currentWindowSize;
 }
+
 SDL_Renderer *VideoManager::getRenderer() const {
   return m_renderer;
 }
@@ -138,6 +163,11 @@ SDL_Window *VideoManager::getWindow() const {
   return m_window;
 }
 
+/**
+ * @brief Cleans up the SDL resources.
+ *
+ * This function destroys the SDL renderer and window, and quits the SDL video subsystem.
+ */
 void VideoManager::cleanup() {
   if (m_renderer != nullptr) {
     SDL_DestroyRenderer(m_renderer);
@@ -161,6 +191,11 @@ bool VideoManager::isWebCanvasEnabled() {
 }
 #endif
 
+/**
+ * Destructor method for the VideoManager.
+ *
+ * Call cleanup() to free resources.
+ */
 VideoManager::~VideoManager() {
   cleanup();
 }
