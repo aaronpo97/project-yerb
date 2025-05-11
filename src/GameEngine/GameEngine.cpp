@@ -14,8 +14,8 @@ GameEngine::GameEngine() {
    * The assets directory contains all the images, audio, and font files used in the game.
    * The configuration directory contains the configuration file for the game.
    *
-   * The configuration file is a JSON file that contains the game settings such as window size,
-   * font path, and more.
+   * The configuration file is a JSON file that contains the game settings such as window
+   * size, font path, and more.
    */
   const Path ASSETS_DIR_PATH  = "assets";
   const Path CONFIG_DIR_PATH  = "config";
@@ -33,7 +33,8 @@ GameEngine::GameEngine() {
   /*
    * Initialize the managers and resources needed by the game engine.
    *
-   * The game engine is composed of several managers that handle different aspects of the game.
+   * The game engine is composed of several managers that handle different aspects of the
+   * game.
    */
   m_configManager    = createConfigManager(CONFIG_FILE_PATH);
   m_audioManager     = createAudioManager();
@@ -243,8 +244,8 @@ void GameEngine::sUserInput() {
       }
 
       /*
-       * If the event is a mouse button event, set the action state to start on mouse down,
-       * and end on mouse up.
+       * If the event is a mouse button event, set the action state to start on mouse
+       * down, and end on mouse up.
        */
       const ActionState actionState =
           event.type == SDL_MOUSEBUTTONDOWN ? ActionState::START : ActionState::END;

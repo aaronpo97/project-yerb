@@ -43,7 +43,8 @@ class VideoManager {
    *
    * Initializes and creates an SDL window using configuration parameters from ConfigManager.
    * Sets various window flags based on the platform and configuration, and handles errors if
-   * window creation fails. Calculates the display scale factor for High-DPI (Retina) displays.
+   * window creation fails. Calculates the display scale factor for High-DPI (Retina)
+   * displays.
    *
    * @return SDL_Window* Pointer to the created SDL window.
    * @throws std::runtime_error If the window could not be created.

@@ -41,9 +41,12 @@ SDL_Window *VideoManager::createWindow() {
   const std::string &windowTitle = gameConfig.windowTitle;
   const Vec2        &windowSize  = gameConfig.windowSize;
 
-  SDL_Window *window = SDL_CreateWindow(windowTitle.c_str(), SDL_WINDOWPOS_CENTERED,
-                                        SDL_WINDOWPOS_CENTERED, static_cast<int>(windowSize.x),
-                                        static_cast<int>(windowSize.y), windowFlags);
+  SDL_Window *window = SDL_CreateWindow(windowTitle.c_str(),
+                                        SDL_WINDOWPOS_CENTERED,
+                                        SDL_WINDOWPOS_CENTERED,
+                                        static_cast<int>(windowSize.x),
+                                        static_cast<int>(windowSize.y),
+                                        windowFlags);
 
   if (window == nullptr) {
     SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "Window could not be created: %s", SDL_GetError());
@@ -99,8 +102,8 @@ void VideoManager::setupRenderer() const {
   }
 
   constexpr SDL_Color backgroundColor = {.r = 0, .g = 0, .b = 0, .a = 255};
-  SDL_SetRenderDrawColor(m_renderer, backgroundColor.r, backgroundColor.g, backgroundColor.b,
-                         backgroundColor.a);
+  SDL_SetRenderDrawColor(
+      m_renderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
   SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
   SDL_RenderClear(m_renderer);
   SDL_RenderPresent(m_renderer);

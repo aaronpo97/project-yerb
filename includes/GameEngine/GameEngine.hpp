@@ -120,8 +120,8 @@ protected:
    *
    * The AudioManager must be initialized before calling this function.
    *
-   * The AudioSampleQueue's role in the game engine is to manage the queue of audio samples to
-   * be played. It uses the AudioManager to play the audio samples.
+   * The AudioSampleQueue's role in the game engine is to manage the queue of audio samples
+   * to be played. It uses the AudioManager to play the audio samples.
    *
    * Used by the audio system in the `Scene` objects.
    *
