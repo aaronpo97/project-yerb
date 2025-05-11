@@ -280,19 +280,19 @@ public:
    *
    * @return AudioTrack The current audio track.
    */
-  AudioTrack  getCurrentAudioTrack() const;
+  AudioTrack getCurrentAudioTrack() const;
 
   /**
    * Get the last played audio track.
    *
    * @return AudioTrack The last played audio track.
    */
-  AudioTrack  getLastAudioTrack() const;
+  AudioTrack getLastAudioTrack() const;
 
   /**
    * Get the last played audio sample.
    *
-   * @return AudioSample The last played audio sample. 
+   * @return AudioSample The last played audio sample.
    */
   AudioSample getLastAudioSample() const;
 

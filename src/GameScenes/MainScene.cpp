@@ -196,22 +196,31 @@ void MainScene::sRender() {
     rect.x = static_cast<int>(pos.x);
     rect.y = static_cast<int>(pos.y);
 
-    if (entity->hasComponent<CSprite>()) {
-      const auto  &cSprite = entity->getComponent<CSprite>();
-      SDL_Surface *surface = cSprite->imageSurface;
-      if (surface == nullptr) {
-        continue;
-      }
-      if (SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-          texture != nullptr) {
-        SDL_RenderCopy(renderer, texture, nullptr, &rect);
-        SDL_DestroyTexture(texture);
-      }
-    } else {
+    // If there's no sprite, render a plain box
+    if (!entity->hasComponent<CSprite>()) {
       SDL_SetRenderDrawColor(renderer, cShape->color.r, cShape->color.g, cShape->color.b,
                              cShape->color.a);
       SDL_RenderFillRect(renderer, &rect);
+      continue; // continue on, render the next entity
     }
+
+    const auto &cSprite = entity->getComponent<CSprite>();
+
+    // Get the image surface from the CSprite component:
+    SDL_Surface *surface = cSprite->imageSurface;
+    if (surface == nullptr) {
+      continue;
+    }
+
+    // Create a texture from the surface
+    // @todo maybe the texture should be part of csprite
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    if (texture == nullptr) {
+      continue;
+    }
+
+    SDL_RenderCopy(renderer, texture, nullptr, &rect);
+    SDL_DestroyTexture(texture);
   }
 
   renderText();
@@ -266,6 +275,7 @@ void MainScene::sMovement() {
 void MainScene::sSpawner() {
   const ConfigManager &configManager  = m_gameEngine->getConfigManager();
   SDL_Renderer        *renderer       = m_gameEngine->getVideoManager().getRenderer();
+  SurfaceManager      &surfaceManager = m_gameEngine->getSurfaceManager();
   const Uint64         ticks          = SDL_GetTicks64();
   const Uint64         SPAWN_INTERVAL = configManager.getGameConfig().spawnInterval;
 
@@ -305,7 +315,7 @@ void MainScene::sSpawner() {
 
   if (decisions.enemy) {
     SpawnHelpers::MainScene::spawnEnemy(renderer, configManager, m_randomGenerator, m_entities,
-                                        m_player);
+                                        m_player, surfaceManager);
   }
 
   if (decisions.speedBoost) {

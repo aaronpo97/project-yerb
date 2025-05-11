@@ -23,13 +23,14 @@ namespace SpawnHelpers::MainScene {
   std::shared_ptr<Entity> spawnPlayer(SDL_Renderer        *renderer,
                                       const ConfigManager &configManager,
                                       EntityManager       &entityManager,
-                                      SurfaceManager      &imageManager);
+                                      SurfaceManager      &surfaceManager);
 
   void spawnEnemy(SDL_Renderer                  *renderer,
                   const ConfigManager           &configManager,
                   std::mt19937                  &randomGenerator,
                   EntityManager                 &entityManager,
-                  const std::shared_ptr<Entity> &player);
+                  const std::shared_ptr<Entity> &player,
+                  SurfaceManager                &surface_manager);
 
   void spawnSpeedBoostEntity(SDL_Renderer                  *renderer,
                              const ConfigManager           &configManager,
