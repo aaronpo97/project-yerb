@@ -93,7 +93,7 @@ namespace SpawnHelpers::MainScene {
     const auto cInput     = std::make_shared<CInput>();
     const auto cEffects   = std::make_shared<CEffects>();
     const auto cSprite =
-        std::make_shared<CSprite>(surfaceManager.getSurface(SurfaceName::EXAMPLE));
+        std::make_shared<CSprite>(surfaceManager.getSurface(SurfaceName::EXAMPLE), renderer);
 
     std::shared_ptr<Entity> player = entityManager.addEntity(EntityTags::Player);
     player->setComponent(cTransform);
@@ -127,7 +127,7 @@ namespace SpawnHelpers::MainScene {
     const auto cLifespan  = std::make_shared<CLifespan>(enemyConfig.lifespan);
 
     const auto cSprite =
-        std::make_shared<CSprite>(surfaceManager.getSurface(SurfaceName::EXAMPLE));
+        std::make_shared<CSprite>(surfaceManager.getSurface(SurfaceName::EXAMPLE), renderer);
 
     const std::shared_ptr<Entity> &enemy = entityManager.addEntity(EntityTags::Enemy);
     enemy->setComponent<CTransform>(cTransform);

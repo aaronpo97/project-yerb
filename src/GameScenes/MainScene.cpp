@@ -206,23 +206,10 @@ void MainScene::sRender() {
       continue; // continue on, render the next entity
     }
 
-    const auto &cSprite = entity->getComponent<CSprite>();
-
-    // Get the image surface from the CSprite component:
-    SDL_Surface *surface = cSprite->imageSurface;
-    if (surface == nullptr) {
-      continue;
-    }
-
-    // Create a texture from the surface
-    // @todo maybe the texture should be part of csprite
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-    if (texture == nullptr) {
-      continue;
-    }
+    const auto  &cSprite = entity->getComponent<CSprite>();
+    SDL_Texture *texture = cSprite->getTexture();
 
     SDL_RenderCopy(renderer, texture, nullptr, &rect);
-    SDL_DestroyTexture(texture);
   }
 
   renderText();
