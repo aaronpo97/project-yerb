@@ -11,7 +11,7 @@ FetchContent_MakeAvailable(json)
 
 
 if (NOT EMSCRIPTEN)
-    find_package(SDL2 REQUIRED)
+    find_package(SDL2)
     if(NOT SDL2_FOUND)
         FetchContent_Declare(
             SDL2
@@ -21,7 +21,7 @@ if (NOT EMSCRIPTEN)
         FetchContent_MakeAvailable(SDL2)
     endif()
 
-    find_package(SDL2_ttf QUIET)
+    find_package(SDL2_ttf)
     if(NOT SDL2_ttf_FOUND)
         FetchContent_Declare(
             SDL_ttf
@@ -31,18 +31,18 @@ if (NOT EMSCRIPTEN)
         FetchContent_MakeAvailable(SDL_ttf)
     endif()
 
-    # Disable all audio formats except OGG and WAV
-    set(SDL2MIXER_OPUS OFF CACHE BOOL "")
-    set(SDL2MIXER_OPUS_SHARED OFF CACHE BOOL "")
-    set(SDL2MIXER_FLAC OFF CACHE BOOL "")
-    set(SDL2MIXER_MOD OFF CACHE BOOL "")
-    set(SDL2MIXER_MIDI OFF CACHE BOOL "")
-    set(SDL2MIXER_WAVPACK OFF CACHE BOOL "")
-    set(SDL2MIXER_MP3 OFF CACHE BOOL "")
-    set(SDL2MIXER_OGG ON CACHE BOOL "")
-
-    find_package(SDL2_mixer QUIET)
+    find_package(SDL2_mixer)
     if(NOT SDL2_mixer_FOUND)
+        # Disable all audio formats except OGG and WAV
+        set(SDL2MIXER_OPUS OFF CACHE BOOL "")
+        set(SDL2MIXER_OPUS_SHARED OFF CACHE BOOL "")
+        set(SDL2MIXER_FLAC OFF CACHE BOOL "")
+        set(SDL2MIXER_MOD OFF CACHE BOOL "")
+        set(SDL2MIXER_MIDI OFF CACHE BOOL "")
+        set(SDL2MIXER_WAVPACK OFF CACHE BOOL "")
+        set(SDL2MIXER_MP3 OFF CACHE BOOL "")
+        set(SDL2MIXER_OGG ON CACHE BOOL "")
+
         FetchContent_Declare(
             SDL_mixer
             GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
@@ -51,7 +51,7 @@ if (NOT EMSCRIPTEN)
         FetchContent_MakeAvailable(SDL_mixer)
     endif()
 
-    find_package(SDL2_image QUIET)
+    find_package(SDL2_image)
     if(NOT SDL2_image_FOUND)
         FetchContent_Declare(
             SDL_image
