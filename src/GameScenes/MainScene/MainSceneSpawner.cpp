@@ -65,8 +65,7 @@ void MainSceneSpawner::spawnEnemy(const std::shared_ptr<Entity> &player) {
   enemy->setComponent<CShape>(cShape);
   enemy->setComponent<CLifespan>(cLifespan);
   enemy->setComponent<CSprite>(cSprite);
-
-  //@todo check for nullptr player
+  
   if (!player) {
     SDL_Log("Player missing, destroying enemy");
     enemy->destroy();
