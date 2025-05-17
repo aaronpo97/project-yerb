@@ -33,6 +33,7 @@ void MenuScene::onEnd() {
     case 2:
       m_gameEngine->quit();
       break;
+    default:;
   }
 }
 
