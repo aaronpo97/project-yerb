@@ -1,9 +1,10 @@
 #include "../../includes/AssetManagement/ImageManager.hpp"
 #include <SDL2/SDL.h>
-#include <SDL_image.h>
+#include <SDL2/SDL_image.h>
 #include <filesystem>
 #include <iostream>
 #include <ranges>
+#include <algorithm>
 
 void ImageManager::loadImage(const ImageName name) {
   const std::filesystem::path &path = imagePaths.at(name);
