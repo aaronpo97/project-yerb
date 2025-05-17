@@ -209,6 +209,9 @@ void MainScene::sRender() {
     const auto  &cSprite = entity->getComponent<CSprite>();
     SDL_Texture *texture = cSprite->getTexture();
 
+    if (texture == nullptr) {
+      continue; // Skip rendering this entity if the texture is null
+    }
     SDL_RenderCopy(renderer, texture, nullptr, &rect);
   }
 
