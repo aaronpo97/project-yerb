@@ -1,16 +1,18 @@
 #include "../../../includes/GameScenes/MainScene/MainSceneSpawner.hpp"
 #include "../../../includes/Helpers/CollisionHelpers.hpp"
 #include "../../../includes/Helpers/SpawnHelpers.hpp"
-MainSceneSpawner::MainSceneSpawner(const std::mt19937   &randomGenerator,
-                                   const ConfigManager  &configManager,
-                                   const TextureManager &textureManager,
-                                   const EntityManager  &entityManager,
+MainSceneSpawner::MainSceneSpawner(std::mt19937   &randomGenerator,
+                                    ConfigManager  &configManager,
+                                    TextureManager &textureManager,
+                                    EntityManager  &entityManager,
                                    SDL_Renderer         *renderer) :
     m_randomGenerator(randomGenerator),
     m_configManager(configManager),
     m_textureManager(textureManager),
     m_entityManager(entityManager),
-    m_renderer(renderer) {}
+    m_renderer(renderer) {
+  std::cout <<"spawner created\n";
+}
 
 std::shared_ptr<Entity> MainSceneSpawner::spawnPlayer() {
   const PlayerConfig &playerConfig = m_configManager.getPlayerConfig();

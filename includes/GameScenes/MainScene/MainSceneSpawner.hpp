@@ -12,10 +12,10 @@ class MainSceneSpawner {
   SDL_Renderer  *m_renderer;
 
 public:
-  MainSceneSpawner(const std::mt19937   &randomGenerator,
-                   const ConfigManager  &configManager,
-                   const TextureManager &textureManager,
-                   const EntityManager  &entityManager,
+  MainSceneSpawner(std::mt19937   &randomGenerator,
+                    ConfigManager  &configManager,
+                    TextureManager &textureManager,
+                    EntityManager  &entityManager,
                    SDL_Renderer         *renderer);
 
   std::shared_ptr<Entity> spawnPlayer();

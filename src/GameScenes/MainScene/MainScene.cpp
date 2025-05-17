@@ -15,21 +15,24 @@
 #include "../../../includes/Helpers/Vec2.hpp"
 
 MainScene::MainScene(GameEngine *gameEngine) :
-    Scene(gameEngine) {
+    Scene(gameEngine),
+    m_spawner(m_randomGenerator,
+              gameEngine->getConfigManager(),
+              gameEngine->getTextureManager(),
+              m_entities,
+              gameEngine->getVideoManager().getRenderer()) {
   SDL_Renderer        *renderer      = m_gameEngine->getVideoManager().getRenderer();
   const ConfigManager &configManager = gameEngine->getConfigManager();
 
   m_entities = EntityManager();
 
   const TextureManager &textureManager = m_gameEngine->getTextureManager();
-  m_spawner                            = std::make_unique<MainSceneSpawner>(
-      m_randomGenerator, configManager, textureManager, m_entities, renderer);
 
-  m_player = m_spawner->spawnPlayer();
+  m_player  = m_spawner.spawnPlayer();
 
   std::cout << "spawned the player" << std::endl;
 
-  m_spawner->spawnWalls();
+  m_spawner.spawnWalls();
 
   // WASD
   registerAction(SDLK_w, "FORWARD");
@@ -122,7 +125,7 @@ void MainScene::sDoAction(Action &action) {
     const Vec2 mousePosition = *position;
 
     audioSampleQueue.queueSample(AudioSample::SHOOT, AudioSamplePriority::STANDARD);
-    m_spawner->spawnBullets(m_player, mousePosition);
+    m_spawner.spawnBullets(m_player, mousePosition);
     m_lastBulletSpawnTime = currentTime;
 
     if (action.getName() == "PAUSE") {
@@ -305,19 +308,19 @@ void MainScene::sSpawner() {
   const bool spawnItem = shouldSpawn(itemCfg.spawnPercentage);
 
   if (spawnEnemy) {
-    m_spawner->spawnEnemy(m_player);
+    m_spawner.spawnEnemy(m_player);
   }
 
   if (spawnSpeedBoost) {
-    m_spawner->spawnSpeedBoostEntity(m_player);
+    m_spawner.spawnSpeedBoostEntity(m_player);
   }
 
   if (spawnSlowDebuff) {
-    m_spawner->spawnSlownessEntity(m_player);
+    m_spawner.spawnSlownessEntity(m_player);
   }
 
   if (spawnItem) {
-    m_spawner->spawnItem(m_player);
+    m_spawner.spawnItem(m_player);
   }
 }
 
@@ -465,5 +468,5 @@ void MainScene::onSceneWindowResize() {
 
   m_entities.update();
 
-  m_spawner->spawnWalls();
+  m_spawner.spawnWalls();
 }
