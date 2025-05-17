@@ -20,10 +20,10 @@ public:
 
   std::shared_ptr<Entity> spawnPlayer();
 
-  void spawnEnemy(const std::shared_ptr<Entity> &m_player);
-  void spawnSpeedBoostEntity(const std::shared_ptr<Entity> &m_player);
-  void spawnSlownessEntity(const std::shared_ptr<Entity> &m_player);
+  void spawnEnemy(const std::shared_ptr<Entity> &player);
+  void spawnSpeedBoostEntity(const std::shared_ptr<Entity> &player);
+  void spawnSlownessEntity(const std::shared_ptr<Entity> &player);
   void spawnWalls();
-  void spawnBullets(const std::shared_ptr<Entity> &m_player, const Vec2 &mousePosition);
-  void spawnItem(const std::shared_ptr<Entity> &m_player);
+  void spawnBullets(const std::shared_ptr<Entity> &player, const Vec2 &mousePosition);
+  void spawnItem(const std::shared_ptr<Entity> &player);
 };

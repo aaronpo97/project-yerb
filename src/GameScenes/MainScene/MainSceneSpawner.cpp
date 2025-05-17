@@ -43,7 +43,7 @@ std::shared_ptr<Entity> MainSceneSpawner::spawnPlayer() {
   m_entityManager.update();
   return player;
 }
-void MainSceneSpawner::spawnEnemy(const std::shared_ptr<Entity> &m_player) {
+void MainSceneSpawner::spawnEnemy(const std::shared_ptr<Entity> &player) {
   constexpr int MAX_SPAWN_ATTEMPTS = 10;
 
   const GameConfig  &gameConfig  = m_configManager.getGameConfig();
@@ -67,21 +67,21 @@ void MainSceneSpawner::spawnEnemy(const std::shared_ptr<Entity> &m_player) {
   enemy->setComponent<CSprite>(cSprite);
 
   //@todo check for nullptr player
-  if (!m_player) {
+  if (!player) {
     SDL_Log("Player missing, destroying enemy");
     enemy->destroy();
     return;
   }
 
   bool isValidSpawn =
-      SpawnHelpers::validateSpawnPosition(enemy, m_player, m_entityManager, windowSize);
+      SpawnHelpers::validateSpawnPosition(enemy, player, m_entityManager, windowSize);
   int spawnAttempt = 1;
 
   while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
     const auto newPosition = SpawnHelpers::createRandomPosition(m_randomGenerator, windowSize);
     enemy->getComponent<CTransform>()->topLeftCornerPos = newPosition;
     isValidSpawn =
-        SpawnHelpers::validateSpawnPosition(enemy, m_player, m_entityManager, windowSize);
+        SpawnHelpers::validateSpawnPosition(enemy, player, m_entityManager, windowSize);
     spawnAttempt += 1;
   }
 
@@ -91,7 +91,7 @@ void MainSceneSpawner::spawnEnemy(const std::shared_ptr<Entity> &m_player) {
 
   m_entityManager.update();
 }
-void MainSceneSpawner::spawnSpeedBoostEntity(const std::shared_ptr<Entity> &m_player) {
+void MainSceneSpawner::spawnSpeedBoostEntity(const std::shared_ptr<Entity> &player) {
   constexpr int MAX_SPAWN_ATTEMPTS = 10;
 
   const GameConfig        &gameConfig        = m_configManager.getGameConfig();
@@ -111,21 +111,21 @@ void MainSceneSpawner::spawnSpeedBoostEntity(const std::shared_ptr<Entity> &m_pl
   speedBoost->setComponent<CLifespan>(cLifespan);
 
   // @todo Check for nullptr player
-  if (!m_player) {
+  if (!player) {
     SDL_Log("Player missing, destroying speed boost");
     speedBoost->destroy();
     return;
   }
 
   bool isValidSpawn =
-      SpawnHelpers::validateSpawnPosition(speedBoost, m_player, m_entityManager, windowSize);
+      SpawnHelpers::validateSpawnPosition(speedBoost, player, m_entityManager, windowSize);
   int spawnAttempt = 1;
 
   while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
     const auto newPosition = SpawnHelpers::createRandomPosition(m_randomGenerator, windowSize);
     speedBoost->getComponent<CTransform>()->topLeftCornerPos = newPosition;
     isValidSpawn =
-        SpawnHelpers::validateSpawnPosition(speedBoost, m_player, m_entityManager, windowSize);
+        SpawnHelpers::validateSpawnPosition(speedBoost, player, m_entityManager, windowSize);
     spawnAttempt += 1;
   }
 
@@ -135,7 +135,7 @@ void MainSceneSpawner::spawnSpeedBoostEntity(const std::shared_ptr<Entity> &m_pl
 
   m_entityManager.update();
 }
-void MainSceneSpawner::spawnSlownessEntity(const std::shared_ptr<Entity> &m_player) {
+void MainSceneSpawner::spawnSlownessEntity(const std::shared_ptr<Entity> &player) {
   constexpr int MAX_SPAWN_ATTEMPTS = 10;
 
   const auto &[windowSize, windowTitle, fontPath, spawnInterval] =
@@ -157,21 +157,21 @@ void MainSceneSpawner::spawnSlownessEntity(const std::shared_ptr<Entity> &m_play
   slownessEntity->setComponent<CShape>(cShape);
   slownessEntity->setComponent<CLifespan>(cLifespan);
 
-  if (!m_player) {
+  if (!player) {
     SDL_Log("Player missing destroying slowness debuff");
     slownessEntity->destroy();
     return;
   }
 
   bool isValidSpawn = SpawnHelpers::validateSpawnPosition(
-      slownessEntity, m_player, m_entityManager, windowSize);
+      slownessEntity, player, m_entityManager, windowSize);
   int spawnAttempt = 1;
 
   while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
     const auto newPosition = SpawnHelpers::createRandomPosition(m_randomGenerator, windowSize);
     slownessEntity->getComponent<CTransform>()->topLeftCornerPos = newPosition;
     isValidSpawn = SpawnHelpers::validateSpawnPosition(
-        slownessEntity, m_player, m_entityManager, windowSize);
+        slownessEntity, player, m_entityManager, windowSize);
     spawnAttempt += 1;
   }
 
@@ -183,7 +183,6 @@ void MainSceneSpawner::spawnSlownessEntity(const std::shared_ptr<Entity> &m_play
 }
 
 void MainSceneSpawner::spawnWalls() {
-
   const GameConfig &gameConfig = m_configManager.getGameConfig();
 
   constexpr SDL_Color wallColor  = {.r = 176, .g = 196, .b = 222, .a = 255};
@@ -257,20 +256,20 @@ void MainSceneSpawner::spawnWalls() {
 
   m_entityManager.update();
 }
-void MainSceneSpawner::spawnBullets(const std::shared_ptr<Entity> &m_player,
+void MainSceneSpawner::spawnBullets(const std::shared_ptr<Entity> &player,
                                     const Vec2                    &mousePosition) {
 
   const EntityVector walls = m_entityManager.getEntities(EntityTags::Wall);
 
   const auto &[lifespan, speed, shape] = m_configManager.getBulletConfig();
 
-  if (!m_player) {
+  if (!player) {
     SDL_Log("player missing, not creating bullet");
     return;
   }
-  const Vec2 &playerCenter = m_player->getCenterPos();
+  const Vec2 &playerCenter = player->getCenterPos();
   const float playerHalfWidth =
-      static_cast<float>(m_player->getComponent<CShape>()->rect.w) / 2;
+      static_cast<float>(player->getComponent<CShape>()->rect.w) / 2;
 
   Vec2 direction;
   direction.x = mousePosition.x - playerCenter.x;
@@ -312,7 +311,7 @@ void MainSceneSpawner::spawnBullets(const std::shared_ptr<Entity> &m_player,
   m_entityManager.update();
 }
 
-void MainSceneSpawner::spawnItem(const std::shared_ptr<Entity> &m_player) {
+void MainSceneSpawner::spawnItem(const std::shared_ptr<Entity> &player) {
   constexpr int MAX_SPAWN_ATTEMPTS = 10;
 
   const GameConfig &gameConfig                          = m_configManager.getGameConfig();
@@ -330,14 +329,14 @@ void MainSceneSpawner::spawnItem(const std::shared_ptr<Entity> &m_player) {
   item->setComponent<CShape>(cShape);
   item->setComponent<CLifespan>(cLifespan);
 
-  if (!m_player) {
+  if (!player) {
     SDL_Log("Player missing, destroying item entity");
     item->destroy();
     return;
   }
 
   bool isValidSpawn =
-      SpawnHelpers::validateSpawnPosition(item, m_player, m_entityManager, windowSize);
+      SpawnHelpers::validateSpawnPosition(item, player, m_entityManager, windowSize);
   int spawnAttempt = 1;
 
   while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
@@ -345,7 +344,7 @@ void MainSceneSpawner::spawnItem(const std::shared_ptr<Entity> &m_player) {
     item->getComponent<CTransform>()->topLeftCornerPos = newPosition;
 
     isValidSpawn =
-        SpawnHelpers::validateSpawnPosition(item, m_player, m_entityManager, windowSize);
+        SpawnHelpers::validateSpawnPosition(item, player, m_entityManager, windowSize);
     spawnAttempt += 1;
   }
 
