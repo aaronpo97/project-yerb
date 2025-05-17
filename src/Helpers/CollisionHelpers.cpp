@@ -18,7 +18,8 @@ namespace CollisionHelpers {
     if (!cTransform || !cShape) {
       SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
                    "Entity with ID %zu and tag %u lacks a transform or shape component.",
-                   entity->id(), entity->tag());
+                   entity->id(),
+                   entity->tag());
 
       return {};
     }
@@ -49,14 +50,16 @@ namespace CollisionHelpers {
 
     if (!cShapeA) {
       SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
-                   "Entity with ID %zu and tag %u lacks a collision component.", entityA->id(),
+                   "Entity with ID %zu and tag %u lacks a collision component.",
+                   entityA->id(),
                    entityA->tag());
       return {0, 0};
     }
 
     if (!cShapeB) {
       SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
-                   "Entity with ID %zu and tag %u lacks a collision component.", entityB->id(),
+                   "Entity with ID %zu and tag %u lacks a collision component.",
+                   entityB->id(),
                    entityB->tag());
       return {0, 0};
     }
@@ -117,7 +120,8 @@ namespace CollisionHelpers::MainScene::Enforce {
     if (!cShape || !cTransform) {
       SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
                    "Entity with ID %zu and tag %u lacks a transform or shape component.",
-                   entity->id(), entity->tag());
+                   entity->id(),
+                   entity->tag());
     };
 
     Vec2 &leftCornerPosition = cTransform->topLeftCornerPos;
@@ -408,8 +412,8 @@ namespace CollisionHelpers::MainScene {
       const EntityVector &slownessDebuffs = m_entities.getEntities(EntityTags::SlownessDebuff);
       const EntityVector &speedBoosts     = m_entities.getEntities(EntityTags::SpeedBoost);
 
-      effectsToCheck.insert(effectsToCheck.end(), slownessDebuffs.begin(),
-                            slownessDebuffs.end());
+      effectsToCheck.insert(
+          effectsToCheck.end(), slownessDebuffs.begin(), slownessDebuffs.end());
       effectsToCheck.insert(effectsToCheck.end(), speedBoosts.begin(), speedBoosts.end());
 
       const AudioSample nextSample = AudioSample::SLOWNESS_DEBUFF;

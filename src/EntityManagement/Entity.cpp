@@ -25,9 +25,9 @@ Vec2 Entity::getCenterPos() const {
   const std::shared_ptr<CShape>     &cShape     = getComponent<CShape>();
 
   if (cTransform == nullptr || cShape == nullptr) {
-    SDL_LogError(
-        SDL_LOG_CATEGORY_ERROR,
-        "Entity lacks a transform or shape component. Unable to calculate center position.");
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR,
+                 "Entity lacks a transform or shape component. Unable to calculate center "
+                 "position.");
     return {0, 0};
   }
 

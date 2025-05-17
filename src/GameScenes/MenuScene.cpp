@@ -69,8 +69,8 @@ void MenuScene::renderText() const {
   const std::string instructionsText  = "How to Play";
   const Vec2        instructionsPos   = playPos + Vec2{0, 50};
   const SDL_Color   instructionsColor = m_selectedIndex == 1 ? selectedColor : textColor;
-  TextHelpers::renderLineOfText(renderer, fontMd, instructionsText, instructionsColor,
-                                instructionsPos);
+  TextHelpers::renderLineOfText(
+      renderer, fontMd, instructionsText, instructionsColor, instructionsPos);
 
 #ifndef __EMSCRIPTEN__
   const std::string quitText  = "Quit";

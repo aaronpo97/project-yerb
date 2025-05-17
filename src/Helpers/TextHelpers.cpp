@@ -10,7 +10,8 @@ namespace TextHelpers {
     // Render the text to a surface
     SDL_Surface *surface = TTF_RenderText_Solid(font, text.c_str(), color);
     if (!surface) {
-      SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to create surface for text rendering: %s",
+      SDL_LogError(SDL_LOG_CATEGORY_ERROR,
+                   "Failed to create surface for text rendering: %s",
                    TTF_GetError());
       return; // Exit if the surface creation fails
     }
