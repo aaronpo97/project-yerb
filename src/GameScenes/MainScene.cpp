@@ -208,6 +208,10 @@ void MainScene::sRender() {
 
     const auto  &cSprite = entity->getComponent<CSprite>();
     SDL_Texture *texture = cSprite->getTexture();
+    // ensure that the texture is not a nullptr
+    if (!texture) {
+      continue;
+    }
 
     SDL_RenderCopy(renderer, texture, nullptr, &rect);
   }

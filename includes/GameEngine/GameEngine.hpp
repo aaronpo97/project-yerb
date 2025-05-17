@@ -111,7 +111,7 @@ protected:
    * Create a FontManager object. Used by the rendering system in `Scene` objects.
    *
    * @throws std::runtime_error if ConfigManager is not initialized
-   * @returns The FontManager object initializedSS
+   * @returns The FontManager object initialized
    */
   std::unique_ptr<FontManager> createFontManager() const;
 

@@ -14,7 +14,7 @@ TextureManager::TextureManager(SDL_Renderer *renderer) :
   for (const auto &name : imagePaths | std::views::keys) {
     loadTexture(name);
   }
-  SDL_Log("SurfaceManager created.");
+  SDL_Log("TextureManager created.");
 }
 
 TextureManager::~TextureManager() {
