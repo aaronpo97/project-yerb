@@ -2,16 +2,16 @@
 #include "../../../includes/Helpers/CollisionHelpers.hpp"
 #include "../../../includes/Helpers/SpawnHelpers.hpp"
 MainSceneSpawner::MainSceneSpawner(std::mt19937   &randomGenerator,
-                                    ConfigManager  &configManager,
-                                    TextureManager &textureManager,
-                                    EntityManager  &entityManager,
-                                   SDL_Renderer         *renderer) :
+                                   ConfigManager  &configManager,
+                                   TextureManager &textureManager,
+                                   EntityManager  &entityManager,
+                                   SDL_Renderer   *renderer) :
     m_randomGenerator(randomGenerator),
     m_configManager(configManager),
     m_textureManager(textureManager),
     m_entityManager(entityManager),
     m_renderer(renderer) {
-  std::cout <<"spawner created\n";
+  std::cout << "spawner created\n";
 }
 
 std::shared_ptr<Entity> MainSceneSpawner::spawnPlayer() {
@@ -257,7 +257,8 @@ void MainSceneSpawner::spawnWalls() {
 
   m_entityManager.update();
 }
-void MainSceneSpawner::spawnBullets(const std::shared_ptr<Entity> &m_player,const Vec2 &mousePosition) {
+void MainSceneSpawner::spawnBullets(const std::shared_ptr<Entity> &m_player,
+                                    const Vec2                    &mousePosition) {
 
   const EntityVector walls = m_entityManager.getEntities(EntityTags::Wall);
 

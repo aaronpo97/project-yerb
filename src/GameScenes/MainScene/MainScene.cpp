@@ -22,15 +22,8 @@ MainScene::MainScene(GameEngine *gameEngine) :
               gameEngine->getTextureManager(),
               m_entities,
               gameEngine->getVideoManager().getRenderer()) {
-  SDL_Renderer        *renderer      = m_gameEngine->getVideoManager().getRenderer();
-  const ConfigManager &configManager = gameEngine->getConfigManager();
-
-  const TextureManager &textureManager = m_gameEngine->getTextureManager();
-
   m_player = m_spawner.spawnPlayer();
-
   std::cout << "spawned the player" << std::endl;
-
   m_spawner.spawnWalls();
 
   // WASD
@@ -187,7 +180,7 @@ void MainScene::sRender() {
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
   SDL_RenderClear(renderer);
 
-  if (m_entities.getEntities().size() == 0) {
+  if (m_entities.getEntities().empty()) {
     std::cout << "no entities\n";
   }
 
