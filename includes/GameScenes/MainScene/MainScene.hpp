@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../../includes/AssetManagement/AudioSampleQueue.hpp"
-#include "../EntityManagement/EntityManager.hpp"
-#include "../GameScenes/Scene.hpp"
+#include "../../../includes/AssetManagement/AudioSampleQueue.hpp"
+#include "../../EntityManagement/EntityManager.hpp"
+#include "../../GameScenes/Scene.hpp"
+#include "MainSceneSpawner.hpp"
 #include <SDL2/SDL.h>
 #include <random>
 
@@ -22,6 +23,7 @@ private:
   std::mt19937            m_randomGenerator     = std::mt19937(m_rd());
   Uint64                  m_lastBulletSpawnTime = 0;
   Uint64                  m_bulletSpawnCooldown = 90;
+  MainSceneSpawner        m_spawner;
   void                    renderText() const;
 
 public:

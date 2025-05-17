@@ -1,7 +1,7 @@
 #pragma once
-#include "../GameEngine/Action.hpp"
-#include "../GameEngine/GameEngine.hpp"
-#include "./Scene.hpp"
+#include "../../GameEngine/Action.hpp"
+#include "../../GameEngine/GameEngine.hpp"
+#include "../Scene.hpp"
 #include <map>
 #include <string>
 

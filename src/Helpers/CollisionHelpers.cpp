@@ -1,6 +1,6 @@
 #include "../../includes/Helpers/CollisionHelpers.hpp"
 #include "../../includes/EntityManagement/Entity.hpp"
-#include "../../includes/GameScenes/MainScene.hpp"
+#include "../../includes/GameScenes/MainScene/MainScene.hpp"
 #include "../../includes/Helpers/EntityHelpers.hpp"
 
 #include <bitset>

@@ -4,27 +4,27 @@
 #include <emscripten/emscripten.h>
 #endif
 
-#include "../../includes/GameScenes/MainScene.hpp"
-#include "../../includes/GameScenes/MenuScene.hpp"
-#include "../../includes/GameScenes/ScoreScene.hpp"
-#include "../../includes/Helpers/CollisionHelpers.hpp"
-#include "../../includes/Helpers/MovementHelpers.hpp"
-#include "../../includes/Helpers/SpawnHelpers.hpp"
-#include "../../includes/Helpers/TextHelpers.hpp"
-#include "../../includes/Helpers/Vec2.hpp"
+#include "../../../includes/GameScenes/MainScene/MainScene.hpp"
+#include "../../../includes/GameScenes/MainScene/MainSceneSpawner.hpp"
+#include "../../../includes/GameScenes/MenuScene/MenuScene.hpp"
+#include "../../../includes/GameScenes/ScoreScene/ScoreScene.hpp"
+#include "../../../includes/Helpers/CollisionHelpers.hpp"
+#include "../../../includes/Helpers/MovementHelpers.hpp"
+#include "../../../includes/Helpers/SpawnHelpers.hpp"
+#include "../../../includes/Helpers/TextHelpers.hpp"
+#include "../../../includes/Helpers/Vec2.hpp"
 
 MainScene::MainScene(GameEngine *gameEngine) :
-    Scene(gameEngine) {
-  SDL_Renderer        *renderer      = m_gameEngine->getVideoManager().getRenderer();
-  const ConfigManager &configManager = gameEngine->getConfigManager();
-
-  m_entities = EntityManager();
-  m_player   = SpawnHelpers::MainScene::spawnPlayer(
-      renderer, configManager, m_entities, m_gameEngine->getTextureManager());
-
+    Scene(gameEngine),
+    m_entities(EntityManager()),
+    m_spawner(m_randomGenerator,
+              gameEngine->getConfigManager(),
+              gameEngine->getTextureManager(),
+              m_entities,
+              gameEngine->getVideoManager().getRenderer()) {
+  m_player = m_spawner.spawnPlayer();
   std::cout << "spawned the player" << std::endl;
-
-  SpawnHelpers::MainScene::spawnWalls(renderer, configManager, m_entities);
+  m_spawner.spawnWalls();
 
   // WASD
   registerAction(SDLK_w, "FORWARD");
@@ -117,11 +117,7 @@ void MainScene::sDoAction(Action &action) {
     const Vec2 mousePosition = *position;
 
     audioSampleQueue.queueSample(AudioSample::SHOOT, AudioSamplePriority::STANDARD);
-    SpawnHelpers::MainScene::spawnBullets(m_gameEngine->getVideoManager().getRenderer(),
-                                          m_gameEngine->getConfigManager(),
-                                          m_entities,
-                                          m_player,
-                                          mousePosition);
+    m_spawner.spawnBullets(m_player, mousePosition);
     m_lastBulletSpawnTime = currentTime;
 
     if (action.getName() == "PAUSE") {
@@ -183,6 +179,10 @@ void MainScene::sRender() {
   SDL_Renderer *renderer = m_gameEngine->getVideoManager().getRenderer();
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
   SDL_RenderClear(renderer);
+
+  if (m_entities.getEntities().empty()) {
+    std::cout << "no entities\n";
+  }
 
   for (const auto &entity : m_entities.getEntities()) {
     const auto &cShape     = entity->getComponent<CShape>();
@@ -276,9 +276,6 @@ void MainScene::sSpawner() {
 
   m_lastNonPlayerEntitySpawnTime = ticks;
 
-  SDL_Renderer   *renderer       = m_gameEngine->getVideoManager().getRenderer();
-  TextureManager &surfaceManager = m_gameEngine->getTextureManager();
-
   std::mt19937 &randomGenerator = m_randomGenerator;
 
   const EnemyConfig          &enemyCfg       = configManager.getEnemyConfig();
@@ -303,23 +300,19 @@ void MainScene::sSpawner() {
   const bool spawnItem = shouldSpawn(itemCfg.spawnPercentage);
 
   if (spawnEnemy) {
-    SpawnHelpers::MainScene::spawnEnemy(
-        renderer, configManager, m_randomGenerator, m_entities, m_player, surfaceManager);
+    m_spawner.spawnEnemy(m_player);
   }
 
   if (spawnSpeedBoost) {
-    SpawnHelpers::MainScene::spawnSpeedBoostEntity(
-        renderer, configManager, m_randomGenerator, m_entities, m_player);
+    m_spawner.spawnSpeedBoostEntity(m_player);
   }
 
   if (spawnSlowDebuff) {
-    SpawnHelpers::MainScene::spawnSlownessEntity(
-        renderer, configManager, m_randomGenerator, m_entities, m_player);
+    m_spawner.spawnSlownessEntity(m_player);
   }
 
   if (spawnItem) {
-    SpawnHelpers::MainScene::spawnItem(
-        renderer, configManager, m_randomGenerator, m_entities, m_player);
+    m_spawner.spawnItem(m_player);
   }
 }
 
@@ -467,7 +460,5 @@ void MainScene::onSceneWindowResize() {
 
   m_entities.update();
 
-  SpawnHelpers::MainScene::spawnWalls(m_gameEngine->getVideoManager().getRenderer(),
-                                      m_gameEngine->getConfigManager(),
-                                      m_entities);
+  m_spawner.spawnWalls();
 }
