@@ -1,7 +1,7 @@
-#include "../../includes/GameScenes/MenuScene.hpp"
-#include "../../includes/GameScenes/HowToPlayScene.hpp"
-#include "../../includes/GameScenes/MainScene.hpp"
-#include "../../includes/Helpers/TextHelpers.hpp"
+#include "../../../includes/GameScenes/MenuScene/MenuScene.hpp"
+#include "../../../includes/GameScenes/HowToPlayScene/HowToPlayScene.hpp"
+#include "../../../includes/GameScenes/MainScene/MainScene.hpp"
+#include "../../../includes/Helpers/TextHelpers.hpp"
 
 #include <SDL2/SDL.h>
 

@@ -1,7 +1,7 @@
-#include "../../includes/GameScenes/ScoreScene.hpp"
-#include "../../includes/GameScenes/MainScene.hpp"
-#include "../../includes/GameScenes/MenuScene.hpp"
-#include "../../includes/Helpers/TextHelpers.hpp"
+#include "../../../includes/GameScenes/ScoreScene/ScoreScene.hpp"
+#include "../../../includes/GameScenes/MainScene/MainScene.hpp"
+#include "../../../includes/GameScenes/MenuScene/MenuScene.hpp"
+#include "../../../includes/Helpers/TextHelpers.hpp"
 #include <SDL2/SDL.h>
 
 ScoreScene::ScoreScene(GameEngine *gameEngine, const int score) :

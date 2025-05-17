@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../GameEngine/GameEngine.hpp"
-#include "../GameScenes/Scene.hpp"
+#include "../../GameEngine/GameEngine.hpp"
+#include "../../GameScenes/Scene.hpp"
 
 class ScoreScene final : public Scene {
 private:
