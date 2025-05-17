@@ -121,22 +121,15 @@ public:
     return m_bounces;
   }
 };
+
 class CSprite {
-  SDL_Surface *m_surface;
   SDL_Texture *m_texture;
 
 public:
-  CSprite(SDL_Surface *imageSurface, SDL_Renderer *renderer) :
-      m_surface(imageSurface), m_texture(SDL_CreateTextureFromSurface(renderer, m_surface)) {
+  explicit CSprite(SDL_Texture *texture) :
+      m_texture(texture) {}
 
-  }
-
-~CSprite() {
-    std::cout << "Destroyed the texture\n";
-    SDL_DestroyTexture(m_texture);
-  }
-
-  auto getTexture() const {
+  SDL_Texture *getTexture() const {
     return m_texture;
   }
 };

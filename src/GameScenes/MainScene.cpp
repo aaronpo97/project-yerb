@@ -20,7 +20,7 @@ MainScene::MainScene(GameEngine *gameEngine) :
 
   m_entities = EntityManager();
   m_player   = SpawnHelpers::MainScene::spawnPlayer(
-      renderer, configManager, m_entities, m_gameEngine->getSurfaceManager());
+      renderer, configManager, m_entities, m_gameEngine->getTextureManager());
 
   std::cout << "spawned the player" << std::endl;
 
@@ -273,7 +273,7 @@ void MainScene::sSpawner() {
   m_lastNonPlayerEntitySpawnTime = ticks;
 
   SDL_Renderer   *renderer       = m_gameEngine->getVideoManager().getRenderer();
-  SurfaceManager &surfaceManager = m_gameEngine->getSurfaceManager();
+  TextureManager &surfaceManager = m_gameEngine->getTextureManager();
 
   std::mt19937 &randomGenerator = m_randomGenerator;
 

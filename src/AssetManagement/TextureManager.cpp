@@ -1,30 +1,36 @@
-#include "../../includes/AssetManagement/SurfaceManager.hpp"
+#include "../../includes/AssetManagement/TextureManager.hpp"
 #include <SDL2/SDL.h>
 #include <SDL_image.h>
 #include <filesystem>
 #include <iostream>
 #include <ranges>
 
-SurfaceManager::SurfaceManager() {
+TextureManager::TextureManager(SDL_Renderer *renderer) :
+    m_renderer(renderer) {
   if (IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG) == -1) {
     std::cout << "SDL_image could not initialize! SDL_image Error: %s\n" << IMG_GetError();
   }
 
   for (const auto &name : imagePaths | std::views::keys) {
-    loadSurface(name);
+    loadTexture(name);
   }
-  SDL_Log("ImageManager created");
+  SDL_Log("SurfaceManager created.");
 }
 
-SurfaceManager::~SurfaceManager() {
+TextureManager::~TextureManager() {
   std::cout << "ImageManager destroyed\n";
-  for (auto &[name, image] : m_surfaces) {
-    SDL_FreeSurface(image);
+  for (auto &[name, surface] : m_surfaces) {
+    SDL_FreeSurface(surface);
     SDL_Log("Surface %d freed", name);
   }
+
+  for (auto &[name, texture] : m_textures) {
+    SDL_DestroyTexture(texture);
+    SDL_Log("Texture %d freed", name);
+  }
 }
 
-void SurfaceManager::loadSurface(const SurfaceName name) {
+void TextureManager::loadTexture(const TextureName name) {
   const std::filesystem::path &path = imagePaths.at(name);
   SDL_Surface                 *img  = IMG_Load(path.c_str());
 
@@ -33,14 +39,15 @@ void SurfaceManager::loadSurface(const SurfaceName name) {
   }
 
   m_surfaces[name] = img;
+  m_textures[name] = SDL_CreateTextureFromSurface(m_renderer, img);
 }
 
-SDL_Surface *SurfaceManager::getSurface(const SurfaceName name) {
+SDL_Texture *TextureManager::getTexture(const TextureName name) {
   if (std::ranges::find_if(imagePaths, [&](const auto &pair) { return pair.first == name; }) ==
       imagePaths.end()) {
     std::cout << "Image not found in ImageManager\n";
     return nullptr;
   }
 
-  return m_surfaces[name];
+  return m_textures[name];
 }

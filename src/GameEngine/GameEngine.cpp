@@ -41,7 +41,7 @@ GameEngine::GameEngine() {
   m_audioSampleQueue = initializeAudioSampleQueue();
   m_fontManager      = createFontManager();
   m_videoManager     = createVideoManager();
-  m_surfaceManager   = createSurfaceManager();
+  m_texture_manager  = createTextureManager();
 
   /*
    * Set the game engine to running state.
@@ -66,8 +66,8 @@ std::unique_ptr<ConfigManager> GameEngine::createConfigManager(const Path &confi
   return std::make_unique<ConfigManager>(configPath);
 }
 
-std::unique_ptr<SurfaceManager> GameEngine::createSurfaceManager() {
-  return std::make_unique<SurfaceManager>();
+std::unique_ptr<TextureManager> GameEngine::createTextureManager() const {
+  return std::make_unique<TextureManager>(m_videoManager->getRenderer());
 }
 
 std::unique_ptr<VideoManager> GameEngine::createVideoManager() const {
@@ -194,12 +194,12 @@ VideoManager &GameEngine::getVideoManager() const {
   return *m_videoManager;
 }
 
-SurfaceManager &GameEngine::getSurfaceManager() const {
-  if (!m_surfaceManager) {
+TextureManager &GameEngine::getTextureManager() const {
+  if (!m_texture_manager) {
     SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "ImageManager not initialized");
     throw std::runtime_error("ImageManager not initialized");
   }
-  return *m_surfaceManager;
+  return *m_texture_manager;
 }
 
 void GameEngine::sUserInput() {

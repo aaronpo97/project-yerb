@@ -2,7 +2,7 @@
 
 #include "../AssetManagement/AudioSampleQueue.hpp"
 #include "../AssetManagement/FontManager.hpp"
-#include "../AssetManagement/SurfaceManager.hpp"
+#include "../AssetManagement/TextureManager.hpp"
 #include "../Configuration/ConfigManager.hpp"
 #include "../SystemManagement/AudioManager.hpp"
 #include "../SystemManagement/VideoManager.hpp"
@@ -23,7 +23,7 @@ protected:
   std::unique_ptr<ConfigManager>                m_configManager;
   std::unique_ptr<FontManager>                  m_fontManager;
   std::unique_ptr<AudioManager>                 m_audioManager;
-  std::unique_ptr<SurfaceManager>               m_surfaceManager;
+  std::unique_ptr<TextureManager>               m_texture_manager;
   std::unique_ptr<AudioSampleQueue>             m_audioSampleQueue;
   std::unique_ptr<VideoManager>                 m_videoManager;
 
@@ -70,18 +70,18 @@ protected:
   static std::unique_ptr<ConfigManager> createConfigManager(const Path &configPath);
 
   /**
-   * Create the SurfaceManager object.
+   * Create the TextureManager object.
    *
-   * The SurfaceManager is responsible for managing the images in the game engine.
+   * The TextureManager is responsible the allocated memory for textures and surfaces..
    *
-   * When the SurfacesManager is created, it loads all surfaces from the assets folder and
-   * stores them in memory for rendering as SDL_Surface objects.
+   * When the TextureManager is created, it loads all surfaces from the assets folder and
+   * stores them in memory and generates textures from the surfaces.
    *
-   * When it goes out of scope, the surfaces are destroyed.
+   * When it goes out of scope, the textures and surfaces are automatically deleted.
    *
-   * @returns std::unique_ptr<SurfaceManager> The initialized SurfaceManager object.
+   * @returns std::unique_ptr<TextureManager> The initialized TextureManager object.
    */
-  static std::unique_ptr<SurfaceManager> createSurfaceManager();
+  std::unique_ptr<TextureManager> createTextureManager() const;
 
   /**
    * Create a VideoManager object.
@@ -202,12 +202,12 @@ public:
   VideoManager &getVideoManager() const;
 
   /**
-   * Retrieves the ImageManager instance associated with the game engine.
+   * Retrieves the TextureManager instance associated with the game engine.
    *
-   * @throws std::runtime_error if ImageManager is not initialized.
-   * @returns A reference to the initialized ImageManager object.
+   * @throws std::runtime_error if TextureManager is not initialized.
+   * @returns A reference to the initialized TextureManager object.
    */
-  SurfaceManager &getSurfaceManager() const;
+  TextureManager &getTextureManager() const;
 
   /**
    * This is the game engine's run method that is called by the C++ main function.

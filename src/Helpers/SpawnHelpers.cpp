@@ -75,7 +75,7 @@ namespace SpawnHelpers::MainScene {
   std::shared_ptr<Entity> spawnPlayer(SDL_Renderer        *renderer,
                                       const ConfigManager &configManager,
                                       EntityManager       &entityManager,
-                                      SurfaceManager      &surfaceManager) {
+                                      TextureManager      &textureManager) {
 
     const PlayerConfig &playerConfig = configManager.getPlayerConfig();
     const GameConfig   &gameConfig   = configManager.getGameConfig();
@@ -93,7 +93,7 @@ namespace SpawnHelpers::MainScene {
     const auto cInput     = std::make_shared<CInput>();
     const auto cEffects   = std::make_shared<CEffects>();
     const auto cSprite =
-        std::make_shared<CSprite>(surfaceManager.getSurface(SurfaceName::EXAMPLE), renderer);
+        std::make_shared<CSprite>(textureManager.getTexture(TextureName::EXAMPLE));
 
     std::shared_ptr<Entity> player = entityManager.addEntity(EntityTags::Player);
     player->setComponent(cTransform);
@@ -112,7 +112,7 @@ namespace SpawnHelpers::MainScene {
                   std::mt19937                  &randomGenerator,
                   EntityManager                 &entityManager,
                   const std::shared_ptr<Entity> &player,
-                  SurfaceManager                &surfaceManager) {
+                  TextureManager                &textureManager) {
     constexpr int MAX_SPAWN_ATTEMPTS = 10;
 
     const GameConfig  &gameConfig  = configManager.getGameConfig();
@@ -127,7 +127,7 @@ namespace SpawnHelpers::MainScene {
     const auto cLifespan  = std::make_shared<CLifespan>(enemyConfig.lifespan);
 
     const auto cSprite =
-        std::make_shared<CSprite>(surfaceManager.getSurface(SurfaceName::EXAMPLE), renderer);
+        std::make_shared<CSprite>(textureManager.getTexture(TextureName::EXAMPLE));
 
     const std::shared_ptr<Entity> &enemy = entityManager.addEntity(EntityTags::Enemy);
     enemy->setComponent<CTransform>(cTransform);
