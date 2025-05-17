@@ -16,6 +16,7 @@
 
 MainScene::MainScene(GameEngine *gameEngine) :
     Scene(gameEngine),
+    m_entities(EntityManager()),
     m_spawner(m_randomGenerator,
               gameEngine->getConfigManager(),
               gameEngine->getTextureManager(),
@@ -24,11 +25,9 @@ MainScene::MainScene(GameEngine *gameEngine) :
   SDL_Renderer        *renderer      = m_gameEngine->getVideoManager().getRenderer();
   const ConfigManager &configManager = gameEngine->getConfigManager();
 
-  m_entities = EntityManager();
-
   const TextureManager &textureManager = m_gameEngine->getTextureManager();
 
-  m_player  = m_spawner.spawnPlayer();
+  m_player = m_spawner.spawnPlayer();
 
   std::cout << "spawned the player" << std::endl;
 
