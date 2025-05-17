@@ -171,7 +171,8 @@ ConfigManager::ConfigManager(std::filesystem::path configPath) :
     m_configPath(std::move(configPath)) {
   try {
     loadConfig();
-    SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "ConfigManager successfully loaded: %s",
+    SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM,
+                "ConfigManager successfully loaded: %s",
                 m_configPath.c_str());
   } catch (const ConfigurationError &e) {
     SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Configuration error: %s", e.what());

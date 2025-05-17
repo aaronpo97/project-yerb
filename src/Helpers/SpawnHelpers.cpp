@@ -75,7 +75,7 @@ namespace SpawnHelpers::MainScene {
   std::shared_ptr<Entity> spawnPlayer(SDL_Renderer        *renderer,
                                       const ConfigManager &configManager,
                                       EntityManager       &entityManager,
-                                      ImageManager        &imageManager) {
+                                      TextureManager      &textureManager) {
 
     const PlayerConfig &playerConfig = configManager.getPlayerConfig();
     const GameConfig   &gameConfig   = configManager.getGameConfig();
@@ -92,7 +92,8 @@ namespace SpawnHelpers::MainScene {
     const auto cTransform = std::make_shared<CTransform>(playerPosition, playerVelocity);
     const auto cInput     = std::make_shared<CInput>();
     const auto cEffects   = std::make_shared<CEffects>();
-    const auto cSprite = std::make_shared<CSprite>(imageManager.getImage(ImageName::EXAMPLE));
+    const auto cSprite =
+        std::make_shared<CSprite>(textureManager.getTexture(TextureName::EXAMPLE));
 
     std::shared_ptr<Entity> player = entityManager.addEntity(EntityTags::Player);
     player->setComponent(cTransform);
@@ -110,7 +111,8 @@ namespace SpawnHelpers::MainScene {
                   const ConfigManager           &configManager,
                   std::mt19937                  &randomGenerator,
                   EntityManager                 &entityManager,
-                  const std::shared_ptr<Entity> &player) {
+                  const std::shared_ptr<Entity> &player,
+                  TextureManager                &textureManager) {
     constexpr int MAX_SPAWN_ATTEMPTS = 10;
 
     const GameConfig  &gameConfig  = configManager.getGameConfig();
@@ -124,10 +126,14 @@ namespace SpawnHelpers::MainScene {
     const auto cShape     = std::make_shared<CShape>(renderer, enemyConfig.shape);
     const auto cLifespan  = std::make_shared<CLifespan>(enemyConfig.lifespan);
 
+    const auto cSprite =
+        std::make_shared<CSprite>(textureManager.getTexture(TextureName::EXAMPLE));
+
     const std::shared_ptr<Entity> &enemy = entityManager.addEntity(EntityTags::Enemy);
     enemy->setComponent<CTransform>(cTransform);
     enemy->setComponent<CShape>(cShape);
     enemy->setComponent<CLifespan>(cLifespan);
+    enemy->setComponent<CSprite>(cSprite);
 
     bool isValidSpawn = validateSpawnPosition(enemy, player, entityManager, windowSize);
     int  spawnAttempt = 1;

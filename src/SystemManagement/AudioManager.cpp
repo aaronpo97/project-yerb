@@ -56,13 +56,15 @@ void AudioManager::loadSample(const AudioSample sample, const Path &filepath) {
     throw std::runtime_error("Mix_LoadWAV error");
   }
 
-  setSampleVolume(sample, sample == AudioSample::BULLET_HIT_01 ? DEFAULT_SAMPLE_VOLUME / 2
-                                                               : DEFAULT_SAMPLE_VOLUME);
+  setSampleVolume(sample,
+                  sample == AudioSample::BULLET_HIT_01 ? DEFAULT_SAMPLE_VOLUME / 2
+                                                       : DEFAULT_SAMPLE_VOLUME);
 }
 
 void AudioManager::playTrack(const AudioTrack track, const int loops) {
   if (track == m_currentAudioTrack) {
-    SDL_LogInfo(SDL_LOG_CATEGORY_AUDIO, "Track %d is already playing, ignoring request.",
+    SDL_LogInfo(SDL_LOG_CATEGORY_AUDIO,
+                "Track %d is already playing, ignoring request.",
                 static_cast<int>(track));
     return;
   }

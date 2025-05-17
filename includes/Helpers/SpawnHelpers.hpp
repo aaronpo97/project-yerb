@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../includes/AssetManagement/ImageManager.hpp"
+#include "../../includes/AssetManagement/TextureManager.hpp"
 #include "../Configuration/ConfigManager.hpp"
 #include "../EntityManagement/Entity.hpp"
 #include "../EntityManagement/EntityManager.hpp"
@@ -23,13 +23,14 @@ namespace SpawnHelpers::MainScene {
   std::shared_ptr<Entity> spawnPlayer(SDL_Renderer        *renderer,
                                       const ConfigManager &configManager,
                                       EntityManager       &entityManager,
-                                      ImageManager        &imageManager);
+                                      TextureManager      &textureManager);
 
   void spawnEnemy(SDL_Renderer                  *renderer,
                   const ConfigManager           &configManager,
                   std::mt19937                  &randomGenerator,
                   EntityManager                 &entityManager,
-                  const std::shared_ptr<Entity> &player);
+                  const std::shared_ptr<Entity> &player,
+                  TextureManager                &textureManager);
 
   void spawnSpeedBoostEntity(SDL_Renderer                  *renderer,
                              const ConfigManager           &configManager,

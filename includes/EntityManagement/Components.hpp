@@ -124,8 +124,13 @@ public:
 };
 
 class CSprite {
+  SDL_Texture *m_texture;
+
 public:
-  SDL_Surface *imageSurface;
-  CSprite(SDL_Surface *imageSurface) :
-      imageSurface(imageSurface) {}
+  explicit CSprite(SDL_Texture *texture) :
+      m_texture(texture) {}
+
+  SDL_Texture *getTexture() const {
+    return m_texture;
+  }
 };
