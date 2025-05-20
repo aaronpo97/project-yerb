@@ -2,6 +2,7 @@
 
 #include <SDL2/SDL.h>
 #include <vector>
+#include <algorithm>
 
 #include "../Configuration/Config.hpp"
 #include "../Helpers/Vec2.hpp"

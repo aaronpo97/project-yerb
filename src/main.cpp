@@ -1,5 +1,5 @@
 #include "../includes/GameEngine/GameEngine.hpp"
-#include <SDL_main.h>
+#include <SDL2/SDL_main.h>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>

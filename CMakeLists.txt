@@ -11,48 +11,55 @@ FetchContent_MakeAvailable(json)
 
 
 if (NOT EMSCRIPTEN)
-    FetchContent_Declare(
+    find_package(SDL2)
+    if(NOT SDL2_FOUND)
+        FetchContent_Declare(
             SDL2
             GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
             GIT_TAG release-2.30.8
-    )
+        )
+        FetchContent_MakeAvailable(SDL2)
+    endif()
 
-    FetchContent_MakeAvailable(SDL2)
-
-    FetchContent_Declare(
+    find_package(SDL2_ttf)
+    if(NOT SDL2_ttf_FOUND)
+        FetchContent_Declare(
             SDL_ttf
             GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
             GIT_TAG release-2.22.0
-    )
+        )
+        FetchContent_MakeAvailable(SDL_ttf)
+    endif()
 
-    FetchContent_MakeAvailable(SDL_ttf)
+    find_package(SDL2_mixer)
+    if(NOT SDL2_mixer_FOUND)
+        # Disable all audio formats except OGG and WAV
+        set(SDL2MIXER_OPUS OFF CACHE BOOL "")
+        set(SDL2MIXER_OPUS_SHARED OFF CACHE BOOL "")
+        set(SDL2MIXER_FLAC OFF CACHE BOOL "")
+        set(SDL2MIXER_MOD OFF CACHE BOOL "")
+        set(SDL2MIXER_MIDI OFF CACHE BOOL "")
+        set(SDL2MIXER_WAVPACK OFF CACHE BOOL "")
+        set(SDL2MIXER_MP3 OFF CACHE BOOL "")
+        set(SDL2MIXER_OGG ON CACHE BOOL "")
 
-    # Disable all audio formats except OGG and WAV
-    set(SDL2MIXER_OPUS OFF CACHE BOOL "")
-    set(SDL2MIXER_OPUS_SHARED OFF CACHE BOOL "")
-    set(SDL2MIXER_FLAC OFF CACHE BOOL "")
-    set(SDL2MIXER_MOD OFF CACHE BOOL "")
-    set(SDL2MIXER_MIDI OFF CACHE BOOL "")
-    set(SDL2MIXER_WAVPACK OFF CACHE BOOL "")
-    set(SDL2MIXER_MP3 OFF CACHE BOOL "")
-    set(SDL2MIXER_OGG ON CACHE BOOL "")
-
-
-    FetchContent_Declare(
+        FetchContent_Declare(
             SDL_mixer
             GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
             GIT_TAG release-2.8.0
-    )
+        )
+        FetchContent_MakeAvailable(SDL_mixer)
+    endif()
 
-    FetchContent_MakeAvailable(SDL_mixer)
-
-
-    FetchContent_Declare(
+    find_package(SDL2_image)
+    if(NOT SDL2_image_FOUND)
+        FetchContent_Declare(
             SDL_image
             GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
             GIT_TAG release-2.8.2
-    )
-    FetchContent_MakeAvailable(SDL_image)
+        )
+        FetchContent_MakeAvailable(SDL_image)
+    endif()
 
     set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
 

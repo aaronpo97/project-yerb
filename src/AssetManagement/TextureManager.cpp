@@ -1,9 +1,10 @@
 #include "../../includes/AssetManagement/TextureManager.hpp"
 #include <SDL2/SDL.h>
-#include <SDL_image.h>
+#include <SDL2/SDL_image.h>
 #include <filesystem>
 #include <iostream>
 #include <ranges>
+#include <algorithm>
 
 TextureManager::TextureManager(SDL_Renderer *renderer) :
     m_renderer(renderer) {
