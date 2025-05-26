@@ -65,7 +65,7 @@ void MainSceneSpawner::spawnEnemy(const std::shared_ptr<Entity> &player) {
   enemy->setComponent<CShape>(cShape);
   enemy->setComponent<CLifespan>(cLifespan);
   enemy->setComponent<CSprite>(cSprite);
-  
+
   if (!player) {
     SDL_Log("Player missing, destroying enemy");
     enemy->destroy();
@@ -137,8 +137,9 @@ void MainSceneSpawner::spawnSpeedBoostEntity(const std::shared_ptr<Entity> &play
 void MainSceneSpawner::spawnSlownessEntity(const std::shared_ptr<Entity> &player) {
   constexpr int MAX_SPAWN_ATTEMPTS = 10;
 
-  const auto &[windowSize, windowTitle, fontPath, spawnInterval] =
-      m_configManager.getGameConfig();
+  const GameConfig &gameConfig = m_configManager.getGameConfig();
+
+  const auto windowSize           = gameConfig.windowSize;
 
   const SlownessEffectConfig &slownessEffectConfig = m_configManager.getSlownessEffectConfig();
 
@@ -162,8 +163,8 @@ void MainSceneSpawner::spawnSlownessEntity(const std::shared_ptr<Entity> &player
     return;
   }
 
-  bool isValidSpawn = SpawnHelpers::validateSpawnPosition(
-      slownessEntity, player, m_entityManager, windowSize);
+  bool isValidSpawn =
+      SpawnHelpers::validateSpawnPosition(slownessEntity, player, m_entityManager, windowSize);
   int spawnAttempt = 1;
 
   while (!isValidSpawn && spawnAttempt < MAX_SPAWN_ATTEMPTS) {
@@ -266,9 +267,8 @@ void MainSceneSpawner::spawnBullets(const std::shared_ptr<Entity> &player,
     SDL_Log("player missing, not creating bullet");
     return;
   }
-  const Vec2 &playerCenter = player->getCenterPos();
-  const float playerHalfWidth =
-      static_cast<float>(player->getComponent<CShape>()->rect.w) / 2;
+  const Vec2 &playerCenter    = player->getCenterPos();
+  const float playerHalfWidth = static_cast<float>(player->getComponent<CShape>()->rect.w) / 2;
 
   Vec2 direction;
   direction.x = mousePosition.x - playerCenter.x;

@@ -1,7 +1,13 @@
 #include "../../includes/AssetManagement/FontManager.hpp"
 
-FontManager::FontManager(const Path &fontPath) :
-    m_fontPath(fontPath) {
+FontManager::FontManager(const Path &fontPath,
+                         const int   fontSizeSm,
+                         const int   fontSizeMd,
+                         const int   fontSizeLg) :
+    m_fontPath(fontPath),
+    m_fontSizeSm(fontSizeSm),
+    m_fontSizeMd(fontSizeMd),
+    m_fontSizeLg(fontSizeLg) {
   if (TTF_Init() != 0) {
     SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Failed to initialize SDL_ttf: %s", TTF_GetError());
     return;
@@ -12,53 +18,50 @@ FontManager::FontManager(const Path &fontPath) :
 }
 
 void FontManager::loadFonts(const Path &fontPath) {
-  constexpr int SMALL_FONT_POINT_SIZE  = 18;
-  constexpr int MEDIUM_FONT_POINT_SIZE = 28;
-  constexpr int LARGE_FONT_POINT_SIZE  = 48;
+  m_fontSm = TTF_OpenFont(fontPath.c_str(), m_fontSizeSm);
+  m_fontMd = TTF_OpenFont(fontPath.c_str(), m_fontSizeMd);
+  m_fontLg = TTF_OpenFont(fontPath.c_str(), m_fontSizeLg);
 
-  m_font_sm = TTF_OpenFont(fontPath.c_str(), SMALL_FONT_POINT_SIZE);
-  m_font_md = TTF_OpenFont(fontPath.c_str(), MEDIUM_FONT_POINT_SIZE);
-  m_font_lg = TTF_OpenFont(fontPath.c_str(), LARGE_FONT_POINT_SIZE);
-
-  const bool fontsLoaded =
-      m_font_lg != nullptr && m_font_md != nullptr && m_font_sm != nullptr;
+  const bool fontsLoaded = m_fontLg != nullptr && m_fontMd != nullptr && m_fontSm != nullptr;
 
   if (!fontsLoaded) {
     SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to load fonts: %s", TTF_GetError());
     return;
   }
 
+  
+
   SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "Fonts loaded successfully!");
 }
 
 TTF_Font *FontManager::getFontLg() const {
-  return m_font_lg;
+  return m_fontLg;
 }
 
 TTF_Font *FontManager::getFontMd() const {
-  return m_font_md;
+  return m_fontMd;
 }
 
 TTF_Font *FontManager::getFontSm() const {
-  return m_font_sm;
+  return m_fontSm;
 }
 
 FontManager::~FontManager() {
   SDL_LogInfo(SDL_LOG_CATEGORY_SYSTEM, "Cleaning up fonts...");
 
-  if (m_font_md != nullptr) {
-    TTF_CloseFont(m_font_md);
-    m_font_md = nullptr;
+  if (m_fontMd != nullptr) {
+    TTF_CloseFont(m_fontMd);
+    m_fontMd = nullptr;
   }
 
-  if (m_font_sm != nullptr) {
-    TTF_CloseFont(m_font_sm);
-    m_font_sm = nullptr;
+  if (m_fontSm != nullptr) {
+    TTF_CloseFont(m_fontSm);
+    m_fontSm = nullptr;
   }
 
-  if (m_font_lg != nullptr) {
-    TTF_CloseFont(m_font_lg);
-    m_font_lg = nullptr;
+  if (m_fontLg != nullptr) {
+    TTF_CloseFont(m_fontLg);
+    m_fontLg = nullptr;
   }
 
   TTF_Quit();

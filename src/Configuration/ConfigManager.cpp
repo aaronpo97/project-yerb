@@ -42,10 +42,18 @@ void ConfigManager::parseGameConfig() {
   const auto spawnInterval =
       getJsonValue<Uint64>(gameConfigJson, "spawnInterval", "gameConfig");
 
+  const auto fontSizeSm = getJsonValue<int>(gameConfigJson,"fontSizeSm", "gameConfig" );
+  const auto fontSizeMd = getJsonValue<int>(gameConfigJson,"fontSizeMd", "gameConfig" );
+  const auto fontSizeLg = getJsonValue<int>(gameConfigJson,"fontSizeLg", "gameConfig" );
+
   m_gameConfig.windowSize    = Vec2(windowWidth, windowHeight);
   m_gameConfig.windowTitle   = windowTitle;
   m_gameConfig.fontPath      = fontPath;
   m_gameConfig.spawnInterval = spawnInterval;
+  m_gameConfig.fontSizeSm   = fontSizeSm;
+  m_gameConfig.fontSizeMd   = fontSizeMd;
+  m_gameConfig.fontSizeLg   = fontSizeLg;
+
 
   if (!fs::exists(m_gameConfig.fontPath)) {
     throw ConfigurationError("Font file not found: " + m_gameConfig.fontPath.string());

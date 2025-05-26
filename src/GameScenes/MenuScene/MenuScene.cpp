@@ -58,8 +58,8 @@ void MenuScene::renderText() const {
     return;
   }
 
-  const std::string titleText = "Yerb's Game";
-  const Vec2        titlePos  = {100, 100};
+  const std::string &titleText = m_gameEngine->getConfigManager().getGameConfig().windowTitle;
+  const Vec2         titlePos  = {100, 100};
   TextHelpers::renderLineOfText(renderer, fontLg, titleText, textColor, titlePos);
 
   const std::string playText  = "Play";

@@ -1,6 +1,6 @@
 #include "../../includes/GameEngine/GameEngine.hpp"
-#include "../../../includes/GameScenes/MainScene/MainScene.hpp"
-#include "../../../includes/GameScenes/MenuScene/MenuScene.hpp"
+#include "../../../../includes/GameScenes/MainScene/MainScene.hpp"
+#include "../../../../includes/GameScenes/MenuScene/MenuScene.hpp"
 #include "../../includes/SystemManagement/VideoManager.hpp"
 
 #ifdef __EMSCRIPTEN__
@@ -105,8 +105,12 @@ std::unique_ptr<FontManager> GameEngine::createFontManager() const {
     throw std::runtime_error("ConfigManager not initialized");
   }
 
-  const std::string &fontPath = m_configManager->getGameConfig().fontPath;
-  return std::make_unique<FontManager>(fontPath);
+  const std::string &fontPath   = m_configManager->getGameConfig().fontPath;
+  const int          fontSizeSm = m_configManager->getGameConfig().fontSizeSm;
+  const int          fontSizeMd = m_configManager->getGameConfig().fontSizeMd;
+  const int          fontSizeLg = m_configManager->getGameConfig().fontSizeLg;
+
+  return std::make_unique<FontManager>(fontPath, fontSizeSm, fontSizeMd, fontSizeLg);
 }
 
 void GameEngine::cleanup() {

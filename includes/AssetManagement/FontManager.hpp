@@ -7,16 +7,20 @@
 typedef std::filesystem::path Path;
 
 class FontManager {
-private:
-  Path      m_fontPath;
-  TTF_Font *m_font_lg = nullptr;
-  TTF_Font *m_font_md = nullptr;
-  TTF_Font *m_font_sm = nullptr;
+  Path m_fontPath;
+
+  int m_fontSizeSm;
+  int m_fontSizeMd;
+  int m_fontSizeLg;
+
+  TTF_Font *m_fontLg = nullptr;
+  TTF_Font *m_fontMd = nullptr;
+  TTF_Font *m_fontSm = nullptr;
 
 public:
-  explicit FontManager(const Path &fontPath);
   ~FontManager();
 
+  FontManager(const Path &fontPath, int fontSizeSm, int fontSizeMd, int fontSizeLg);
   void      loadFonts(const Path &fontPath);
   TTF_Font *getFontLg() const;
   TTF_Font *getFontMd() const;

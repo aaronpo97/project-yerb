@@ -54,7 +54,7 @@ if (NOT EMSCRIPTEN)
     )
     FetchContent_MakeAvailable(SDL_image)
 
-    set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
+    # set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
 
 endif ()
 

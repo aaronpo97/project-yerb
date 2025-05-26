@@ -1,9 +1,12 @@
 {
   "gameConfig": {
     "windowSize": { "height": 900, "width": 1600 },
-    "windowTitle": "Yerb's Game",
-    "fontPath": "./assets/fonts/Sixtyfour/static/Sixtyfour-Regular.ttf",
-    "spawnInterval": 500
+    "windowTitle": "Project Yerb: Demo",
+    "fontPath": "./assets/fonts/MotionControl-Bold.otf",
+    "spawnInterval": 500,
+    "fontSizeSm": 38,
+    "fontSizeMd" : 48,
+    "fontSizeLg" : 68
   },
   "playerConfig": {
     "baseSpeed": 9.0,
